@@ -1,25 +1,152 @@
 <!doctype html>
 <html lang="cs" data-theme="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="FRAXY Riskuj — společenská vědomostní hra.">
-<title>BBFRAXY | Riskuj</title>
-<link rel="stylesheet" href="/assets/css/styles.css">
-<link rel="stylesheet" href="./css/riskuj.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="FRAXY Riskuj — společenská vědomostní hra.">
+    <title>BBFRAXY | Riskuj</title>
+
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="./css/riskuj.css">
 </head>
 <body>
-<div class="site-shell">
-<header class="site-header"><nav class="navbar" aria-label="Primary navigation">
-<a class="brand" href="/" aria-label="BBFRAXY home"><span class="brand-mark">F</span><span>BBFRAXY</span></a>
-<button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Open navigation"><span></span><span></span><span></span></button>
-<div class="nav-menu" id="site-menu"><div class="nav-links"><a href="/games/" aria-current="page">Games</a><a href="/tools">Tools</a><a href="/projects">Projects</a><a href="/downloads">Downloads</a></div><div class="nav-actions"><a class="icon-button" href="https://github.com/FraXyprojects" target="_blank" rel="noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z"/></svg></a><button class="icon-button theme-toggle" type="button" aria-label="Switch theme" aria-pressed="false"><span class="theme-icon" aria-hidden="true"></span></button></div></div>
-</nav></header>
-<main>
-<section id="landing"><div class="hero"><div class="eyebrow">FRAXY // SOCIAL QUIZ</div><h1>Riskuj</h1><p>Společenská vědomostní hra pro partu přátel, rodinný večer nebo celý Discord. Vyberete témata, sbíráte body a postupně zjistíte, kdo z vás má v hlavě nejvíc zbytečných znalostí.</p><div class="hero-actions"><button class="btn" id="launch-game">Spustit hru →</button><a class="btn secondary" href="/games/riskuj-builder/?new=1">Vytvořit kvíz</a><a class="btn secondary" href="/games/riskuj-builder/?edit=1">Upravit kvíz</a></div></div><div class="info-grid"><article class="info-card"><h2>Jak se Riskuj hraje?</h2><p>Herní deska má několik témat a u každého otázky s různou bodovou hodnotou. Hráč nebo tým si vybere políčko, moderátor přečte otázku a hráč odpoví.</p><ul><li>Správná odpověď přičte hodnotu otázky.</li><li>Špatná odpověď může body odečíst, jako v klasickém Riskuj.</li><li>Po vyhodnocení pokračuje další hráč nebo tým.</li><li>Vyhrává nejvyšší skóre po vyčerpání desky.</li></ul></article><article class="info-card"><h2>Ideální na Discord</h2><p>Jeden člověk může dělat moderátora a sdílet obrazovku s ostatními. Hra běží lokálně v prohlížeči, bez registrace a serveru.</p><p class="note">Pravidla si můžete upravit podle party — například kdo smí odpovídat po chybě, zda se používá časový limit nebo jak řešit remízu.</p></article></div></section>
-<section id="launch" class="hidden"><div class="panel"><div class="topline"><div><div class="eyebrow">FRAXY // START</div><h2>Jak chceš připravit hru?</h2></div><button class="btn secondary" id="launch-back">← Zpět</button></div><div class="mode-grid"><div class="mode" data-mode="prepared"><div class="icon">📦</div><h2>Mám připravený kvíz</h2><p>Nahraj svůj <strong>quiz.json</strong> a nastav hráče, barvy a časovač.</p></div><div class="mode" data-mode="build"><div class="icon">⚡</div><h2>Připravit před spuštěním</h2><p>Vyber počet témat i otázek v každém tématu a vytvoř hru přímo teď.</p></div></div></div></section>
-<section id="setup" class="panel hidden"></section><section id="game" class="panel hidden"></section>
-</main><footer class="site-footer"><span>BBFRAXY</span></footer></div>
-<script src="/assets/js/main.js" defer></script>
-<script type="module" src="./js/app.js"></script>
-</body></html>
+    <div class="site-shell">
+        <header class="site-header">
+            <nav class="navbar" aria-label="Primary navigation">
+                <a class="brand" href="/" aria-label="BBFRAXY home">
+                    <span class="brand-mark">F</span>
+                    <span>BBFRAXY</span>
+                </a>
+
+                <button
+                    class="menu-toggle"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="site-menu"
+                    aria-label="Open navigation"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <div class="nav-menu" id="site-menu">
+                    <div class="nav-links">
+                        <a href="/games/" aria-current="page">Games</a>
+                        <a href="/tools">Tools</a>
+                        <a href="/projects">Projects</a>
+                        <a href="/downloads">Downloads</a>
+                    </div>
+
+                    <div class="nav-actions">
+                        <a
+                            class="icon-button"
+                            href="https://github.com/FraXyprojects"
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label="GitHub"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z" />
+                            </svg>
+                        </a>
+
+                        <button
+                            class="icon-button theme-toggle"
+                            type="button"
+                            aria-label="Switch theme"
+                            aria-pressed="false"
+                        >
+                            <span class="theme-icon" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <section id="landing">
+                <div class="hero">
+                    <div class="eyebrow">FRAXY // SOCIAL QUIZ</div>
+                    <h1>Riskuj</h1>
+                    <p>
+                        Společenská vědomostní hra pro partu přátel, rodinný večer nebo celý Discord.
+                        Vyberete témata, sbíráte body a postupně zjistíte, kdo z vás má v hlavě nejvíc
+                        zbytečných znalostí.
+                    </p>
+
+                    <div class="hero-actions">
+                        <button class="btn" id="launch-game">Spustit hru →</button>
+                        <a class="btn secondary" href="/games/riskuj-builder/?new=1">Vytvořit kvíz</a>
+                        <a class="btn secondary" href="/games/riskuj-builder/?edit=1">Upravit kvíz</a>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <article class="info-card">
+                        <h2>Jak se Riskuj hraje?</h2>
+                        <p>
+                            Herní deska má několik témat a u každého otázky s různou bodovou hodnotou.
+                            Hráč nebo tým si vybere políčko, moderátor přečte otázku a hráč odpoví.
+                        </p>
+                        <ul>
+                            <li>Správná odpověď přičte hodnotu otázky.</li>
+                            <li>Špatná odpověď může body odečíst, jako v klasickém Riskuj.</li>
+                            <li>Po vyhodnocení pokračuje další hráč nebo tým.</li>
+                            <li>Vyhrává nejvyšší skóre po vyčerpání desky.</li>
+                        </ul>
+                    </article>
+
+                    <article class="info-card">
+                        <h2>Ideální na Discord</h2>
+                        <p>
+                            Jeden člověk může dělat moderátora a sdílet obrazovku s ostatními.
+                            Hra běží lokálně v prohlížeči, bez registrace a serveru.
+                        </p>
+                        <p class="note">
+                            Pravidla si můžete upravit podle party — například kdo smí odpovídat po chybě,
+                            zda se používá časový limit nebo jak řešit remízu.
+                        </p>
+                    </article>
+                </div>
+            </section>
+
+            <section id="launch" class="hidden">
+                <div class="panel">
+                    <div class="topline">
+                        <div>
+                            <div class="eyebrow">FRAXY // START</div>
+                            <h2>Jak chceš připravit hru?</h2>
+                        </div>
+                        <button class="btn secondary" id="launch-back">← Zpět</button>
+                    </div>
+
+                    <div class="mode-grid">
+                        <div class="mode" data-mode="prepared">
+                            <div class="icon">📦</div>
+                            <h2>Mám připravený kvíz</h2>
+                            <p>Nahraj svůj <strong>quiz.json</strong> a nastav hráče, barvy a časovač.</p>
+                        </div>
+
+                        <div class="mode" data-mode="build">
+                            <div class="icon">⚡</div>
+                            <h2>Připravit před spuštěním</h2>
+                            <p>Vyber počet témat i otázek v každém tématu a vytvoř hru přímo teď.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="setup" class="panel hidden"></section>
+            <section id="game" class="panel hidden"></section>
+        </main>
+
+        <footer class="site-footer">
+            <span>BBFRAXY</span>
+        </footer>
+    </div>
+
+    <script src="/assets/js/main.js" defer></script>
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>
