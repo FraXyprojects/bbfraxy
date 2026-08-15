@@ -54,7 +54,6 @@ export function renderGame({
         </div>
 
         <div id="scores" class="scorebar"></div>
-        <div id="legend" class="legend"></div>
 
         <div class="board-wrap">
             <table class="board">
@@ -92,6 +91,14 @@ export function openQuestion({
 
     state.selected = btn;
     btn.classList.add('selected');
+
+    document
+        .querySelectorAll('.cell-btn:not(.answered)')
+        .forEach((cell) => {
+            if (cell !== btn) {
+                cell.disabled = true;
+            }
+        });
 
     const question = state.questions[btn.dataset.key];
 
@@ -176,9 +183,11 @@ export function scoreQuestion({
     const question = state.questions[state.selected.dataset.key];
     const player = state.players[state.currentPlayer];
 
-    player.score += ok
-        ? question.value
-        : -question.value;
+    if (ok) {
+        player.score += question.value;
+    } else if (state.deductOnWrong) {
+        player.score -= question.value;
+    }
 
     state.selected.classList.add(
         'answered',
@@ -193,6 +202,12 @@ export function scoreQuestion({
     state.selected.classList.remove('selected');
     state.selected.disabled = true;
     state.selected = null;
+
+    document
+        .querySelectorAll('.cell-btn:not(.answered)')
+        .forEach((cell) => {
+            cell.disabled = false;
+        });
 
     state.currentPlayer =
         (state.currentPlayer + 1) % state.players.length;
