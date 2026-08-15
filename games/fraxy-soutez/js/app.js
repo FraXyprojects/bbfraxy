@@ -1,4 +1,4 @@
-import { countries } from '../data.js';
+import { countries } from './data.js';
 
 const welcomeScreen = document.getElementById('welcome-screen');
 const rulesScreen = document.getElementById('rules-screen');
