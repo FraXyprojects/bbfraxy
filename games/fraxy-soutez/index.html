@@ -14,8 +14,8 @@
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
     >
-    <link rel="stylesheet" href="./css/soutez.css">
-    <link rel="stylesheet" href="./css/result-overrides.css">
+    <link rel="stylesheet" href="./css/soutez.css?v=4">
+    <link rel="stylesheet" href="./css/result-overrides.css?v=2">
 </head>
 <body>
     <div class="site-shell">
@@ -83,7 +83,7 @@
                     </p>
 
                     <div class="hero-actions">
-                        <button class="btn" id="start-rules">
+                        <button class="btn" id="start-rules" type="button">
                             Začít soutěž →
                         </button>
                     </div>
@@ -138,7 +138,7 @@
                         </div>
 
                         <div class="actions">
-                            <button class="btn" id="start-map">
+                            <button class="btn" id="start-map" type="button">
                                 Otevřít mapu →
                             </button>
                             <a class="btn secondary" href="/games/">
@@ -169,7 +169,7 @@
                                     <div class="eyebrow">PROGRESS</div>
                                     <h2>Zbývá zodpovědět</h2>
                                 </div>
-                                <button class="btn secondary" id="back-to-rules">
+                                <button class="btn secondary" id="back-to-rules" type="button">
                                     ← Zpět
                                 </button>
                             </div>
@@ -184,7 +184,11 @@
                             <ul id="remaining-countries"></ul>
 
                             <div class="sidebar-actions">
-                                <button class="btn danger" id="finish-early">
+                                <button
+                                    class="btn danger"
+                                    id="finish-early"
+                                    type="button"
+                                >
                                     Ukončit a vyhodnotit
                                 </button>
                             </div>
@@ -200,41 +204,27 @@
                         <h2>Soutěž dokončena.</h2>
                         <div class="result-score" id="total-score">0.00</div>
                         <p class="result-note">bodů ze všech zodpovězených otázek</p>
+                        <p class="result-note" id="competition-duration">Trvání: —</p>
                         <p class="result-note" id="result-summary"></p>
-
-                        <div class="result-meta">
-                            <div>
-                                <span>Začátek</span>
-                                <strong id="result-start-time">—</strong>
-                            </div>
-                            <div>
-                                <span>Konec</span>
-                                <strong id="result-end-time">—</strong>
-                            </div>
-                            <div>
-                                <span>Trvání</span>
-                                <strong id="result-duration">—</strong>
-                            </div>
-                        </div>
-
-                        <div class="result-actions download-exclude">
-                            <button class="btn" id="restart-competition">
-                                Hrát znovu
-                            </button>
-                            <button class="btn secondary" id="download-result">
-                                Stáhnout výsledek
-                            </button>
-                        </div>
                     </article>
 
                     <article class="question-history-card" id="question-history-card">
                         <div class="eyebrow">FRAXY // REVIEW</div>
                         <h2>Přehled otázek</h2>
                         <p class="question-history-intro">
-                            Tvoje odpověď, správná odpověď a počet získaných bodů.
+                            Tvoje odpověď, správná odpověď, rozdíl a počet získaných bodů.
                         </p>
                         <div id="question-history"></div>
                     </article>
+                </div>
+
+                <div class="result-actions download-exclude">
+                    <button class="btn" id="download-result" type="button">
+                        Stáhnout výsledek
+                    </button>
+                    <button class="btn secondary" id="restart-competition" type="button">
+                        Hrát znovu
+                    </button>
                 </div>
             </section>
         </main>
@@ -274,7 +264,7 @@
                     placeholder="Zadej odpověď"
                     autocomplete="off"
                 >
-                <button class="btn" id="submit-answer">
+                <button class="btn" id="submit-answer" type="button">
                     Odeslat →
                 </button>
             </div>
@@ -284,6 +274,6 @@
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="/assets/js/main.js" defer></script>
-    <script type="module" src="./js/app.js"></script>
+    <script type="module" src="./js/app.js?v=7"></script>
 </body>
 </html>
