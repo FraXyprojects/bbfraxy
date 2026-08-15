@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BBFRAXY games — small games, experiments and random interactive stuff.">
+  <meta name="theme-color" content="#050607">
+  <title>BBFRAXY | Games</title>
+  <link rel="canonical" href="https://bbfraxy.com/games/">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <style>
+    .games-page {
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: 58px 0 72px;
+    }
+
+    .games-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 28px;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: .74rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      content: "";
+    }
+
+    .games-heading h1 {
+      margin: 0;
+      font-size: clamp(2.1rem, 5vw, 3.4rem);
+      line-height: 1;
+      letter-spacing: -.035em;
+    }
+
+    .games-heading p {
+      max-width: 430px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .games-count {
+      flex: 0 0 auto;
+      padding: 10px 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--faint);
+      background: rgba(255, 255, 255, .025);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .game-card {
+      display: grid;
+      grid-template-columns: minmax(260px, .9fr) minmax(0, 1.1fr);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.045), transparent 45%),
+        var(--surface);
+      box-shadow: 0 24px 70px var(--shadow), 0 0 46px rgba(95, 231, 255, .055);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .game-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: 0 28px 78px var(--shadow), 0 0 54px rgba(95, 231, 255, .1);
+      transform: translateY(-2px);
+    }
+
+    .game-art {
+      position: relative;
+      min-height: 330px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+      background:
+        radial-gradient(circle at 50% 42%, rgba(95,231,255,.16), transparent 22%),
+        linear-gradient(145deg, #080b0d, #111820 58%, #080a0c);
+      isolation: isolate;
+    }
+
+    .game-art::before,
+    .game-art::after {
+      position: absolute;
+      inset: 12%;
+      border: 1px solid rgba(95,231,255,.12);
+      transform: rotate(8deg);
+      content: "";
+      z-index: -1;
+    }
+
+    .game-art::after {
+      inset: 18%;
+      border-color: rgba(255,255,255,.055);
+      transform: rotate(-12deg);
+    }
+
+    .art-grid {
+      position: absolute;
+      inset: 0;
+      opacity: .32;
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(circle at center, black, transparent 72%);
+    }
+
+    .art-mark {
+      display: grid;
+      width: 142px;
+      height: 142px;
+      place-items: center;
+      border: 1px solid rgba(95,231,255,.3);
+      border-radius: 22px;
+      color: var(--accent-strong);
+      background: rgba(95,231,255,.055);
+      box-shadow: inset 0 0 38px rgba(95,231,255,.08), 0 0 55px rgba(95,231,255,.12);
+      font-size: 4.3rem;
+      font-weight: 900;
+      letter-spacing: -.08em;
+    }
+
+    .art-label {
+      position: absolute;
+      left: 22px;
+      bottom: 18px;
+      color: rgba(255,255,255,.42);
+      font-size: .67rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+    }
+
+    .game-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(28px, 5vw, 46px);
+    }
+
+    .game-status {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: var(--accent-strong);
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .game-status span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .game-body h2 {
+      margin: 0;
+      font-size: clamp(1.7rem, 4vw, 2.45rem);
+      line-height: 1.05;
+      letter-spacing: -.025em;
+    }
+
+    .game-subtitle {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .game-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 24px 0 28px;
+    }
+
+    .game-meta span {
+      padding: 7px 9px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--faint);
+      background: rgba(255,255,255,.025);
+      font-size: .69rem;
+      font-weight: 750;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .game-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .play-game {
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 20px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      color: #031014;
+      background: var(--accent);
+      box-shadow: 0 0 24px var(--glow);
+      font-size: .88rem;
+      font-weight: 800;
+      transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .play-game::after {
+      content: "↗";
+      font-size: 1rem;
+    }
+
+    .play-game:hover,
+    .play-game:focus-visible {
+      background: var(--accent-strong);
+      box-shadow: 0 0 32px var(--glow);
+      transform: translateY(-1px);
+    }
+
+    .games-note {
+      margin: 22px 0 0;
+      color: var(--faint);
+      font-size: .78rem;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 720px) {
+      .games-page {
+        padding: 38px 0 56px;
+      }
+
+      .games-heading {
+        align-items: start;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .game-card {
+        grid-template-columns: 1fr;
+      }
+
+      .game-art {
+        min-height: 245px;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .art-mark {
+        width: 112px;
+        height: 112px;
+        font-size: 3.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas class="ambient-canvas" id="ambient-canvas" aria-hidden="true"></canvas>
+
+  <div class="site-shell">
+    <header class="site-header">
+      <nav class="navbar" aria-label="Primary navigation">
+        <a class="brand" href="/" aria-label="BBFRAXY home">
+          <span class="brand-mark" aria-hidden="true">B</span>
+          <span>BBFRAXY</span>
+        </a>
+
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Open navigation">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="nav-menu" id="site-menu">
+          <div class="nav-links" aria-label="Site sections">
+            <a href="/games/" aria-current="page">Games</a>
+            <a href="/tools">Tools</a>
+            <a href="/projects">Projects</a>
+            <a href="/downloads">Downloads</a>
+          </div>
+
+          <div class="nav-actions">
+            <a class="icon-button" href="https://github.com/FraXyprojects" target="_blank" rel="noreferrer" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
+                <path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z"/>
+              </svg>
+            </a>
+            <button class="icon-button theme-toggle" type="button" aria-label="Switch theme" aria-pressed="false">
+              <span class="theme-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="games-page" id="main">
+      <section aria-labelledby="games-title">
+        <div class="games-heading">
+          <div>
+            <p class="eyebrow">FRAXY // GAMES</p>
+            <h1 id="games-title">Mini games & experiments.</h1>
+            <p>A small collection of things to play, test and probably waste a few minutes on.</p>
+          </div>
+          <span class="games-count">01 GAME ONLINE</span>
+        </div>
+
+        <article class="game-card">
+          <div class="game-art" aria-hidden="true">
+            <div class="art-grid"></div>
+            <div class="art-mark">F</div>
+            <span class="art-label">FRAXY SYSTEM // GAME 01</span>
+          </div>
+
+          <div class="game-body">
+            <div class="game-status"><span></span> ONLINE // EXTERNAL</div>
+            <h2>FraXy's Wild West Quiz</h2>
+            <p class="game-subtitle">How well do you know FraXy? Step into the Wild West and find out.</p>
+
+            <div class="game-meta" aria-label="Game details">
+              <span>Quiz</span>
+              <span>Casual</span>
+              <span>Browser</span>
+            </div>
+
+            <div class="game-actions">
+              <a class="play-game" href="https://combos.game/play/29318a6b703c3d926b052ff2d7db345b" target="_blank" rel="noopener noreferrer">Play game</a>
+            </div>
+
+            <p class="games-note">Hosted on Combos for now. The game can move directly onto BBFRAXY later when an export becomes available.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>BBFRAXY</span>
+    </footer>
+  </div>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>
