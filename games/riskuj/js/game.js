@@ -7,8 +7,11 @@ export function renderGame({
     onNewGame,
     updateScores
 }) {
-    const values = Object.values(state.questions).map((question) => question.value);
-    const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
+    const values = Object.values(state.questions)
+        .map((question) => question.value);
+
+    const uniqueValues = [...new Set(values)]
+        .sort((a, b) => a - b);
 
     const head = state.topics
         .map((topic) => `<th>${esc(topic)}</th>`)
@@ -45,7 +48,9 @@ export function renderGame({
                 <h2>Herní deska</h2>
             </div>
 
-            <button class="btn secondary" id="new-game">Nová hra</button>
+            <button class="btn secondary" id="new-game">
+                Nová hra
+            </button>
         </div>
 
         <div id="scores" class="scorebar"></div>
@@ -75,7 +80,12 @@ export function renderGame({
         });
 }
 
-export function openQuestion({ state, btn, questionEl, startTimer }) {
+export function openQuestion({
+    state,
+    btn,
+    questionEl,
+    startTimer
+}) {
     if (btn.classList.contains('answered') || btn.disabled) {
         return;
     }
@@ -106,9 +116,11 @@ export function openQuestion({ state, btn, questionEl, startTimer }) {
             <button class="btn secondary" id="show-answer">
                 Ukázat odpověď
             </button>
-            <button class="btn" id="score-right">
+
+            <button class="btn success" id="score-right">
                 ✓ Správně
             </button>
+
             <button class="btn danger" id="score-wrong">
                 ✕ Špatně
             </button>
@@ -123,11 +135,14 @@ export function openQuestion({ state, btn, questionEl, startTimer }) {
         state.timer = null;
 
         const timerElement = questionEl.querySelector('#timer');
+
         if (timerElement) {
             timerElement.textContent = '—';
         }
 
-        questionEl.querySelector('#answer').classList.remove('hidden');
+        questionEl
+            .querySelector('#answer')
+            .classList.remove('hidden');
     };
 
     questionEl.querySelector('#score-right').onclick = () => {
@@ -161,7 +176,9 @@ export function scoreQuestion({
     const question = state.questions[state.selected.dataset.key];
     const player = state.players[state.currentPlayer];
 
-    player.score += ok ? question.value : -question.value;
+    player.score += ok
+        ? question.value
+        : -question.value;
 
     state.selected.classList.add(
         'answered',
@@ -188,8 +205,13 @@ export function scoreQuestion({
         </div>
     `;
 
-    const answeredCells = document.querySelectorAll('.cell-btn.answered').length;
-    const totalCells = document.querySelectorAll('.cell-btn').length;
+    const answeredCells = document.querySelectorAll(
+        '.cell-btn.answered'
+    ).length;
+
+    const totalCells = document.querySelectorAll(
+        '.cell-btn'
+    ).length;
 
     if (answeredCells >= totalCells) {
         finishGame();
