@@ -14,12 +14,25 @@ main {
 }
 
 .screen {
-    display: block;
+    padding: 22px 0 48px;
+}
+
+#rules-screen,
+#map-screen,
+#result-screen {
     min-height: 0;
 }
 
+#welcome-screen {
+    display: block;
+}
+
 .hero {
-    padding: 18px 0 26px;
+    padding: 18px 0 30px;
+}
+
+#welcome-screen .hero {
+    max-width: 900px;
 }
 
 .eyebrow {
@@ -36,9 +49,9 @@ main {
 }
 
 .hero h1 {
-    margin: 10px 0 18px;
-    font-size: clamp(2.8rem, 6vw, 5rem);
-    line-height: 0.95;
+    margin: 8px 0 16px;
+    font-size: clamp(2.7rem, 6vw, 4.8rem);
+    line-height: 0.98;
     letter-spacing: -0.05em;
 }
 
@@ -51,7 +64,7 @@ main {
 
 .hero p {
     max-width: 720px;
-    font-size: 1.08rem;
+    font-size: 1.06rem;
 }
 
 .hero-actions,
@@ -115,7 +128,7 @@ main {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
-    margin-top: 42px;
+    margin-top: 34px;
 }
 
 .info-card,
@@ -171,7 +184,7 @@ main {
 }
 
 #map-screen {
-    min-height: calc(100vh - 150px);
+    min-height: 0;
 }
 
 .game-shell {
@@ -296,6 +309,7 @@ main {
 }
 
 .custom-marker {
+    display: block;
     width: 14px;
     height: 14px;
     border-radius: 50%;
@@ -381,7 +395,6 @@ main {
 
 .result-screen {
     min-height: calc(100vh - 150px);
-    display: flex;
     align-items: center;
     justify-content: center;
 }
