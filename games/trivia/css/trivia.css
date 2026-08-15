@@ -1,62 +1,217 @@
-body {
-    font-family: Arial, sans-serif;
+:root {
+    --trivia-math: #5fe7ff;
+    --trivia-neutral: #a78bfa;
+    --trivia-pink: #fb7185;
+    --trivia-lime: #a3e635;
+}
+
+.trivia-page {
+    width: min(100% - 32px, 1180px);
+    margin: 0 auto;
+    padding: 28px 0 76px;
+}
+
+.trivia-hero {
+    padding: 24px 0 30px;
+}
+
+.trivia-eyebrow,
+.panel-label {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.trivia-eyebrow::before,
+.panel-label::before {
+    content: "•";
+    color: var(--accent);
+    margin-right: 8px;
+}
+
+.trivia-hero h1 {
+    margin: 9px 0 14px;
+    font-size: clamp(2.8rem, 7vw, 5.8rem);
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+}
+
+.trivia-hero p {
+    max-width: 760px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.65;
+}
+
+.trivia-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.28fr) minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.trivia-sidebar {
+    display: grid;
+    gap: 14px;
+    position: sticky;
+    top: 92px;
+}
+
+.trivia-panel,
+.trivia-main-panel,
+.board-shell,
+.question-container,
+.result-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 20px 60px var(--shadow);
+}
+
+.trivia-panel {
+    padding: 18px;
+}
+
+.timer {
+    margin-top: 9px;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -0.03em;
+}
+
+.panel-note,
+.trivia-rules p {
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.panel-note {
+    margin: 8px 0 0;
+}
+
+.trivia-rules p {
+    margin: 10px 0 0;
+}
+
+.trivia-main-panel {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+}
+
+.question-container {
+    padding: 20px;
     text-align: center;
-    background-color: #f0f8ff;
-    position: relative;
+    background: var(--surface-strong);
 }
 
-h1 {
-    font-size: 3em;
-    margin-top: 20px;
+#question-text {
+    max-width: 780px;
+    margin: 14px auto 0;
+    font-size: clamp(1.3rem, 2.5vw, 2rem);
+    font-weight: 800;
+    line-height: 1.35;
 }
 
-#timer {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 1.5em;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
+.answer-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 760px;
+    margin: 18px auto 0;
 }
 
-#question-container {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    font-size: 1.5em;
+.answer {
+    min-height: 52px;
+    margin: 0;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+    transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+
+.answer:hover {
+    transform: translateY(-1px);
+    background: var(--bg-soft);
+    border-color: var(--border-strong);
+}
+
+.board-shell {
+    padding: 20px;
+}
+
+.board-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.board-header h2 {
+    margin: 8px 0 0;
+    font-size: 1.5rem;
+}
+
+.board-status {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-strong);
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
 }
 
 #game-board {
     display: grid;
-    grid-template-columns: repeat(7, 80px);
-    grid-gap: 10px;
-    justify-content: center;
-    margin: auto;
+    grid-template-columns: repeat(7, minmax(68px, 1fr));
+    gap: 8px;
+    max-width: 780px;
+    margin: 0 auto;
 }
 
 .square {
-    width: 80px;
-    height: 80px;
+    min-width: 0;
+    aspect-ratio: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: lightgray;
     position: relative;
-    color: black;
-    font-weight: bold;
-    font-size: 0.9em;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-strong);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 850;
     cursor: pointer;
-    border: 2px solid black;
     box-sizing: border-box;
+    transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.square:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
 }
 
 .square[data-theme="math"] {
-    background-color: #2cb4de;
+    background: color-mix(in srgb, var(--trivia-math) 14%, var(--surface-strong));
+    border-color: color-mix(in srgb, var(--trivia-math) 30%, var(--border));
 }
 
 .square[data-theme="history"] {
-    background-color: burlywood;
+    background: color-mix(in srgb, #c89b6b 12%, var(--surface-strong));
+    border-color: color-mix(in srgb, #c89b6b 30%, var(--border));
 }
 
 .square[data-theme="fun"],
@@ -65,99 +220,156 @@ h1 {
 .square[data-theme="nove_technologie"],
 .square[data-theme="elektronika"],
 .square[data-theme="hry"] {
-    background-color: pink;
+    background: color-mix(in srgb, var(--trivia-pink) 11%, var(--surface-strong));
+    border-color: color-mix(in srgb, var(--trivia-pink) 26%, var(--border));
 }
 
 .square[data-theme="mista_cinu"] {
-    background-color: #cef216;
+    background: color-mix(in srgb, var(--trivia-lime) 11%, var(--surface-strong));
+    border-color: color-mix(in srgb, var(--trivia-lime) 27%, var(--border));
 }
 
 .square.start {
-    background-color: lightgreen;
+    background: color-mix(in srgb, var(--accent) 18%, var(--surface-strong));
+    border-color: color-mix(in srgb, var(--accent) 52%, var(--border));
+    color: var(--accent);
 }
 
 .square.goal {
-    background-color: lightcoral;
+    background: color-mix(in srgb, #fb7185 16%, var(--surface-strong));
+    border-color: color-mix(in srgb, #fb7185 45%, var(--border));
+    color: #fb7185;
 }
 
 .square.active {
-    border-color: red;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent), 0 0 24px var(--glow);
+    transform: translateY(-2px);
 }
 
-#result {
+.result-card {
     display: none;
-    margin-top: 40px;
-    font-size: 2em;
+    padding: 26px;
+    text-align: center;
+    background: var(--surface-strong);
 }
 
 #result p.success {
-    color: green;
-    font-size: 1.5em;
-    font-weight: bold;
+    margin: 10px 0;
+    color: var(--accent);
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 900;
 }
 
 #result p.details {
-    color: black;
-    font-size: 1.2em;
-    margin-bottom: 20px;
+    margin: 0 auto;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.7;
 }
 
 #result .highlight {
-    font-weight: bold;
-    color: red;
+    color: var(--text);
+    font-weight: 900;
 }
 
 #result-buttons {
-    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 24px;
 }
 
 .btn {
-    font-size: 1em;
-    padding: 10px 20px;
-    margin: 5px;
-    border: none;
-    border-radius: 5px;
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #031014;
+    font: inherit;
+    font-weight: 850;
     cursor: pointer;
+    transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
 }
 
-.btn-download {
-    background-color: #4caf50;
-    color: white;
-}
-
-.btn-download:hover {
-    background-color: #45a049;
+.btn:hover {
+    transform: translateY(-1px);
+    background: var(--accent-strong);
 }
 
 .btn-restart {
-    background-color: #2196f3;
-    color: white;
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
 }
 
 .btn-restart:hover {
-    background-color: #1976d2;
+    background: var(--bg-soft);
+    border-color: var(--border-strong);
 }
 
-.answer {
-    display: block;
-    margin: 8px auto;
-    padding: 10px 18px;
-    min-width: 220px;
-    cursor: pointer;
+.btn-download {
+    background: color-mix(in srgb, var(--accent) 78%, var(--surface));
+}
+
+@media (max-width: 900px) {
+    .trivia-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .trivia-sidebar {
+        position: static;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 700px) {
+    .trivia-page {
+        width: min(100% - 20px, 1180px);
+        padding-top: 18px;
+    }
+
+    .trivia-hero h1 {
+        font-size: clamp(2.6rem, 15vw, 4.2rem);
+    }
+
+    .trivia-sidebar {
+        grid-template-columns: 1fr;
+    }
+
+    .trivia-main-panel,
+    .board-shell,
+    .question-container,
+    .result-card {
+        padding: 16px;
+    }
+
+    .answer-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .board-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
     #game-board {
-        grid-template-columns: repeat(5, 64px);
+        grid-template-columns: repeat(5, minmax(52px, 1fr));
         gap: 6px;
     }
 
     .square {
-        width: 64px;
-        height: 64px;
+        font-size: 0.72rem;
     }
 
-    h1 {
-        font-size: 2em;
+    #result-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #result-buttons .btn {
+        width: min(260px, 100%);
     }
 }
