@@ -1,8 +1,9 @@
 import {PALETTE,esc} from './setup.js';import {state,renderSetup,readBuilt} from './setup-flow.js';import {renderGame,openQuestion,scoreQuestion} from './game.js';import {renderResults} from './results.js';
 const $=id=>document.getElementById(id),landing=$('landing'),launch=$('launch'),setupEl=$('setup'),gameEl=$('game');
-landing.querySelector('.hero .btn').onclick=()=>{landing.classList.add('hidden');launch.classList.remove('hidden');};
-launch.querySelectorAll('.mode').forEach((el,i)=>el.onclick=()=>{state.runMode=i?'build':'prepared';launch.classList.add('hidden');setupEl.classList.remove('hidden');renderSetup({setupEl,backLanding:()=>location.reload(),startGame,addPlayer,removePlayer,loadQuiz});});
-function setupRender(){renderSetup({setupEl,backLanding:()=>location.reload(),startGame,addPlayer,removePlayer,loadQuiz});}
+landing.querySelector('#launch-game').onclick=()=>{landing.classList.add('hidden');launch.classList.remove('hidden');};
+launch.querySelector('#launch-back').onclick=()=>{launch.classList.add('hidden');landing.classList.remove('hidden');};
+launch.querySelectorAll('.mode').forEach(el=>el.onclick=()=>{state.runMode=el.dataset.mode;launch.classList.add('hidden');setupEl.classList.remove('hidden');renderSetup({setupEl,backLanding:()=>{setupEl.classList.add('hidden');landing.classList.remove('hidden');},startGame,addPlayer,removePlayer,loadQuiz});});
+function setupRender(){renderSetup({setupEl,backLanding:()=>{setupEl.classList.add('hidden');landing.classList.remove('hidden');},startGame,addPlayer,removePlayer,loadQuiz});}
 function addPlayer(){if(state.players.length>=10)return;state.players.push({name:'',color:PALETTE[state.players.length],score:0});setupRender();}
 function removePlayer(i){if(state.players.length<=2)return;state.players.splice(i,1);setupRender();}
 function loadQuiz(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d.topics)||!d.topics.length)throw Error();state.topics=d.topics.map(t=>t.name);state.questions={};d.topics.forEach(t=>(t.questions||[]).forEach(q=>state.questions[`${t.name}-${q.value}`]={question:q.question||'',answer:q.answer||'',value:Number(q.value)||0}));state.loadedQuiz=true;const el=$('loadStatus');if(el)el.textContent=`Načteno: ${state.topics.length} témat. Kvíz je připraven.`;}catch{state.loadedQuiz=false;const el=$('loadStatus');if(el)el.textContent='Soubor není platný Riskuj JSON.';}};r.readAsText(f);}
