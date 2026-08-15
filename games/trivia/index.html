@@ -4,67 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FraXy´s Trivia</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f8ff; position: relative; }
-        h1 { font-size: 3em; margin-top: 20px; }
-        #timer { position: absolute; top: 10px; right: 20px; font-size: 1.5em; background-color: rgba(0, 0, 0, 0.5); color: white; padding: 10px; border-radius: 5px; }
-        #question-container { margin-top: 20px; margin-bottom: 20px; font-size: 1.5em; }
-        #game-board { display: grid; grid-template-columns: repeat(7, 80px); grid-gap: 10px; justify-content: center; margin: auto; }
-        .square { width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; background-color: lightgray; position: relative; color: black; font-weight: bold; font-size: 0.9em; cursor: pointer; border: 2px solid black; box-sizing: border-box; }
-        .square[data-theme="math"] { background-color: #2cb4de; }
-        .square[data-theme="history"] { background-color: burlywood; }
-        .square[data-theme="fun"], .square[data-theme="serialy"], .square[data-theme="aktualni_udalosti"], .square[data-theme="nove_technologie"], .square[data-theme="elektronika"], .square[data-theme="hry"] { background-color: pink; }
-        .square[data-theme="mista_cinu"] { background-color: #cef216; }
-        .square.start { background-color: lightgreen; }
-        .square.goal { background-color: lightcoral; }
-        .square.active { border-color: red; }
-        #result { display: none; margin-top: 40px; font-size: 2em; }
-        #result p.success { color: green; font-size: 1.5em; font-weight: bold; }
-        #result p.details { color: black; font-size: 1.2em; margin-bottom: 20px; }
-        #result .highlight { font-weight: bold; color: red; }
-        #result-buttons { margin-top: 20px; }
-        .btn { font-size: 1em; padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-download { background-color: #4caf50; color: white; }
-        .btn-download:hover { background-color: #45a049; }
-        .btn-restart { background-color: #2196f3; color: white; }
-        .btn-restart:hover { background-color: #1976d2; }
-        .answer { display:block; margin:8px auto; padding:10px 18px; min-width:220px; cursor:pointer; }
-        @media (max-width:700px) { #game-board { grid-template-columns: repeat(5, 64px); gap:6px; } .square { width:64px; height:64px; } h1 { font-size:2em; } }
-    </style>
+    <link rel="stylesheet" href="./css/trivia.css">
 </head>
 <body>
     <h1>FraXy´s Trivia</h1>
+
     <div id="timer">Čas: 0s</div>
-    <div id="question-container"><p id="question-text">Pro spuštění hry klikni na políčko START</p><div id="answer-buttons" style="display: none;"></div></div>
+
+    <div id="question-container">
+        <p id="question-text">
+            Pro spuštění hry klikni na políčko START
+        </p>
+
+        <div id="answer-buttons" style="display: none;"></div>
+    </div>
+
     <div id="game-board">
         <div class="square start">START</div>
-        <div class="square" data-theme="math">1</div><div class="square" data-theme="math">2</div><div class="square" data-theme="math">3</div><div class="square" data-theme="math">4</div><div class="square" data-theme="math">5</div><div class="square" data-theme="math">6</div><div class="square" data-theme="math">7</div><div class="square" data-theme="math">8</div><div class="square" data-theme="math">9</div><div class="square" data-theme="math">10</div><div class="square" data-theme="math">11</div><div class="square" data-theme="math">12</div>
+
+        <div class="square" data-theme="math">1</div>
+        <div class="square" data-theme="math">2</div>
+        <div class="square" data-theme="math">3</div>
+        <div class="square" data-theme="math">4</div>
+        <div class="square" data-theme="math">5</div>
+        <div class="square" data-theme="math">6</div>
+        <div class="square" data-theme="math">7</div>
+        <div class="square" data-theme="math">8</div>
+        <div class="square" data-theme="math">9</div>
+        <div class="square" data-theme="math">10</div>
+        <div class="square" data-theme="math">11</div>
+        <div class="square" data-theme="math">12</div>
+
         <div class="square goal">CÍL</div>
     </div>
-    <div id="result"><p class="success">Vyhrál jsi!</p><p class="details">Dokončil jsi kvíz s <span class="highlight" id="wrong-answers">0</span> špatnými odpověďmi.<br><br>Trvalo ti to <span class="highlight" id="completion-time">0</span> sekund.</p><div id="result-buttons"><button class="btn btn-download" onclick="downloadResult()">Stáhnout výsledek</button><button class="btn btn-restart" onclick="restartGame()">Restartovat</button></div></div>
-<script>
-const gameBoard=document.getElementById("game-board"),questionContainer=document.getElementById("question-container"),questionText=document.getElementById("question-text"),answerButtons=document.getElementById("answer-buttons"),result=document.getElementById("result"),wrongAnswersElement=document.getElementById("wrong-answers"),completionTimeElement=document.getElementById("completion-time"),timerElement=document.getElementById("timer"),squares=Array.from(document.querySelectorAll(".square"));
-let currentIndex=0,wrongAnswers=0,timeElapsed=0,timer,gameStarted=false,usedQuestions={math:[],history:[],fun:[],aktualni_udalosti:[],mista_cinu:[],elektronika:[],nove_technologie:[],hry:[],serialy:[]};
-const questions={
-math:[{question:"Kolik je 2+2?",answers:["3","4","5","6"],correct:1},{question:"Kolik je 5*6?",answers:["30","35","40","25"],correct:0}],
-history:[{question:"Kdo byl prvním prezidentem USA?",answers:["Lincoln","Washington","Adams","Jefferson"],correct:1},{question:"Kdy skončila 2. světová válka?",answers:["1945","1939","1918","1941"],correct:0}],
-fun:[{question:"Jaké je hlavní město zábavy?",answers:["Smile Town","Joy City","Happy Land","Funville"],correct:3},{question:"Jakou práci má SpongeBob?",answers:["Fry Cook","Lifeguard","Teacher","Captain"],correct:0}],
-aktualni_udalosti:[{question:"Která země hostila Letní olympijské hry 2024?",answers:["Japonsko","USA","Francie","Brazílie"],correct:2},{question:"Jaká je nejaktuálnější verze systému iOS v roce 2024?",answers:["iOS 16","iOS 17","iOS 18","iOS 19"],correct:2},{question:"Kdo získal Nobelovu cenu za mír v roce 2023?",answers:["Greta Thunberg","Volodymyr Zelenskyj","Svjatlana Cichanouská","Narges Mohammadi"],correct:3}],
-mista_cinu:[{question:"Ve kterém městě se odehrála kauza Watergate?",answers:["New York","Washington D.C.","Los Angeles","Miami"],correct:1},{question:"Která známá banka byla vykradena v roce 2023 ve filmu 'Konec hry'?",answers:["Bank of America","Barclays","Swiss National Bank","First Republic Bank"],correct:3},{question:"Jaký byl hlavní motiv zločinu v případě Jeffreyho Dahmera?",answers:["Loupež","Kanibalismus","Mstivost","Psychopatie"],correct:1}],
-elektronika:[{question:"Jaký je hlavní výrobce procesorů řady Ryzen?",answers:["Intel","AMD","NVIDIA","Qualcomm"],correct:1},{question:"Která společnost vyvinula technologii OLED?",answers:["LG","Sony","Samsung","Panasonic"],correct:0},{question:"Jak se jmenuje revoluční herní konzole od společnosti Valve?",answers:["Steam Box","Steam Deck","Valve Console","Gabe's Game"],correct:1}],
-nove_technologie:[{question:"Jaká technologie stojí za kryptoměnami jako Bitcoin?",answers:["Blockchain","Cloud","Quantum Computing","AI"],correct:0},{question:"Který startup je známý vývojem Neuralinku?",answers:["Blue Origin","SpaceX","OpenAI","Neuralink"],correct:3},{question:"Co je CRISPR?",answers:["Technologie pro genetické úpravy","Superrychlý internet","Typ baterie","AI algoritmus"],correct:0}],
-hry:[{question:"Která hra vyhrála cenu Game of the Year 2022?",answers:["Elden Ring","God of War: Ragnarok","The Last of Us Part II","Cyberpunk 2077"],correct:0},{question:"Kdy vyšel první díl hry Minecraft?",answers:["2009","2010","2011","2012"],correct:2},{question:"Která postava je hlavní protagonistou série The Witcher?",answers:["Ciri","Geralt","Yennefer","Dandelion"],correct:1}],
-serialy:[{question:"Ve kterém městě se odehrává děj seriálu Breaking Bad?",answers:["Los Angeles","Albuquerque","Dallas","San Diego"],correct:1},{question:"Jaký je podtitul první sezóny True Detective?",answers:["American Crime Story","The Yellow King","The Long Dark","Night of Lies"],correct:1},{question:"Kdo je hlavní postava seriálu Peaky Blinders?",answers:["Alfie Solomons","Thomas Shelby","Arthur Shelby","John Shelby"],correct:1}]};
-function startGame(){gameStarted=true;timerElement.style.display="block";timer=setInterval(()=>{timeElapsed++;timerElement.textContent=`Čas: ${timeElapsed}s`},1000);currentIndex=1;updateActiveSquare();askQuestion(currentIndex)}
-function askQuestion(index){const theme=gameBoard.children[index].dataset.theme;if(!theme){endGame();return}const qs=questions[theme];if(!qs||!qs.length){endGame();return}if(usedQuestions[theme].length===qs.length)usedQuestions[theme]=[];const available=qs.filter((_,i)=>!usedQuestions[theme].includes(i));const q=available[Math.floor(Math.random()*available.length)];usedQuestions[theme].push(qs.indexOf(q));questionText.textContent=q.question;answerButtons.style.display="block";answerButtons.innerHTML="";shuffleArray(q.answers.map((answer,i)=>({answer,index:i}))).forEach(({answer,index})=>{const b=document.createElement("button");b.textContent=answer;b.classList.add("answer");b.onclick=()=>checkAnswer(index,q.correct);answerButtons.appendChild(b)})}
-function checkAnswer(selected,correct){if(selected===correct){if(currentIndex===gameBoard.children.length-1)endGame();else{currentIndex++;updateActiveSquare();askQuestion(currentIndex)}}else{wrongAnswers++;if(currentIndex>1){currentIndex--;updateActiveSquare();askQuestion(currentIndex)}else{questionText.textContent="To se ti nepovedlo. Klikni na pokračovat nebo restart.";answerButtons.style.display="none";const c=document.createElement("button");c.textContent="Pokračovat";c.classList.add("btn","btn-restart");c.onclick=()=>{questionContainer.style.display="block";askQuestion(currentIndex);c.remove();r.remove()};const r=document.createElement("button");r.textContent="Restartovat";r.classList.add("btn","btn-restart");r.onclick=()=>location.reload();questionContainer.appendChild(c);questionContainer.appendChild(r)}}}
-function updateActiveSquare(){squares.forEach((s,i)=>s.classList.toggle("active",i===currentIndex))}
-function shuffleArray(a){return a.map(value=>({value,sort:Math.random()})).sort((a,b)=>a.sort-b.sort).map(({value})=>value)}
-function endGame(){clearInterval(timer);questionContainer.style.display="none";gameBoard.style.display="none";result.style.display="block";wrongAnswersElement.textContent=wrongAnswers;completionTimeElement.textContent=timeElapsed}
-function downloadResult(){if(!window.html2canvas){alert("Chyba: html2canvas není dostupné.");return}html2canvas(result,{useCORS:true}).then(canvas=>{const link=document.createElement("a");link.download="vysledek.png";link.href=canvas.toDataURL();link.click()}).catch(()=>alert("Chyba při generování obrázku výsledku."))}
-function restartGame(){location.reload()}
-squares[0].addEventListener("click",()=>{if(!gameStarted)startGame()});
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <div id="result">
+        <p class="success">Vyhrál jsi!</p>
+
+        <p class="details">
+            Dokončil jsi kvíz s
+            <span class="highlight" id="wrong-answers">0</span>
+            špatnými odpověďmi.
+            <br>
+            <br>
+            Trvalo ti to
+            <span class="highlight" id="completion-time">0</span>
+            sekund.
+        </p>
+
+        <div id="result-buttons">
+            <button class="btn btn-download">
+                Stáhnout výsledek
+            </button>
+
+            <button class="btn btn-restart">
+                Restartovat
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script type="module" src="./js/app.js"></script>
 </body>
 </html>
