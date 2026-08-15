@@ -237,9 +237,7 @@ export function scoreQuestion({
         '.cell-btn.answered'
     ).length;
 
-    const totalCells = document.querySelectorAll(
-        '.cell-btn'
-    ).length;
+    const totalCells = Object.keys(state.questions).length;
 
     if (answeredCells >= totalCells) {
         finishGame();
@@ -253,9 +251,7 @@ export function enablePostGameReview({ state, gameEl }) {
     const cells = gameEl.querySelectorAll('.cell-btn');
 
     cells.forEach((cell) => {
-        if (cell.disabled && !cell.classList.contains('answered')) {
-            cell.disabled = false;
-        }
+        cell.disabled = false;
 
         cell.onclick = () => {
             toggleQuestionPreview({
@@ -287,7 +283,11 @@ function renderQuestionPreview({ state, cell, preview }) {
 
     preview.dataset.key = cell.dataset.key;
     preview.innerHTML = `
-        <button class="question-preview-close" type="button" aria-label="Zavřít">
+        <button
+            class="question-preview-close"
+            type="button"
+            aria-label="Zavřít"
+        >
             ×
         </button>
 
