@@ -72,11 +72,12 @@ main {
     padding: 10px 16px;
     border: 1px solid transparent;
     border-radius: var(--radius);
-    background: var(--bg-soft);
-    color: var(--text);
+    background: var(--accent);
+    color: #031014;
     font-weight: 850;
     cursor: pointer;
     text-decoration: none;
+    transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
 }
 
 .btn:hover {
@@ -85,7 +86,7 @@ main {
 }
 
 .btn.secondary {
-    background: var(--surface);
+    background: var(--surface-strong);
     color: var(--text);
     border-color: var(--border);
 }
@@ -95,9 +96,23 @@ main {
     background: var(--surface);
 }
 
+.btn.success {
+    background: color-mix(in srgb, #34d399 72%, var(--surface));
+    border-color: color-mix(in srgb, #34d399 55%, var(--border));
+    color: #03140d;
+}
+
+.btn.success:hover {
+    background: #34d399;
+}
+
 .btn.danger {
     background: #632832;
     color: #fff;
+}
+
+.btn.danger:hover {
+    background: #7b3040;
 }
 
 .btn:disabled {
@@ -260,7 +275,6 @@ main {
     background: var(--player-color);
     border: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow: 0 0 14px color-mix(in srgb, var(--player-color) 35%, transparent);
-    transform: translateY(0);
 }
 
 .player-remove {
@@ -414,13 +428,12 @@ main {
     color: var(--muted);
 }
 
-.legend-item .dot {
+.legend-dot {
     width: 9px;
     height: 9px;
     border-radius: 50%;
     background: var(--player-color);
     box-shadow: 0 0 9px color-mix(in srgb, var(--player-color) 55%, transparent);
-    transform: translateY(0);
 }
 
 .question-card {
@@ -428,7 +441,7 @@ main {
     margin-top: 18px;
 }
 
-.question-values {
+.question-value {
     color: var(--accent);
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -451,7 +464,7 @@ main {
     max-width: 760px;
 }
 
-.time {
+.timer {
     font-size: 2rem;
     font-weight: 900;
     color: var(--accent);
@@ -464,6 +477,10 @@ main {
     border: 1px solid var(--border-strong);
     border-radius: var(--radius);
     background: var(--surface-strong);
+}
+
+.winner .btn {
+    margin-top: 18px;
 }
 
 .topline {
@@ -575,7 +592,7 @@ main {
     width: 122px;
     padding: 6px 9px;
     box-sizing: border-box;
-    transform: rotate(var(--angle)) translateY(calc(-50% - 90px)) rotate(calc(-1 * var(--angle)));
+    transform: translate(-50%, -50%);
     color: #fff;
     font-weight: 900;
     font-size: 0.78rem;
@@ -614,11 +631,7 @@ main {
     }
 
     .player-row {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .q-row input {
-        width: 100%;
+        grid-template-columns: 34px 1fr 34px;
     }
 
     .wheel-label {
