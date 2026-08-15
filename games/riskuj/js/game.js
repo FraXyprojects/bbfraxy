@@ -85,7 +85,11 @@ export function openQuestion({
     questionEl,
     startTimer
 }) {
-    if (btn.classList.contains('answered') || btn.disabled) {
+    if (
+        state.selected ||
+        btn.classList.contains('answered') ||
+        btn.disabled
+    ) {
         return;
     }
 
@@ -93,7 +97,7 @@ export function openQuestion({
     btn.classList.add('selected');
 
     document
-        .querySelectorAll('.cell-btn:not(.answered)')
+        .querySelectorAll('.cell-btn:not([disabled])')
         .forEach((cell) => {
             if (cell !== btn) {
                 cell.disabled = true;
@@ -183,11 +187,9 @@ export function scoreQuestion({
     const question = state.questions[state.selected.dataset.key];
     const player = state.players[state.currentPlayer];
 
-    if (ok) {
-        player.score += question.value;
-    } else if (state.deductOnWrong) {
-        player.score -= question.value;
-    }
+    player.score += ok
+        ? question.value
+        : -question.value;
 
     state.selected.classList.add(
         'answered',
@@ -203,14 +205,16 @@ export function scoreQuestion({
     state.selected.disabled = true;
     state.selected = null;
 
+    state.currentPlayer =
+        (state.currentPlayer + 1) % state.players.length;
+
     document
         .querySelectorAll('.cell-btn:not(.answered)')
         .forEach((cell) => {
-            cell.disabled = false;
+            if (!cell.hasAttribute('data-locked')) {
+                cell.disabled = false;
+            }
         });
-
-    state.currentPlayer =
-        (state.currentPlayer + 1) % state.players.length;
 
     updateScores();
 
