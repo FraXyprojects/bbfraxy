@@ -47,6 +47,16 @@ const icons = {
 };
 
 const root = document.documentElement;
+const favicon = document.createElement("link");
+favicon.rel = "icon";
+favicon.type = "image/svg+xml";
+favicon.href = "/assets/favicon.svg";
+document.head.append(favicon);
+
+const brandStyle = document.createElement("style");
+brandStyle.textContent = `.brand-mark{font-size:0}.brand-mark::before{content:"F";font-size:1rem;font-weight:850;line-height:1}`;
+document.head.append(brandStyle);
+
 const themeToggle = document.querySelector(".theme-toggle");
 const menuToggle = document.querySelector(".menu-toggle");
 const navMenu = document.querySelector("#site-menu");
