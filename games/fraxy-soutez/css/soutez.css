@@ -14,14 +14,12 @@ main {
 }
 
 .screen {
-    min-height: calc(100vh - 150px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: block;
+    min-height: 0;
 }
 
 .hero {
-    padding: 22px 0 40px;
+    padding: 18px 0 26px;
 }
 
 .eyebrow {
@@ -39,7 +37,7 @@ main {
 
 .hero h1 {
     margin: 10px 0 18px;
-    font-size: clamp(3rem, 8vw, 6rem);
+    font-size: clamp(2.8rem, 6vw, 5rem);
     line-height: 0.95;
     letter-spacing: -0.05em;
 }
@@ -61,7 +59,7 @@ main {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    margin-top: 24px;
+    margin-top: 22px;
 }
 
 .btn {
@@ -117,7 +115,7 @@ main {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
-    margin-top: 18px;
+    margin-top: 42px;
 }
 
 .info-card,
@@ -383,7 +381,9 @@ main {
 
 .result-screen {
     min-height: calc(100vh - 150px);
+    display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .result-card {
