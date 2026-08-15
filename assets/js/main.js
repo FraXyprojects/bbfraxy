@@ -1,7 +1,7 @@
 const socialLinks = [
   {
     label: "Discord",
-    url: "",
+    url: "https://discord.com/users/667728965615484947",
     icon: "discord",
   },
   {
@@ -11,12 +11,12 @@ const socialLinks = [
   },
   {
     label: "Steam",
-    url: "",
+    url: "https://steamcommunity.com/id/fraxyk/",
     icon: "steam",
   },
   {
     label: "YouTube",
-    url: "",
+    url: "https://www.youtube.com/@fraxy01",
     icon: "youtube",
   },
 ];
