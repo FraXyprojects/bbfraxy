@@ -1,4 +1,4 @@
-import { countries } from './data.js';
+import { countries } from '../data.js';
 
 const landingFixStylesheet = document.createElement('link');
 landingFixStylesheet.rel = 'stylesheet';
