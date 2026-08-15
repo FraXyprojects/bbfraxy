@@ -144,6 +144,8 @@ function startGame() {
         Math.min(600, Number($('timerSeconds')?.value) || 60)
     );
 
+    state.deductOnWrong = $('deductWrong')?.checked ?? true;
+
     state.players.forEach((player, index) => {
         player.name = player.name.trim() || `Tým ${index + 1}`;
         player.score = 0;
@@ -185,20 +187,6 @@ function updateScores() {
                     <strong>${esc(player.name)}</strong><br>
                     ${player.score} bodů
                 </div>
-            `
-        )
-        .join('');
-
-    $('legend').innerHTML = state.players
-        .map(
-            (player) => `
-                <span class="legend-item">
-                    <i
-                        class="legend-dot"
-                        style="--player-color:${player.color}"
-                    ></i>
-                    ${esc(player.name)}
-                </span>
             `
         )
         .join('');
