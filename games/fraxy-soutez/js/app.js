@@ -1,5 +1,10 @@
 import { countries } from './data.js';
 
+const landingFixStylesheet = document.createElement('link');
+landingFixStylesheet.rel = 'stylesheet';
+landingFixStylesheet.href = './css/landing-fix.css';
+document.head.appendChild(landingFixStylesheet);
+
 const welcomeScreen = document.getElementById('welcome-screen');
 const rulesScreen = document.getElementById('rules-screen');
 const mapScreen = document.getElementById('map-screen');
