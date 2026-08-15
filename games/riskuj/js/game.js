@@ -67,6 +67,7 @@ export function renderGame({
         </div>
 
         <div id="question" class="question-card"></div>
+        <div id="question-preview" class="question-preview hidden"></div>
     `;
 
     gameEl.querySelector('#new-game').onclick = onNewGame;
@@ -86,6 +87,7 @@ export function openQuestion({
     startTimer
 }) {
     if (
+        state.gameOver ||
         state.selected ||
         btn.classList.contains('answered') ||
         btn.disabled
@@ -186,10 +188,17 @@ export function scoreQuestion({
 
     const question = state.questions[state.selected.dataset.key];
     const player = state.players[state.currentPlayer];
+    const key = state.selected.dataset.key;
 
-    player.score += ok
+    player.score += ok || !state.deductOnWrong
         ? question.value
         : -question.value;
+
+    state.answerHistory[key] = {
+        correct: ok,
+        player: player.name,
+        playerColor: player.color
+    };
 
     state.selected.classList.add(
         'answered',
@@ -235,4 +244,70 @@ export function scoreQuestion({
     if (answeredCells >= totalCells) {
         finishGame();
     }
+}
+
+export function enablePostGameReview({ state, gameEl }) {
+    state.gameOver = true;
+
+    const preview = gameEl.querySelector('#question-preview');
+    const cells = gameEl.querySelectorAll('.cell-btn');
+
+    cells.forEach((cell) => {
+        if (cell.disabled && !cell.classList.contains('answered')) {
+            cell.disabled = false;
+        }
+
+        cell.onclick = () => {
+            toggleQuestionPreview({
+                state,
+                cell,
+                preview
+            });
+        };
+    });
+}
+
+function toggleQuestionPreview({ state, cell, preview }) {
+    const key = cell.dataset.key;
+
+    if (!preview || preview.dataset.key === key) {
+        preview?.classList.toggle('hidden');
+        return;
+    }
+
+    renderQuestionPreview({ state, cell, preview });
+}
+
+function renderQuestionPreview({ state, cell, preview }) {
+    const question = state.questions[cell.dataset.key];
+
+    if (!question || !preview) {
+        return;
+    }
+
+    preview.dataset.key = cell.dataset.key;
+    preview.innerHTML = `
+        <button class="question-preview-close" type="button" aria-label="Zavřít">
+            ×
+        </button>
+
+        <div class="question-preview-value">
+            ${question.value} BODŮ
+        </div>
+
+        <div class="question-preview-text">
+            ${esc(question.question)}
+        </div>
+
+        <div class="question-preview-answer">
+            ${esc(question.answer)}
+        </div>
+    `;
+
+    preview.classList.remove('hidden');
+
+    preview.querySelector('.question-preview-close').onclick = () => {
+        preview.classList.add('hidden');
+        preview.dataset.key = '';
+    };
 }
