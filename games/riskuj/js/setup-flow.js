@@ -1,4 +1,189 @@
-import {esc,renderPlayers,renderQuestionEditor,collectBuiltQuiz} from './setup.js';
-export const state={runMode:'',topics:[],questions:{},players:[{name:'',color:'#5fe7ff',score:0},{name:'',color:'#a78bfa',score:0}],currentPlayer:0,selected:null,timer:null,seconds:60,loadedQuiz:false,setupState:{topics:5,questions:5}};
-export function renderSetup({setupEl,backLanding,startGame,addPlayer,removePlayer,loadQuiz}){setupEl.innerHTML=`<div class="topline"><div><div class="eyebrow">FRAXY // SETUP</div><h2>${state.runMode==='build'?'Připravit kvíz':'Načíst připravený kvíz'}</h2></div><button class="btn secondary" id="setup-back">← Zpět</button></div>${state.runMode==='prepared'?`<div class="field"><label>Quiz JSON</label><input id="quizFile" type="file" accept=".json"><p id="loadStatus" class="note">Vyber JSON vytvořený pomocí Riskuj Quiz Builderu.</p></div>`:''}<div class="form-grid" style="margin-top:18px">${state.runMode==='build'?`<div class="field"><label>Počet témat</label><select id="topicCount">${[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===state.setupState.topics?'selected':''}>${n}</option>`).join('')}</select></div><div class="field"><label>Otázek na téma</label><select id="questionCount">${[1,2,3,4,5,6,7].map(n=>`<option value="${n}" ${n===state.setupState.questions?'selected':''}>${n}</option>`).join('')}</select></div>`:''}<div class="field"><label>Odpočet v sekundách</label><input id="timerSeconds" type="number" min="1" max="600" value="60"><span class="setup-note">Časový limit pro jednu otázku.</span></div></div><div class="topic-block" style="margin-top:18px"><div class="topline"><div class="topic-title">Hráči / týmy</div><button class="btn secondary add-player">＋ Přidat hráče</button></div><div id="playersSetup"></div><p class="note">Začínáme se dvěma hráči. Každý dostane vlastní barvu, která se zobrazí i ve hře.</p></div>${state.runMode==='build'?'<div id="questionsSetup" class="setup-questions"></div>':''}<div class="actions"><button class="btn" id="start-game">Spustit Riskuj →</button></div>`;setupEl.querySelector('#setup-back').onclick=backLanding;renderPlayers({players:state.players,container:setupEl.querySelector('#playersSetup'),onAdd:addPlayer,onRemove:removePlayer});setupEl.querySelector('#start-game').onclick=startGame;if(state.runMode==='build'){const render=()=>{state.setupState={topics:+setupEl.querySelector('#topicCount').value,questions:+setupEl.querySelector('#questionCount').value};renderQuestionEditor({topicCount:state.setupState.topics,questionCount:state.setupState.questions,container:setupEl.querySelector('#questionsSetup')})};setupEl.querySelector('#topicCount').onchange=render;setupEl.querySelector('#questionCount').onchange=render;render()}else setupEl.querySelector('#quizFile').onchange=loadQuiz;}
-export function readBuilt(setupEl){const d=collectBuiltQuiz(setupEl.querySelector('#questionsSetup'));state.topics=d.topics;state.questions=d.questions;return state.topics.length>0;}
+import {
+    collectBuiltQuiz,
+    renderPlayers,
+    renderQuestionEditor
+} from './setup.js';
+
+export const state = {
+    runMode: '',
+    topics: [],
+    questions: {},
+    players: [
+        {
+            name: '',
+            color: '#5fe7ff',
+            score: 0
+        },
+        {
+            name: '',
+            color: '#a78bfa',
+            score: 0
+        }
+    ],
+    currentPlayer: 0,
+    selected: null,
+    timer: null,
+    seconds: 60,
+    loadedQuiz: false,
+    setupState: {
+        topics: 5,
+        questions: 5
+    }
+};
+
+export function renderSetup({
+    setupEl,
+    backLanding,
+    startGame,
+    addPlayer,
+    removePlayer,
+    loadQuiz
+}) {
+    setupEl.innerHTML = `
+        <div class="topline">
+            <div>
+                <div class="eyebrow">FRAXY // SETUP</div>
+                <h2>
+                    ${state.runMode === 'build'
+                        ? 'Připravit kvíz'
+                        : 'Načíst připravený kvíz'}
+                </h2>
+            </div>
+
+            <button class="btn secondary" id="setup-back">← Zpět</button>
+        </div>
+
+        ${state.runMode === 'prepared'
+            ? `
+                <div class="field">
+                    <label>Quiz JSON</label>
+                    <input
+                        id="quizFile"
+                        type="file"
+                        accept=".json"
+                    >
+                    <p id="loadStatus" class="note">
+                        Vyber JSON vytvořený pomocí Riskuj Quiz Builderu.
+                    </p>
+                </div>
+            `
+            : ''}
+
+        <div class="form-grid" style="margin-top: 18px">
+            ${state.runMode === 'build'
+                ? `
+                    <div class="field">
+                        <label>Počet témat</label>
+                        <select id="topicCount">
+                            ${[1, 2, 3, 4, 5, 6, 7, 8]
+                                .map(
+                                    (count) => `
+                                        <option
+                                            value="${count}"
+                                            ${count === state.setupState.topics ? 'selected' : ''}
+                                        >
+                                            ${count}
+                                        </option>
+                                    `
+                                )
+                                .join('')}
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Otázek na téma</label>
+                        <select id="questionCount">
+                            ${[1, 2, 3, 4, 5, 6, 7]
+                                .map(
+                                    (count) => `
+                                        <option
+                                            value="${count}"
+                                            ${count === state.setupState.questions ? 'selected' : ''}
+                                        >
+                                            ${count}
+                                        </option>
+                                    `
+                                )
+                                .join('')}
+                        </select>
+                    </div>
+                `
+                : ''}
+
+            <div class="field">
+                <label>Odpočet v sekundách</label>
+                <input
+                    id="timerSeconds"
+                    type="number"
+                    min="1"
+                    max="600"
+                    value="60"
+                >
+                <span class="setup-note">Časový limit pro jednu otázku.</span>
+            </div>
+        </div>
+
+        <div class="topic-block" style="margin-top: 18px">
+            <div class="topline">
+                <div class="topic-title">Hráči / týmy</div>
+                <button class="btn secondary add-player">＋ Přidat hráče</button>
+            </div>
+
+            <div id="playersSetup"></div>
+
+            <p class="note">
+                Začínáme se dvěma hráči. Každý dostane vlastní barvu,
+                která se zobrazí i ve hře.
+            </p>
+        </div>
+
+        ${state.runMode === 'build'
+            ? '<div id="questionsSetup" class="setup-questions"></div>'
+            : ''}
+
+        <div class="actions">
+            <button class="btn" id="start-game">Spustit Riskuj →</button>
+        </div>
+    `;
+
+    setupEl.querySelector('#setup-back').onclick = backLanding;
+
+    renderPlayers({
+        players: state.players,
+        container: setupEl.querySelector('#playersSetup'),
+        onAdd: addPlayer,
+        onRemove: removePlayer
+    });
+
+    setupEl.querySelector('#start-game').onclick = startGame;
+
+    if (state.runMode === 'build') {
+        const render = () => {
+            state.setupState = {
+                topics: Number(setupEl.querySelector('#topicCount').value),
+                questions: Number(setupEl.querySelector('#questionCount').value)
+            };
+
+            renderQuestionEditor({
+                topicCount: state.setupState.topics,
+                questionCount: state.setupState.questions,
+                container: setupEl.querySelector('#questionsSetup')
+            });
+        };
+
+        setupEl.querySelector('#topicCount').onchange = render;
+        setupEl.querySelector('#questionCount').onchange = render;
+        render();
+    } else {
+        setupEl.querySelector('#quizFile').onchange = loadQuiz;
+    }
+}
+
+export function readBuilt(setupEl) {
+    const data = collectBuiltQuiz(setupEl.querySelector('#questionsSetup'));
+
+    state.topics = data.topics;
+    state.questions = data.questions;
+
+    return state.topics.length > 0;
+}
