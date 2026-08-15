@@ -14,7 +14,6 @@ import {
     renderResults,
     renderFinalResults
 } from './results.js';
-import { startTiebreak } from './tiebreak.js';
 
 const $ = (id) => document.getElementById(id);
 const landing = $('landing');
@@ -261,18 +260,5 @@ function finishGame() {
     enablePostGameReview({
         state,
         gameEl
-    });
-
-    startTiebreak({
-        players: state.players,
-        questionEl: $('question'),
-        renderFinal: (orderedPlayers) => {
-            renderFinalResults({
-                players: orderedPlayers,
-                state,
-                questionEl: $('question'),
-                restart: () => location.reload()
-            });
-        }
     });
 }
