@@ -6,8 +6,8 @@ export const countries = {
     },
     Andorra: {
         coords: [42.5078, 1.5211],
-        question: 'Kolik turistů navštíví Andorru ročně?',
-        answer: 10000000
+        question: 'Kolik návštěv turistů zaznamená Andorra za rok?',
+        answer: 9650000
     },
     Belgium: {
         coords: [50.8503, 4.3517],
@@ -22,21 +22,21 @@ export const countries = {
     Bulgaria: {
         coords: [42.7339, 25.4858],
         question: 'Kolik tun růžového oleje Bulharsko vyprodukuje ročně?',
-        answer: 2
+        answer: 2.475
     },
     'Czech Republic': {
         coords: [49.8175, 15.473],
         question: 'Kolik litrů piva průměrně vypije Čech za rok?',
-        answer: 140
+        answer: 131
     },
     Montenegro: {
         coords: [42.7083, 19.3744],
         question: 'Kolik kilometrů pobřeží má Černá Hora?',
-        answer: 293
+        answer: 293.5
     },
     Denmark: {
         coords: [56.2639, 9.5018],
-        question: 'Kolik ostrovů patří Dánsku?',
+        question: 'Kolik pojmenovaných ostrovů má Dánsko?',
         answer: 443
     },
     Estonia: {
@@ -47,7 +47,7 @@ export const countries = {
     Finland: {
         coords: [61.9241, 25.7482],
         question: 'Kolik saun se nachází ve Finsku?',
-        answer: 2000000
+        answer: 3300000
     },
     France: {
         coords: [46.6034, 1.8883],
@@ -56,18 +56,18 @@ export const countries = {
     },
     Croatia: {
         coords: [45.1, 15.2],
-        question: 'Kolik turistů navštíví Chorvatsko ročně?',
-        answer: 20000000
+        question: 'Kolik turistických příjezdů zaznamenalo Chorvatsko v roce 2025?',
+        answer: 20698963
     },
     Ireland: {
         coords: [53.1424, -7.6921],
-        question: 'Kolik litrů whiskey vyprodukuje Irsko ročně?',
-        answer: 160000000
+        question: 'Kolik milionů litrů irské whiskey bylo vyvezeno v roce 2024?',
+        answer: 131
     },
     Iceland: {
         coords: [64.9631, -19.0208],
-        question: 'Kolik geotermálních pramenů je na Islandu?',
-        answer: 250
+        question: 'Kolik horkých pramenů se nachází na Islandu?',
+        answer: 800
     },
     Italy: {
         coords: [41.8719, 12.5674],
@@ -82,22 +82,22 @@ export const countries = {
     Liechtenstein: {
         coords: [47.166, 9.5554],
         question: 'Kolik obyvatel má Lichtenštejnsko?',
-        answer: 39000
+        answer: 41237
     },
     Lithuania: {
         coords: [55.1694, 23.8813],
         question: 'Kolik hektarů lesa pokrývá Litvu?',
-        answer: 2000000
+        answer: 2214323
     },
     Latvia: {
         coords: [56.8796, 24.6036],
-        question: 'Kolik písní je zaznamenáno v Lotyšském národním zpěvníku?',
+        question: 'Kolik písní je zaznamenáno v lotyšských dainách?',
         answer: 1200000
     },
     Luxembourg: {
         coords: [49.8153, 6.1296],
         question: 'Kolik bank má Lucembursko?',
-        answer: 120
+        answer: 116
     },
     Hungary: {
         coords: [47.1625, 19.5033],
@@ -106,13 +106,13 @@ export const countries = {
     },
     Malta: {
         coords: [35.8997, 14.5146],
-        question: 'Kolik turistů navštíví Maltu ročně?',
-        answer: 2500000
+        question: 'Kolik zahraničních turistů navštívilo Maltu v roce 2025?',
+        answer: 4022310
     },
     Moldova: {
         coords: [47.4116, 28.3699],
-        question: 'Kolik litrů vína průměrně vyprodukuje Moldavsko ročně?',
-        answer: 120000000
+        question: 'Kolik litrů vína se v Moldavsku vyrobilo v roce 2025?',
+        answer: 123000000
     },
     Monaco: {
         coords: [43.7384, 7.4246],
@@ -121,7 +121,7 @@ export const countries = {
     },
     Netherlands: {
         coords: [52.1326, 5.2916],
-        question: 'Kolik větrných mlýnů je v Nizozemsku?',
+        question: 'Kolik historických větrných mlýnů přežilo v Nizozemsku?',
         answer: 1200
     },
     Norway: {
@@ -131,13 +131,13 @@ export const countries = {
     },
     Poland: {
         coords: [51.9194, 19.1451],
-        question: 'Kolik tun jablek Polsko vyprodukuje ročně?',
-        answer: 4000000
+        question: 'Kolik tun jablek Polsko vyprodukovalo v roce 2025?',
+        answer: 3700000
     },
     Portugal: {
         coords: [39.3999, -8.2245],
-        question: 'Kolik lahví portského vína vyprodukuje Portugalsko ročně?',
-        answer: 6000000
+        question: 'Kolik devítilitrových kartonů portského se prodalo v roce 2025?',
+        answer: 6983231
     },
     Austria: {
         coords: [47.5162, 14.5501],
@@ -157,11 +157,11 @@ export const countries = {
     'San Marino': {
         coords: [43.9336, 12.4508],
         question: 'Kolik obyvatel má San Marino?',
-        answer: 34000
+        answer: 34172
     },
     Slovakia: {
         coords: [48.669, 19.699],
-        question: 'Kolik hradů a zámků má Slovensko?',
+        question: 'Kolik zámků má Slovensko?',
         answer: 425
     },
     Slovenia: {
@@ -181,17 +181,17 @@ export const countries = {
     },
     Switzerland: {
         coords: [46.8182, 8.2275],
-        question: 'Kolik hodin ročně průměrně Švýcaři pracují?',
-        answer: 1600
+        question: 'Kolik hodin ročně průměrně odpracuje jeden pracovník ve Švýcarsku?',
+        answer: 1417
     },
     Ukraine: {
         coords: [48.3794, 31.1656],
-        question: 'Kolik kilometrů hranic má Ukrajina?',
-        answer: 6500
+        question: 'Kolik kilometrů měří mezinárodní hranice Ukrajiny?',
+        answer: 6993
     },
     'United Kingdom': {
         coords: [55.3781, -3.436],
         question: 'Kolik šálků čaje se vypije ve Velké Británii za den?',
-        answer: 165000000
+        answer: 100000000
     }
 };
