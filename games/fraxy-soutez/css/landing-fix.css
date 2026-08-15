@@ -1,20 +1,16 @@
 /* Keep the competition landing screen compact like Riskuj. */
 
 #welcome-screen .hero {
-    display: block;
-    min-height: 0;
+    display: block !important;
+    min-height: 0 !important;
     width: min(100%, 900px);
     margin: 0 auto;
-    padding: 10px 0 18px;
+    padding: 16px 0 22px;
     text-align: center;
 }
 
-#welcome-screen .hero .eyebrow {
-    margin-bottom: 6px;
-}
-
 #welcome-screen .hero h1 {
-    margin: 4px 0 12px;
+    margin: 8px 0 12px;
 }
 
 #welcome-screen .hero p {
@@ -24,9 +20,9 @@
 
 #welcome-screen .hero-actions {
     justify-content: center;
-    margin-top: 16px;
+    margin-top: 18px;
 }
 
 #welcome-screen .info-grid {
-    margin-top: 20px;
+    margin-top: 22px;
 }
