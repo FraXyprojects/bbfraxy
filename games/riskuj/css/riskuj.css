@@ -129,7 +129,7 @@ main {
 }
 
 .info-grid {
-    margin-top: 26px;
+    margin-top: 52px;
 }
 
 .info-card,
@@ -168,7 +168,7 @@ main {
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
 }
 
@@ -185,15 +185,30 @@ main {
 }
 
 .field input,
-.field select {
+.field select,
+.topic-title input,
+.q-row input {
     box-sizing: border-box;
     width: 100%;
     padding: 11px 12px;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--bg-soft);
+    border-radius: 7px;
+    background: var(--surface-strong);
     color: var(--text);
     font: inherit;
+    outline: none;
+}
+
+.field input:focus,
+.field select:focus,
+.topic-title input:focus,
+.q-row input:focus {
+    border-color: var(--border-strong);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.field input[type="file"] {
+    padding: 8px;
 }
 
 .setup-questions {
@@ -217,22 +232,21 @@ main {
     margin-bottom: 10px;
 }
 
+.topic-title input {
+    font-weight: 750;
+    background: var(--surface-strong);
+}
+
 .q-row {
     display: grid;
     grid-template-columns: 1fr 1fr 90px;
-    gap: 10px 0;
-    margin: 7px 0 0;
+    gap: 8px;
+    margin: 8px 0;
 }
 
-.q-row input {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 9px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font: inherit;
+.q-row input:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .player-row {
@@ -249,7 +263,7 @@ main {
     padding: 10px 11px;
     border: 1px solid var(--border);
     border-radius: 7px;
-    background: var(--surface);
+    background: var(--surface-strong);
     color: var(--text);
     font: inherit;
     outline: none;
@@ -257,7 +271,9 @@ main {
     -webkit-appearance: none;
 }
 
-.player-row input::placeholder {
+.player-row input::placeholder,
+.topic-title input::placeholder,
+.q-row input::placeholder {
     color: var(--muted);
     opacity: 1;
 }
@@ -265,7 +281,6 @@ main {
 .player-row input:focus {
     border-color: var(--border-strong);
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
-    background: var(--surface);
 }
 
 .player-color {
@@ -286,6 +301,64 @@ main {
     background: var(--surface);
     color: var(--muted);
     cursor: pointer;
+}
+
+.player-remove:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.advanced-settings {
+    margin-top: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.advanced-settings summary {
+    padding: 14px 16px;
+    cursor: pointer;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.advanced-settings summary::marker {
+    color: var(--accent);
+}
+
+.advanced-settings-grid {
+    display: grid;
+    grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
+    gap: 16px;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.check-setting {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-strong);
+    cursor: pointer;
+}
+
+.check-setting input {
+    margin-top: 3px;
+    accent-color: var(--accent);
+}
+
+.check-setting span {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.check-setting small {
+    color: var(--muted);
+    line-height: 1.45;
 }
 
 .board-wrap {
@@ -319,12 +392,17 @@ main {
     font-size: 1.25rem;
     font-weight: 900;
     cursor: pointer;
-    transition: 0.15s;
+    transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }
 
-.cell-btn:hover {
+.cell-btn:hover:not(:disabled) {
     background: var(--accent);
     color: #031014;
+}
+
+.cell-btn:disabled:not(.answered) {
+    opacity: 0.28;
+    cursor: not-allowed;
 }
 
 .cell-btn.answered {
@@ -337,12 +415,6 @@ main {
     background: color-mix(in srgb, var(--answered-color) 18%, var(--surface));
     border-color: color-mix(in srgb, var(--answered-color) 35%, var(--border));
     color: color-mix(in srgb, var(--answered-color) 62%, var(--muted));
-}
-
-.cell-btn.answered.correct:hover {
-    background: color-mix(in srgb, var(--answered-color) 22%, var(--surface));
-    border-color: color-mix(in srgb, var(--answered-color) 48%, var(--answered-color));
-    color: color-mix(in srgb, var(--answered-color) 48%, var(--border));
 }
 
 .cell-btn.answered.wrong {
@@ -365,10 +437,6 @@ main {
         color-mix(in srgb, var(--answered-color) 28%, transparent) 10px
     );
     pointer-events: none;
-}
-
-.cell-btn.answered.wrong:hover {
-    background: var(--surface-strong);
 }
 
 .cell-btn.selected {
@@ -406,34 +474,6 @@ main {
 .score.active {
     border-color: var(--player-color);
     box-shadow: 0 0 22px color-mix(in srgb, var(--player-color) 48%, transparent);
-    pointer-events: none;
-}
-
-.legend {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin: 12px 0 4px;
-}
-
-.legend-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 7px 9px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    font-size: 0.78rem;
-    color: var(--muted);
-}
-
-.legend-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--player-color);
-    box-shadow: 0 0 9px color-mix(in srgb, var(--player-color) 55%, transparent);
 }
 
 .question-card {
@@ -480,7 +520,12 @@ main {
 }
 
 .winner .btn {
-    margin-top: 18px;
+    margin-top: 28px;
+}
+
+.decision-hint {
+    margin-top: 8px;
+    color: var(--muted);
 }
 
 .topline {
@@ -495,7 +540,7 @@ main {
     margin: 0;
 }
 
-.setup-notes {
+.setup-note {
     font-size: 0.8rem;
     color: var(--muted);
     margin-top: 8px;
@@ -511,7 +556,7 @@ main {
     border-radius: var(--radius);
     background: var(--surface);
     box-shadow: 0 20px 60px var(--shadow);
-    text-align: left;
+    text-align: center;
 }
 
 .tiebreak-card h3 {
@@ -524,7 +569,6 @@ main {
     margin: 0 auto;
     color: var(--muted);
     line-height: 1.6;
-    text-align: center;
 }
 
 .wheel-stage {
@@ -553,7 +597,7 @@ main {
 
 .wheel-pointer {
     position: absolute;
-    z-index: 3;
+    z-index: 5;
     top: -2px;
     left: 50%;
     width: 0;
@@ -582,33 +626,29 @@ main {
     font-size: 1.5rem;
     font-weight: 900;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    z-index: 2;
+    z-index: 4;
 }
 
 .wheel-label {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 122px;
-    padding: 6px 9px;
+    width: 96px;
+    padding: 6px 8px;
     box-sizing: border-box;
     transform: translate(-50%, -50%);
     color: #fff;
     font-weight: 900;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     line-height: 1.1;
     text-align: center;
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    background: rgba(3, 16, 20, 0.82);
+    background: rgba(3, 16, 20, 0.84);
     border: 1px solid color-mix(in srgb, var(--label-color) 78%, #fff);
-    box-shadow:
-        0 0 12px color-mix(in srgb, var(--label-color) 25%, transparent),
-        inset 0 0 12px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--label-color) 25%, transparent);
     border-radius: 999px;
-    z-index: 4;
+    z-index: 3;
 }
 
 .wheel-result {
@@ -621,13 +661,13 @@ main {
 @media (max-width: 800px) {
     .info-grid,
     .mode-grid,
-    .form-grid {
+    .form-grid,
+    .advanced-settings-grid {
         grid-template-columns: 1fr;
     }
 
     .q-row {
         grid-template-columns: 1fr;
-        gap: 12px;
     }
 
     .player-row {
@@ -635,8 +675,8 @@ main {
     }
 
     .wheel-label {
-        width: 96px;
-        font-size: 0.7rem;
+        width: 84px;
+        font-size: 0.68rem;
         padding: 5px 7px;
     }
 
