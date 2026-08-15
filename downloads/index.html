@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BBFRAXY downloads for games, tools and projects.">
+  <meta name="theme-color" content="#050607">
+  <title>Downloads | BBFRAXY</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <style>
+    .downloads-page {
+      min-height: calc(100vh - 96px);
+      padding: 7rem 1.5rem 5rem;
+    }
+
+    .downloads-inner {
+      width: min(980px, 100%);
+      margin: 0 auto;
+    }
+
+    .downloads-heading {
+      margin-bottom: 2rem;
+    }
+
+    .downloads-kicker {
+      margin: 0 0 .7rem;
+      color: var(--accent-strong);
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .downloads-heading h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      letter-spacing: -.045em;
+    }
+
+    .downloads-heading p {
+      max-width: 600px;
+      margin: .9rem 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .download-card {
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr) auto;
+      gap: 1.25rem;
+      align-items: center;
+      padding: 1.35rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .download-icon {
+      display: grid;
+      width: 76px;
+      height: 76px;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(5, 6, 7, .5);
+    }
+
+    .download-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .download-content h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .download-content p {
+      margin: .4rem 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .download-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-top: .7rem;
+    }
+
+    .download-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 .65rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+
+    .download-badge.version {
+      border-color: rgba(95, 231, 255, .25);
+      color: var(--accent-strong);
+    }
+
+    .download-actions {
+      display: flex;
+      flex-direction: column;
+      gap: .55rem;
+      min-width: 132px;
+    }
+
+    .download-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 .95rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      background: rgba(255,255,255,.035);
+      font-size: .8rem;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+
+    .download-button:hover {
+      transform: translateY(-2px);
+      border-color: rgba(95, 231, 255, .35);
+      background: rgba(95, 231, 255, .08);
+    }
+
+    .download-button.primary {
+      border-color: rgba(95, 231, 255, .35);
+      color: var(--accent-strong);
+    }
+
+    .download-button.disabled {
+      cursor: default;
+      opacity: .42;
+      pointer-events: none;
+    }
+
+    @media (max-width: 700px) {
+      .downloads-page {
+        padding-top: 5.5rem;
+      }
+
+      .download-card {
+        grid-template-columns: 60px minmax(0, 1fr);
+      }
+
+      .download-icon {
+        width: 60px;
+        height: 60px;
+      }
+
+      .download-actions {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .downloads-page {
+        padding-inline: 1rem;
+      }
+
+      .download-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas class="ambient-canvas" id="ambient-canvas" aria-hidden="true"></canvas>
+
+  <div class="site-shell">
+    <header class="site-header">
+      <nav class="navbar" aria-label="Primary navigation">
+        <a class="brand" href="../" aria-label="BBFRAXY home">
+          <span class="brand-mark" aria-hidden="true">B</span>
+          <span>BBFRAXY</span>
+        </a>
+
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Open navigation">
+          <span></span><span></span><span></span>
+        </button>
+
+        <div class="nav-menu" id="site-menu">
+          <div class="nav-links" aria-label="Site sections">
+            <a href="../games">Games</a>
+            <a href="../tools">Tools</a>
+            <a href="../projects">Projects</a>
+            <a href="./" aria-current="page">Downloads</a>
+          </div>
+
+          <div class="nav-actions">
+            <a class="icon-button" href="https://github.com/FraXyprojects" target="_blank" rel="noreferrer" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z"/></svg>
+            </a>
+            <button class="icon-button theme-toggle" type="button" aria-label="Switch theme" aria-pressed="false">
+              <span class="theme-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="downloads-page">
+      <div class="downloads-inner">
+        <header class="downloads-heading">
+          <p class="downloads-kicker">BBFRAXY / DOWNLOADS</p>
+          <h1>Downloads</h1>
+          <p>Games, tools and projects that are ready to download — or currently being prepared for release.</p>
+        </header>
+
+        <article class="download-card">
+          <div class="download-icon">
+            <img src="https://raw.githubusercontent.com/FraXyprojects/Valheim-mod/main/icon.png" alt="Valheim Session Chronicle icon">
+          </div>
+
+          <div class="download-content">
+            <h2>Valheim Session Chronicle</h2>
+            <p>Client-side Valheim session chronicle and activity tracker with Czech TXT reports and JSON export.</p>
+            <div class="download-meta">
+              <span class="download-badge version">v1.0.0</span>
+              <span class="download-badge">Development</span>
+              <span class="download-badge">BepInEx</span>
+            </div>
+          </div>
+
+          <div class="download-actions">
+            <span class="download-button disabled">Download soon</span>
+            <a class="download-button primary" href="https://github.com/FraXyprojects/Valheim-mod" target="_blank" rel="noreferrer">View on GitHub ↗</a>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <span>BBFRAXY</span>
+    </footer>
+  </div>
+
+  <script src="../assets/js/main.js" defer></script>
+</body>
+</html>
