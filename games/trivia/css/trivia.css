@@ -1,0 +1,163 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f8ff;
+    position: relative;
+}
+
+h1 {
+    font-size: 3em;
+    margin-top: 20px;
+}
+
+#timer {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 1.5em;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#question-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(7, 80px);
+    grid-gap: 10px;
+    justify-content: center;
+    margin: auto;
+}
+
+.square {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: lightgray;
+    position: relative;
+    color: black;
+    font-weight: bold;
+    font-size: 0.9em;
+    cursor: pointer;
+    border: 2px solid black;
+    box-sizing: border-box;
+}
+
+.square[data-theme="math"] {
+    background-color: #2cb4de;
+}
+
+.square[data-theme="history"] {
+    background-color: burlywood;
+}
+
+.square[data-theme="fun"],
+.square[data-theme="serialy"],
+.square[data-theme="aktualni_udalosti"],
+.square[data-theme="nove_technologie"],
+.square[data-theme="elektronika"],
+.square[data-theme="hry"] {
+    background-color: pink;
+}
+
+.square[data-theme="mista_cinu"] {
+    background-color: #cef216;
+}
+
+.square.start {
+    background-color: lightgreen;
+}
+
+.square.goal {
+    background-color: lightcoral;
+}
+
+.square.active {
+    border-color: red;
+}
+
+#result {
+    display: none;
+    margin-top: 40px;
+    font-size: 2em;
+}
+
+#result p.success {
+    color: green;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+#result p.details {
+    color: black;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+#result .highlight {
+    font-weight: bold;
+    color: red;
+}
+
+#result-buttons {
+    margin-top: 20px;
+}
+
+.btn {
+    font-size: 1em;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-download {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-download:hover {
+    background-color: #45a049;
+}
+
+.btn-restart {
+    background-color: #2196f3;
+    color: white;
+}
+
+.btn-restart:hover {
+    background-color: #1976d2;
+}
+
+.answer {
+    display: block;
+    margin: 8px auto;
+    padding: 10px 18px;
+    min-width: 220px;
+    cursor: pointer;
+}
+
+@media (max-width: 700px) {
+    #game-board {
+        grid-template-columns: repeat(5, 64px);
+        gap: 6px;
+    }
+
+    .square {
+        width: 64px;
+        height: 64px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+}
