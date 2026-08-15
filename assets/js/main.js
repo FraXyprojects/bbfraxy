@@ -21,12 +21,12 @@ const socialLinks = [
   },
   {
     label: "Spotify",
-    url: "https://open.spotify.com/",
+    url: "https://open.spotify.com/user/fraxycz",
     icon: "spotify",
   },
   {
     label: "Instagram",
-    url: "https://www.instagram.com/",
+    url: "https://www.instagram.com/fraxycz",
     icon: "instagram",
   },
 ];
