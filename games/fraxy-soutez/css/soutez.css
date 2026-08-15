@@ -1,6 +1,7 @@
 :root {
     --competition-accent: #5fe7ff;
     --competition-accent-strong: #7ef0ff;
+    --competition-success: #34d399;
 }
 
 body {
@@ -112,9 +113,13 @@ main {
 }
 
 .btn.success {
-    background: color-mix(in srgb, #34d399 72%, var(--surface));
-    border-color: color-mix(in srgb, #34d399 55%, var(--border));
+    background: color-mix(in srgb, var(--competition-success) 72%, var(--surface));
+    border-color: color-mix(in srgb, var(--competition-success) 55%, var(--border));
     color: #03140d;
+}
+
+.btn.success:hover {
+    background: var(--competition-success);
 }
 
 .btn.danger {
@@ -139,7 +144,8 @@ main {
 .info-card,
 .rules-card,
 .game-shell,
-.result-card {
+.result-card,
+.question-history-card {
     padding: 24px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -149,7 +155,8 @@ main {
 
 .info-card h2,
 .rules-card h2,
-.result-card h2 {
+.result-card h2,
+.question-history-card h2 {
     margin: 0 0 12px;
 }
 
@@ -158,8 +165,10 @@ main {
 }
 
 .rules-grid {
+    width: min(100%, 900px);
+    margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
 }
 
@@ -184,12 +193,17 @@ main {
     color: var(--text);
 }
 
-.hidden {
-    display: none !important;
+.rules-copy .actions {
+    justify-content: flex-start;
+    align-items: flex-end;
 }
 
-#map-screen {
-    min-height: 0;
+.rules-copy .actions .secondary {
+    margin-left: auto;
+}
+
+.hidden {
+    display: none !important;
 }
 
 .game-shell {
@@ -226,6 +240,13 @@ main {
     background: color-mix(in srgb, var(--surface-strong) 88%, transparent);
     backdrop-filter: blur(12px);
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+    transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
+.map-overlay.map-overlay-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .map-overlay h2 {
@@ -283,12 +304,32 @@ main {
 }
 
 #remaining-countries li {
+    width: 100%;
     padding: 8px 10px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--surface-strong);
     color: var(--muted);
     font-size: 0.82rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+#remaining-countries li:hover,
+#remaining-countries li:focus-visible {
+    color: var(--text);
+    border-color: var(--border-strong);
+    background: rgba(95, 231, 255, 0.08);
+    transform: translateX(-2px);
+    outline: none;
+}
+
+#remaining-countries li.answered {
+    color: #71e0aa;
+    border-color: rgba(52, 211, 153, 0.28);
+    background: rgba(52, 211, 153, 0.07);
+    cursor: default;
 }
 
 .leaflet-container {
@@ -321,6 +362,12 @@ main {
     background: var(--competition-accent);
     border: 2px solid #061014;
     box-shadow: 0 0 0 2px rgba(95, 231, 255, 0.25), 0 0 18px rgba(95, 231, 255, 0.65);
+    transition: background 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+}
+
+.custom-marker.answered {
+    background: var(--competition-success);
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.28), 0 0 18px rgba(52, 211, 153, 0.58);
 }
 
 .modal-overlay {
@@ -399,9 +446,12 @@ main {
 }
 
 .result-screen {
-    min-height: calc(100vh - 150px);
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 16px;
+    padding-top: 22px;
 }
 
 .result-card {
@@ -429,8 +479,69 @@ main {
     margin-top: 24px;
 }
 
+.question-history-card {
+    width: min(100%, 900px);
+}
+
+.question-history-card h2 {
+    text-align: center;
+}
+
+.question-history-intro {
+    margin: -2px 0 18px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.question-history-group + .question-history-group {
+    margin-top: 18px;
+}
+
+.question-history-group h3 {
+    margin: 0 0 10px;
+    color: var(--competition-accent-strong);
+    font-size: 1rem;
+}
+
+.question-history-list {
+    display: grid;
+    gap: 8px;
+}
+
+.question-history-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-strong);
+}
+
+.question-history-question {
+    font-weight: 750;
+}
+
+.question-history-answer {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.question-history-score {
+    min-width: 94px;
+    text-align: right;
+    color: var(--competition-success);
+    font-weight: 850;
+}
+
+.question-history-score.low {
+    color: #fb7185;
+}
+
 @media (max-width: 900px) {
-    .rules-grid,
     .map-layout {
         grid-template-columns: 1fr;
     }
@@ -438,7 +549,7 @@ main {
     #sidebar {
         border-left: 0;
         border-top: 1px solid var(--border);
-        max-height: 280px;
+        max-height: 320px;
     }
 
     #map {
@@ -451,6 +562,11 @@ main {
         grid-template-columns: 1fr;
     }
 
+    .rules-copy .actions .secondary {
+        margin-left: 0;
+        width: 100%;
+    }
+
     .answer-row {
         grid-template-columns: 1fr;
     }
@@ -459,5 +575,13 @@ main {
         left: 10px;
         right: 10px;
         max-width: none;
+    }
+
+    .question-history-item {
+        grid-template-columns: 1fr;
+    }
+
+    .question-history-score {
+        text-align: left;
     }
 }
