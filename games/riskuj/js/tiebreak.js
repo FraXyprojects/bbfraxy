@@ -1,6 +1,10 @@
 import { esc } from './setup.js';
 
-export function startTiebreak({ players, questionEl, renderFinal }) {
+export function startTiebreak({
+    players,
+    questionEl,
+    renderFinal
+}) {
     const sorted = [...players].sort((a, b) => b.score - a.score);
     const groups = [];
 
@@ -58,6 +62,7 @@ function processNextGroup(state, mount, renderFinal) {
 function renderWheel(state, mount, renderFinal) {
     const group = state.currentGroup;
     const segment = 360 / group.length;
+    const labelRadius = 27;
 
     const gradient = group
         .map(
@@ -68,10 +73,10 @@ function renderWheel(state, mount, renderFinal) {
 
     const labels = group
         .map((player, index) => {
-            const middle = (index + 0.5) * segment;
-            const radians = ((middle - 90) * Math.PI) / 180;
-            const x = 50 + 34 * Math.cos(radians);
-            const y = 50 + 34 * Math.sin(radians);
+            const middleAngle = (index + 0.5) * segment;
+            const radians = (middleAngle - 90) * Math.PI / 180;
+            const x = 50 + labelRadius * Math.cos(radians);
+            const y = 50 + labelRadius * Math.sin(radians);
 
             return `
                 <span
@@ -94,11 +99,8 @@ function renderWheel(state, mount, renderFinal) {
                 <strong>
                     ${group
                         .map(
-                            (player) => `
-                                <span style="color:${player.color}">
-                                    ${esc(player.name)}
-                                </span>
-                            `
+                            (player) =>
+                                `<span style="color:${player.color}">${esc(player.name)}</span>`
                         )
                         .join(', ')}
                 </strong>
@@ -111,18 +113,15 @@ function renderWheel(state, mount, renderFinal) {
                 <div
                     class="wheel"
                     id="wheel"
-                    style="--wheel-gradient:conic-gradient(${gradient})"
+                    style="--wheel-gradient: conic-gradient(${gradient})"
                 >
                     ${labels}
+
                     <div class="wheel-center">?</div>
                 </div>
             </div>
 
-            <div
-                id="wheel-result"
-                class="wheel-result"
-                aria-live="polite"
-            ></div>
+            <div id="wheel-result" class="wheel-result" aria-live="polite"></div>
 
             <button class="btn" id="spin-wheel">
                 🎡 Zatočit kolem
@@ -137,10 +136,10 @@ function renderWheel(state, mount, renderFinal) {
 
 function randomIndex(max) {
     if (globalThis.crypto?.getRandomValues) {
-        const array = new Uint32Array(1);
-        globalThis.crypto.getRandomValues(array);
+        const values = new Uint32Array(1);
+        globalThis.crypto.getRandomValues(values);
 
-        return Math.floor((array[0] / 4294967296) * max);
+        return Math.floor((values[0] / 4294967296) * max);
     }
 
     return Math.floor(Math.random() * max);
@@ -158,8 +157,8 @@ function spin(state, mount, renderFinal) {
 
     const winnerIndex = randomIndex(group.length);
     const segment = 360 / group.length;
-    const center = winnerIndex * segment + segment / 2;
-    const target = 360 * 5 + (360 - center);
+    const centerAngle = winnerIndex * segment + segment / 2;
+    const target = 360 * 5 + (360 - centerAngle);
 
     wheel.style.setProperty('--spin-target', `${target}deg`);
     wheel.classList.add('spinning');
@@ -179,7 +178,9 @@ function spin(state, mount, renderFinal) {
             <strong>${place}. místo</strong>.
         `;
 
-        state.currentGroup = group.filter((player) => player !== winner);
+        state.currentGroup = group.filter(
+            (player) => player !== winner
+        );
 
         window.setTimeout(() => {
             if (state.currentGroup.length > 1) {
