@@ -190,9 +190,11 @@ export function scoreQuestion({
     const player = state.players[state.currentPlayer];
     const key = state.selected.dataset.key;
 
-    player.score += ok || !state.deductOnWrong
-        ? question.value
-        : -question.value;
+    if (ok) {
+        player.score += question.value;
+    } else if (state.deductOnWrong) {
+        player.score -= question.value;
+    }
 
     state.answerHistory[key] = {
         correct: ok,
@@ -220,9 +222,7 @@ export function scoreQuestion({
     document
         .querySelectorAll('.cell-btn:not(.answered)')
         .forEach((cell) => {
-            if (!cell.hasAttribute('data-locked')) {
-                cell.disabled = false;
-            }
+            cell.disabled = false;
         });
 
     updateScores();
