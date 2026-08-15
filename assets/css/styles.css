@@ -296,19 +296,14 @@ button {
   box-shadow: 0 0 34px rgba(95, 231, 255, 0.12);
 }
 
-.avatar-placeholder {
-  display: grid;
+.avatar-image {
+  display: block;
   width: 96px;
   height: 96px;
-  place-items: center;
+  object-fit: contain;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius);
-  background:
-    linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(95, 231, 255, 0.08)),
-    rgba(5, 6, 7, 0.52);
-  color: var(--accent-strong);
-  font-size: 1.45rem;
-  font-weight: 800;
+  background: rgba(5, 6, 7, 0.52);
 }
 
 .signal {
@@ -638,7 +633,7 @@ button {
     height: 104px;
   }
 
-  .avatar-placeholder {
+  .avatar-image {
     width: 84px;
     height: 84px;
   }
