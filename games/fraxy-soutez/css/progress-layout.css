@@ -1,0 +1,47 @@
+#sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: min(78vh, 760px);
+    max-height: min(78vh, 760px);
+    overflow: hidden;
+}
+
+#remaining-countries {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+}
+
+#remaining-countries::-webkit-scrollbar {
+    width: 6px;
+}
+
+#remaining-countries::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#remaining-countries::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--border-strong);
+}
+
+.sidebar-actions {
+    flex: 0 0 auto;
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.sidebar-actions .btn {
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    #sidebar {
+        min-height: 320px;
+        max-height: 320px;
+    }
+}
