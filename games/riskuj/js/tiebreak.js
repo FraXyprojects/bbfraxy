@@ -15,11 +15,15 @@ export function startTiebreak({ players, questionEl, renderFinal }) {
   }
 
   const state = { groups, groupIndex: 0, currentGroup: null, placed: [] };
-  questionEl.innerHTML = '<div id="decision-wheel"></div>';
-  processNextGroup(state, questionEl, renderFinal);
+  const mount = questionEl.querySelector('#decision-wheel');
+  if (!mount) {
+    renderFinal(sorted);
+    return;
+  }
+  processNextGroup(state, mount, renderFinal);
 }
 
-function processNextGroup(state, questionEl, renderFinal) {
+function processNextGroup(state, mount, renderFinal) {
   const group = state.groups[state.groupIndex];
   if (!group) {
     renderFinal(state.placed);
@@ -28,14 +32,14 @@ function processNextGroup(state, questionEl, renderFinal) {
   if (group.length === 1) {
     state.placed.push(group[0]);
     state.groupIndex += 1;
-    processNextGroup(state, questionEl, renderFinal);
+    processNextGroup(state, mount, renderFinal);
     return;
   }
   state.currentGroup = [...group];
-  renderWheel(state, questionEl, renderFinal);
+  renderWheel(state, mount, renderFinal);
 }
 
-function renderWheel(state, questionEl, renderFinal) {
+function renderWheel(state, mount, renderFinal) {
   const group = state.currentGroup;
   const segment = 360 / group.length;
   const gradient = group.map((player, i) => `${player.color} ${i * segment}deg ${(i + 1) * segment}deg`).join(',');
@@ -44,7 +48,7 @@ function renderWheel(state, questionEl, renderFinal) {
     return `<span class="wheel-label" style="--angle:${angle}deg;--label-color:${player.color}">${esc(player.name)}</span>`;
   }).join('');
 
-  questionEl.querySelector('#decision-wheel').innerHTML = `
+  mount.innerHTML = `
     <div class="tiebreak-card">
       <div class="eyebrow">FRAXY // DECISION ROUND</div>
       <h3>Kolo rozhodnutí</h3>
@@ -60,14 +64,14 @@ function renderWheel(state, questionEl, renderFinal) {
       <button class="btn" id="spin-wheel">🎡 Zatočit kolem</button>
     </div>`;
 
-  questionEl.querySelector('#spin-wheel').onclick = () => spin(state, questionEl, renderFinal);
+  mount.querySelector('#spin-wheel').onclick = () => spin(state, mount, renderFinal);
 }
 
-function spin(state, questionEl, renderFinal) {
+function spin(state, mount, renderFinal) {
   const group = state.currentGroup;
-  const wheel = questionEl.querySelector('#wheel');
-  const button = questionEl.querySelector('#spin-wheel');
-  const result = questionEl.querySelector('#wheel-result');
+  const wheel = mount.querySelector('#wheel');
+  const button = mount.querySelector('#spin-wheel');
+  const result = mount.querySelector('#wheel-result');
   if (!wheel || !button || !result || button.disabled) return;
 
   const winnerIndex = Math.floor(Math.random() * group.length);
@@ -86,12 +90,12 @@ function spin(state, questionEl, renderFinal) {
     state.currentGroup = group.filter((player) => player !== winner);
     window.setTimeout(() => {
       if (state.currentGroup.length > 1) {
-        renderWheel(state, questionEl, renderFinal);
+        renderWheel(state, mount, renderFinal);
         return;
       }
       if (state.currentGroup.length === 1) state.placed.push(state.currentGroup[0]);
       state.groupIndex += 1;
-      processNextGroup(state, questionEl, renderFinal);
+      processNextGroup(state, mount, renderFinal);
     }, 1000);
   }, 3900);
 }
