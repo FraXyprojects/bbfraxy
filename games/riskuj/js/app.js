@@ -1,14 +1,275 @@
-import {PALETTE,esc} from './setup.js';import {state,renderSetup,readBuilt} from './setup-flow.js';import {renderGame,openQuestion,scoreQuestion} from './game.js';import {renderResults,renderFinalResults} from './results.js';import {startTiebreak} from './tiebreak.js';
-const $=id=>document.getElementById(id),landing=$('landing'),launch=$('launch'),setupEl=$('setup'),gameEl=$('game');
-landing.querySelector('#launch-game').onclick=()=>{landing.classList.add('hidden');launch.classList.remove('hidden');};
-launch.querySelector('#launch-back').onclick=()=>{launch.classList.add('hidden');landing.classList.remove('hidden');};
-launch.querySelectorAll('.mode').forEach(el=>el.onclick=()=>{state.runMode=el.dataset.mode;launch.classList.add('hidden');setupEl.classList.remove('hidden');renderSetup({setupEl,backLanding:()=>{setupEl.classList.add('hidden');landing.classList.remove('hidden');},startGame,addPlayer,removePlayer,loadQuiz});});
-function setupRender(){renderSetup({setupEl,backLanding:()=>{setupEl.classList.add('hidden');landing.classList.remove('hidden');},startGame,addPlayer,removePlayer,loadQuiz});}
-function addPlayer(){if(state.players.length>=10)return;state.players.push({name:'',color:PALETTE[state.players.length],score:0});setupRender();}
-function removePlayer(i){if(state.players.length<=2)return;state.players.splice(i,1);setupRender();}
-function loadQuiz(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d.topics)||!d.topics.length)throw Error();state.topics=d.topics.map(t=>t.name);state.questions={};d.topics.forEach(t=>(t.questions||[]).forEach(q=>state.questions[`${t.name}-${q.value}`]={question:q.question||'',answer:q.answer||'',value:Number(q.value)||0}));state.loadedQuiz=true;const el=$('loadStatus');if(el)el.textContent=`Načteno: ${state.topics.length} témat. Kvíz je připraven.`;}catch{state.loadedQuiz=false;const el=$('loadStatus');if(el)el.textContent='Soubor není platný Riskuj JSON.';}};r.readAsText(f);}
-function startGame(){state.seconds=Math.max(1,Math.min(600,Number($('timerSeconds')?.value)||60));state.players.forEach((p,i)=>{p.name=p.name.trim()||`Tým ${i+1}`;p.score=0});if(state.runMode==='build'&&!readBuilt(setupEl)){alert('Zadej alespoň jedno téma.');return;}if(state.runMode==='prepared'&&!state.loadedQuiz){alert('Nejdřív vyber a načti quiz.json.');return;}state.currentPlayer=0;state.selected=null;setupEl.classList.add('hidden');gameEl.classList.remove('hidden');renderGame({state,gameEl,onPick,updateScores,onNewGame:()=>location.reload()});}
-function updateScores(){$('scores').innerHTML=state.players.map((p,i)=>`<div class="score ${i===state.currentPlayer?'active':''}" style="--player-color:${p.color}"><strong>${esc(p.name)}</strong><br>${p.score} bodů</div>`).join('');$('legend').innerHTML=state.players.map(p=>`<span class="legend-item"><i class="legend-dot" style="--player-color:${p.color}"></i>${esc(p.name)}</span>`).join('');}
-function startTimer(){if(state.timer)clearInterval(state.timer);let left=state.seconds;const el=$('timer');if(el)el.textContent=left;state.timer=setInterval(()=>{left--;const cur=$('timer');if(cur)cur.textContent=left;if(left<=0){clearInterval(state.timer);state.timer=null;if(cur)cur.textContent='ČAS';}},1000);}
-function onPick(btn){openQuestion({state,btn,questionEl:$('question'),startTimer});state._scoreQuestion=ok=>scoreQuestion({state,ok,questionEl:$('question'),updateScores,finishGame});}
-function finishGame(){renderResults({players:state.players,questionEl:$('question'),restart:()=>location.reload()});startTiebreak({players:state.players,questionEl:$('question'),renderFinal:(ordered)=>renderFinalResults({players:ordered,questionEl:$('question'),restart:()=>location.reload()})});}
+import { PALETTE, esc } from './setup.js';
+import {
+    state,
+    renderSetup,
+    readBuilt
+} from './setup-flow.js';
+import {
+    renderGame,
+    openQuestion,
+    scoreQuestion
+} from './game.js';
+import {
+    renderResults,
+    renderFinalResults
+} from './results.js';
+import { startTiebreak } from './tiebreak.js';
+
+const $ = (id) => document.getElementById(id);
+const landing = $('landing');
+const launch = $('launch');
+const setupEl = $('setup');
+const gameEl = $('game');
+
+landing.querySelector('#launch-game').onclick = () => {
+    landing.classList.add('hidden');
+    launch.classList.remove('hidden');
+};
+
+launch.querySelector('#launch-back').onclick = () => {
+    launch.classList.add('hidden');
+    landing.classList.remove('hidden');
+};
+
+launch.querySelectorAll('.mode').forEach((element) => {
+    element.onclick = () => {
+        state.runMode = element.dataset.mode;
+        launch.classList.add('hidden');
+        setupEl.classList.remove('hidden');
+
+        renderSetup({
+            setupEl,
+            backLanding: () => {
+                setupEl.classList.add('hidden');
+                landing.classList.remove('hidden');
+            },
+            startGame,
+            addPlayer,
+            removePlayer,
+            loadQuiz
+        });
+    };
+});
+
+function setupRender() {
+    renderSetup({
+        setupEl,
+        backLanding: () => {
+            setupEl.classList.add('hidden');
+            landing.classList.remove('hidden');
+        },
+        startGame,
+        addPlayer,
+        removePlayer,
+        loadQuiz
+    });
+}
+
+function addPlayer() {
+    if (state.players.length >= 10) {
+        return;
+    }
+
+    state.players.push({
+        name: '',
+        color: PALETTE[state.players.length],
+        score: 0
+    });
+
+    setupRender();
+}
+
+function removePlayer(index) {
+    if (state.players.length <= 2) {
+        return;
+    }
+
+    state.players.splice(index, 1);
+    setupRender();
+}
+
+function loadQuiz(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (loadEvent) => {
+        try {
+            const data = JSON.parse(loadEvent.target.result);
+
+            if (!Array.isArray(data.topics) || !data.topics.length) {
+                throw new Error();
+            }
+
+            state.topics = data.topics.map((topic) => topic.name);
+            state.questions = {};
+
+            data.topics.forEach((topic) => {
+                (topic.questions || []).forEach((question) => {
+                    state.questions[`${topic.name}-${question.value}`] = {
+                        question: question.question || '',
+                        answer: question.answer || '',
+                        value: Number(question.value) || 0
+                    };
+                });
+            });
+
+            state.loadedQuiz = true;
+
+            const loadStatus = $('loadStatus');
+            if (loadStatus) {
+                loadStatus.textContent =
+                    `Načteno: ${state.topics.length} témat. Kvíz je připraven.`;
+            }
+        } catch {
+            state.loadedQuiz = false;
+
+            const loadStatus = $('loadStatus');
+            if (loadStatus) {
+                loadStatus.textContent = 'Soubor není platný Riskuj JSON.';
+            }
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+function startGame() {
+    state.seconds = Math.max(
+        1,
+        Math.min(600, Number($('timerSeconds')?.value) || 60)
+    );
+
+    state.players.forEach((player, index) => {
+        player.name = player.name.trim() || `Tým ${index + 1}`;
+        player.score = 0;
+    });
+
+    if (state.runMode === 'build' && !readBuilt(setupEl)) {
+        alert('Zadej alespoň jedno téma.');
+        return;
+    }
+
+    if (state.runMode === 'prepared' && !state.loadedQuiz) {
+        alert('Nejdřív vyber a načti quiz.json.');
+        return;
+    }
+
+    state.currentPlayer = 0;
+    state.selected = null;
+
+    setupEl.classList.add('hidden');
+    gameEl.classList.remove('hidden');
+
+    renderGame({
+        state,
+        gameEl,
+        onPick,
+        updateScores,
+        onNewGame: () => location.reload()
+    });
+}
+
+function updateScores() {
+    $('scores').innerHTML = state.players
+        .map(
+            (player, index) => `
+                <div
+                    class="score ${index === state.currentPlayer ? 'active' : ''}"
+                    style="--player-color:${player.color}"
+                >
+                    <strong>${esc(player.name)}</strong><br>
+                    ${player.score} bodů
+                </div>
+            `
+        )
+        .join('');
+
+    $('legend').innerHTML = state.players
+        .map(
+            (player) => `
+                <span class="legend-item">
+                    <i
+                        class="legend-dot"
+                        style="--player-color:${player.color}"
+                    ></i>
+                    ${esc(player.name)}
+                </span>
+            `
+        )
+        .join('');
+}
+
+function startTimer() {
+    if (state.timer) {
+        clearInterval(state.timer);
+    }
+
+    let remaining = state.seconds;
+    const timerElement = $('timer');
+
+    if (timerElement) {
+        timerElement.textContent = remaining;
+    }
+
+    state.timer = setInterval(() => {
+        remaining--;
+
+        const currentTimer = $('timer');
+        if (currentTimer) {
+            currentTimer.textContent = remaining;
+        }
+
+        if (remaining <= 0) {
+            clearInterval(state.timer);
+            state.timer = null;
+
+            if (currentTimer) {
+                currentTimer.textContent = 'ČAS';
+            }
+        }
+    }, 1000);
+}
+
+function onPick(button) {
+    openQuestion({
+        state,
+        btn: button,
+        questionEl: $('question'),
+        startTimer
+    });
+
+    state._scoreQuestion = (correct) => {
+        scoreQuestion({
+            state,
+            ok: correct,
+            questionEl: $('question'),
+            updateScores,
+            finishGame
+        });
+    };
+}
+
+function finishGame() {
+    renderResults({
+        players: state.players,
+        questionEl: $('question'),
+        restart: () => location.reload()
+    });
+
+    startTiebreak({
+        players: state.players,
+        questionEl: $('question'),
+        renderFinal: (orderedPlayers) => {
+            renderFinalResults({
+                players: orderedPlayers,
+                questionEl: $('question'),
+                restart: () => location.reload()
+            });
+        }
+    });
+}
