@@ -24,6 +24,56 @@ const downloadResultButton = document.getElementById('download-result');
 const restartButton = document.getElementById('restart-competition');
 const backToRulesButton = document.getElementById('back-to-rules');
 
+const countryNames = {
+    Albania: 'Albánie',
+    Andorra: 'Andorra',
+    Austria: 'Rakousko',
+    Belgium: 'Belgie',
+    'Bosnia and Herzegovina': 'Bosna a Hercegovina',
+    Bulgaria: 'Bulharsko',
+    Croatia: 'Chorvatsko',
+    'Czech Republic': 'Česko',
+    Denmark: 'Dánsko',
+    Estonia: 'Estonsko',
+    Finland: 'Finsko',
+    France: 'Francie',
+    Greece: 'Řecko',
+    Hungary: 'Maďarsko',
+    Iceland: 'Island',
+    Ireland: 'Irsko',
+    Italy: 'Itálie',
+    Kosovo: 'Kosovo',
+    Latvia: 'Lotyšsko',
+    Liechtenstein: 'Lichtenštejnsko',
+    Lithuania: 'Litva',
+    Luxembourg: 'Lucembursko',
+    Malta: 'Malta',
+    Moldova: 'Moldavsko',
+    Monaco: 'Monako',
+    Montenegro: 'Černá Hora',
+    Netherlands: 'Nizozemsko',
+    Norway: 'Norsko',
+    Poland: 'Polsko',
+    Portugal: 'Portugalsko',
+    Romania: 'Rumunsko',
+    'San Marino': 'San Marino',
+    Slovakia: 'Slovensko',
+    Slovenia: 'Slovinsko',
+    Spain: 'Španělsko',
+    Sweden: 'Švédsko',
+    Switzerland: 'Švýcarsko',
+    Ukraine: 'Ukrajina',
+    'United Kingdom': 'Spojené království'
+};
+
+const sortedCountries = Object.keys(countries).sort((first, second) => {
+    return getCountryName(first).localeCompare(
+        getCountryName(second),
+        'cs-CZ',
+        { sensitivity: 'base' }
+    );
+});
+
 let map = null;
 let totalScore = 0;
 let currentCountry = null;
@@ -34,6 +84,10 @@ let endTime = null;
 const answeredCountries = new Set();
 const answerHistory = new Map();
 const mapMarkers = new Map();
+
+function getCountryName(country) {
+    return countryNames[country] || country;
+}
 
 function ensureRequiredElements() {
     const required = [
@@ -76,13 +130,13 @@ function createMarkerIcon(answered = false) {
 function updateRemaining() {
     remainingCountriesElement.innerHTML = '';
 
-    Object.keys(countries).forEach((country) => {
+    sortedCountries.forEach((country) => {
         if (answeredCountries.has(country)) {
             return;
         }
 
         const item = document.createElement('li');
-        item.textContent = country;
+        item.textContent = getCountryName(country);
         item.tabIndex = 0;
 
         item.addEventListener('click', () => focusCountry(country));
@@ -124,9 +178,10 @@ function showCountryTooltip(country) {
     closeActiveTooltip();
 
     const history = answerHistory.get(country);
+    const displayName = getCountryName(country);
     const tooltipText = history
-        ? `${country} · ${history.score.toFixed(2)} bodů`
-        : country;
+        ? `${displayName} · ${history.score.toFixed(2)} bodů`
+        : displayName;
 
     marker.bindTooltip(tooltipText, {
         direction: 'top',
@@ -184,7 +239,7 @@ function openQuestion(country) {
         mapOverlay.classList.add('map-overlay-hidden');
     }
 
-    countryName.textContent = country;
+    countryName.textContent = getCountryName(country);
     questionText.textContent = data.question;
     answerInput.value = '';
 
@@ -250,14 +305,15 @@ function updateMarkerAfterAnswer(country) {
 function renderQuestionHistory() {
     questionHistoryElement.innerHTML = '';
 
-    Object.entries(countries).forEach(([country, data]) => {
+    sortedCountries.forEach((country) => {
+        const data = countries[country];
         const history = answerHistory.get(country);
 
         const group = document.createElement('section');
         group.className = 'question-history-group';
 
         const title = document.createElement('h3');
-        title.textContent = country;
+        title.textContent = getCountryName(country);
 
         const list = document.createElement('div');
         list.className = 'question-history-list';
@@ -360,7 +416,7 @@ function initializeMap() {
     }).setView([54, 15], 4.25);
 
     const tiles = L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
         {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19
