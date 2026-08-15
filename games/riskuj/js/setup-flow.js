@@ -26,6 +26,8 @@ export const state = {
     seconds: 60,
     deductOnWrong: true,
     loadedQuiz: false,
+    gameOver: false,
+    answerHistory: {},
     setupState: {
         topics: 5,
         questions: 5
@@ -51,7 +53,9 @@ export function renderSetup({
                 </h2>
             </div>
 
-            <button class="btn secondary" id="setup-back">← Zpět</button>
+            <button class="btn secondary" id="setup-back">
+                ← Zpět
+            </button>
         </div>
 
         ${state.runMode === 'prepared'
@@ -81,7 +85,9 @@ export function renderSetup({
                                     (count) => `
                                         <option
                                             value="${count}"
-                                            ${count === state.setupState.topics ? 'selected' : ''}
+                                            ${count === state.setupState.topics
+                                                ? 'selected'
+                                                : ''}
                                         >
                                             ${count}
                                         </option>
@@ -99,7 +105,9 @@ export function renderSetup({
                                     (count) => `
                                         <option
                                             value="${count}"
-                                            ${count === state.setupState.questions ? 'selected' : ''}
+                                            ${count === state.setupState.questions
+                                                ? 'selected'
+                                                : ''}
                                         >
                                             ${count}
                                         </option>
@@ -149,7 +157,9 @@ export function renderSetup({
         <div class="topic-block" style="margin-top: 18px">
             <div class="topline">
                 <div class="topic-title">Hráči / týmy</div>
-                <button class="btn secondary add-player">＋ Přidat hráče</button>
+                <button class="btn secondary add-player">
+                    ＋ Přidat hráče
+                </button>
             </div>
 
             <div id="playersSetup"></div>
@@ -165,7 +175,9 @@ export function renderSetup({
             : ''}
 
         <div class="actions">
-            <button class="btn" id="start-game">Spustit Riskuj →</button>
+            <button class="btn" id="start-game">
+                Spustit Riskuj →
+            </button>
         </div>
     `;
 
@@ -184,7 +196,9 @@ export function renderSetup({
         const render = () => {
             state.setupState = {
                 topics: Number(setupEl.querySelector('#topicCount').value),
-                questions: Number(setupEl.querySelector('#questionCount').value)
+                questions: Number(
+                    setupEl.querySelector('#questionCount').value
+                )
             };
 
             renderQuestionEditor({
@@ -203,7 +217,9 @@ export function renderSetup({
 }
 
 export function readBuilt(setupEl) {
-    const data = collectBuiltQuiz(setupEl.querySelector('#questionsSetup'));
+    const data = collectBuiltQuiz(
+        setupEl.querySelector('#questionsSetup')
+    );
 
     state.topics = data.topics;
     state.questions = data.questions;
