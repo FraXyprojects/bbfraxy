@@ -1,6 +1,6 @@
 import { esc } from './setup.js';
 
-export function startTiebreak({
+export function openTiebreak({
     players,
     questionEl,
     renderFinal
@@ -18,11 +18,6 @@ export function startTiebreak({
         }
     }
 
-    if (!groups.some((group) => group.length > 1)) {
-        renderFinal(sorted);
-        return;
-    }
-
     const state = {
         groups,
         groupIndex: 0,
@@ -30,14 +25,53 @@ export function startTiebreak({
         placed: []
     };
 
-    const mount = questionEl.querySelector('#decision-wheel');
+    const modal = document.createElement('div');
+    modal.className = 'decision-modal';
+    modal.innerHTML = `
+        <div
+            class="decision-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="decision-modal-title"
+        >
+            <button
+                class="decision-modal-close"
+                type="button"
+                aria-label="Zavřít"
+            >
+                ×
+            </button>
 
-    if (!mount) {
-        renderFinal(sorted);
-        return;
-    }
+            <div id="decision-modal-content"></div>
+        </div>
+    `;
 
-    processNextGroup(state, mount, renderFinal);
+    questionEl.appendChild(modal);
+    modal.classList.add('open');
+
+    const content = modal.querySelector('#decision-modal-content');
+    const closeButton = modal.querySelector('.decision-modal-close');
+
+    const close = () => {
+        if (!modal.classList.contains('finished')) {
+            modal.remove();
+        }
+    };
+
+    closeButton.onclick = close;
+    modal.onclick = (event) => {
+        if (event.target === modal && !modal.classList.contains('spinning')) {
+            close();
+        }
+    };
+
+    const finish = (orderedPlayers) => {
+        modal.classList.add('finished');
+        modal.remove();
+        renderFinal(orderedPlayers);
+    };
+
+    processNextGroup(state, content, finish);
 }
 
 function processNextGroup(state, mount, renderFinal) {
@@ -62,7 +96,7 @@ function processNextGroup(state, mount, renderFinal) {
 function renderWheel(state, mount, renderFinal) {
     const group = state.currentGroup;
     const segment = 360 / group.length;
-    const labelRadius = 27;
+    const labelRadius = 36;
 
     const gradient = group
         .map(
@@ -93,7 +127,7 @@ function renderWheel(state, mount, renderFinal) {
     mount.innerHTML = `
         <div class="tiebreak-card">
             <div class="eyebrow">FRAXY // DECISION ROUND</div>
-            <h3>Kolo rozhodnutí</h3>
+            <h3 id="decision-modal-title">Kolo rozhodnutí</h3>
             <p>
                 Skóre mezi
                 <strong>
@@ -116,7 +150,6 @@ function renderWheel(state, mount, renderFinal) {
                     style="--wheel-gradient: conic-gradient(${gradient})"
                 >
                     ${labels}
-
                     <div class="wheel-center">?</div>
                 </div>
             </div>
@@ -128,6 +161,9 @@ function renderWheel(state, mount, renderFinal) {
             </button>
         </div>
     `;
+
+    mount.closest('.decision-modal-dialog')
+        ?.classList.remove('spinning');
 
     mount.querySelector('#spin-wheel').onclick = () => {
         spin(state, mount, renderFinal);
@@ -150,6 +186,7 @@ function spin(state, mount, renderFinal) {
     const wheel = mount.querySelector('#wheel');
     const button = mount.querySelector('#spin-wheel');
     const result = mount.querySelector('#wheel-result');
+    const dialog = mount.closest('.decision-modal-dialog');
 
     if (!wheel || !button || !result || button.disabled) {
         return;
@@ -163,6 +200,8 @@ function spin(state, mount, renderFinal) {
     wheel.style.setProperty('--spin-target', `${target}deg`);
     wheel.classList.add('spinning');
     button.disabled = true;
+
+    dialog?.classList.add('spinning');
 
     window.setTimeout(() => {
         const winner = group[winnerIndex];
@@ -184,6 +223,7 @@ function spin(state, mount, renderFinal) {
 
         window.setTimeout(() => {
             if (state.currentGroup.length > 1) {
+                dialog?.classList.remove('spinning');
                 renderWheel(state, mount, renderFinal);
                 return;
             }
