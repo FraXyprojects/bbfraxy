@@ -7,7 +7,8 @@ import {
 import {
     renderGame,
     openQuestion,
-    scoreQuestion
+    scoreQuestion,
+    enablePostGameReview
 } from './game.js';
 import {
     renderResults,
@@ -145,6 +146,8 @@ function startGame() {
     );
 
     state.deductOnWrong = $('deductWrong')?.checked ?? true;
+    state.gameOver = false;
+    state.answerHistory = {};
 
     state.players.forEach((player, index) => {
         player.name = player.name.trim() || `Tým ${index + 1}`;
@@ -243,10 +246,21 @@ function onPick(button) {
 }
 
 function finishGame() {
+    if (state.timer) {
+        clearInterval(state.timer);
+        state.timer = null;
+    }
+
     renderResults({
         players: state.players,
+        state,
         questionEl: $('question'),
         restart: () => location.reload()
+    });
+
+    enablePostGameReview({
+        state,
+        gameEl
     });
 
     startTiebreak({
@@ -255,6 +269,7 @@ function finishGame() {
         renderFinal: (orderedPlayers) => {
             renderFinalResults({
                 players: orderedPlayers,
+                state,
                 questionEl: $('question'),
                 restart: () => location.reload()
             });
