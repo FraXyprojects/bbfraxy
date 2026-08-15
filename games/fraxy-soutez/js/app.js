@@ -23,10 +23,18 @@ const resultSummary = document.getElementById('result-summary');
 const submitAnswerButton = document.getElementById('submit-answer');
 const closeModalButton = document.getElementById('close-question');
 const questionHistoryElement = document.getElementById('question-history');
+const resultStartTimeElement = document.getElementById('result-start-time');
+const resultEndTimeElement = document.getElementById('result-end-time');
+const resultDurationElement = document.getElementById('result-duration');
+const finishEarlyButton = document.getElementById('finish-early');
+const downloadResultButton = document.getElementById('download-result');
+const resultExport = document.getElementById('result-export');
 
 let map;
 let totalScore = 0;
 let currentCountry = null;
+let startTime = null;
+let endTime = null;
 const answeredCountries = new Set();
 const answerHistory = new Map();
 const mapMarkers = new Map();
@@ -44,24 +52,20 @@ function updateRemaining() {
     remainingCountriesElement.innerHTML = '';
 
     Object.keys(countries).forEach((country) => {
-        const item = document.createElement('li');
-        const isAnswered = answeredCountries.has(country);
-
-        item.textContent = country;
-        item.classList.toggle('answered', isAnswered);
-
-        if (isAnswered) {
-            item.setAttribute('aria-disabled', 'true');
-        } else {
-            item.tabIndex = 0;
-            item.addEventListener('click', () => focusCountry(country));
-            item.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    focusCountry(country);
-                }
-            });
+        if (answeredCountries.has(country)) {
+            return;
         }
+
+        const item = document.createElement('li');
+        item.textContent = country;
+        item.tabIndex = 0;
+        item.addEventListener('click', () => focusCountry(country));
+        item.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                focusCountry(country);
+            }
+        });
 
         remainingCountriesElement.appendChild(item);
     });
@@ -130,8 +134,9 @@ function submitAnswer() {
 
     const country = currentCountry;
     const correctAnswer = countries[country].answer;
+    const difference = Math.abs(answer - correctAnswer);
     const score = Math.max(
-        100 - Math.abs(answer - correctAnswer) / correctAnswer * 100,
+        100 - difference / correctAnswer * 100,
         0
     );
     const roundedScore = Number.parseFloat(score.toFixed(2));
@@ -141,6 +146,7 @@ function submitAnswer() {
     answerHistory.set(country, {
         answer,
         correctAnswer,
+        difference,
         score: roundedScore
     });
 
@@ -171,10 +177,6 @@ function renderQuestionHistory() {
     Object.entries(countries).forEach(([country, data]) => {
         const history = answerHistory.get(country);
 
-        if (!history) {
-            return;
-        }
-
         const group = document.createElement('section');
         group.className = 'question-history-group';
 
@@ -195,16 +197,30 @@ function renderQuestionHistory() {
 
         const answer = document.createElement('div');
         answer.className = 'question-history-answer';
-        answer.textContent =
-            `Tvoje odpověď: ${formatNumber(history.answer)} · ` +
-            `Správná odpověď: ${formatNumber(history.correctAnswer)}`;
+
+        if (history) {
+            answer.textContent =
+                `Tvoje odpověď: ${formatNumber(history.answer)} · ` +
+                `Správná odpověď: ${formatNumber(history.correctAnswer)} · ` +
+                `Rozdíl: ${formatNumber(history.difference)}`;
+        } else {
+            answer.textContent = 'Tvoje odpověď: nezodpovězeno · Správná odpověď: ' +
+                `${formatNumber(data.answer)}`;
+            answer.classList.add('unanswered');
+        }
 
         details.append(question, answer);
 
         const score = document.createElement('div');
         score.className = 'question-history-score';
-        score.classList.toggle('low', history.score < 50);
-        score.textContent = `+${history.score.toFixed(2)} b.`;
+
+        if (history) {
+            score.classList.toggle('low', history.score < 50);
+            score.textContent = `+${history.score.toFixed(2)} b.`;
+        } else {
+            score.classList.add('low');
+            score.textContent = '0 b.';
+        }
 
         item.append(details, score);
         list.appendChild(item);
@@ -219,18 +235,105 @@ function formatNumber(value) {
     }).format(value);
 }
 
+function formatDateTime(value) {
+    return new Intl.DateTimeFormat('cs-CZ', {
+        dateStyle: 'short',
+        timeStyle: 'medium'
+    }).format(value);
+}
+
+function formatDuration(milliseconds) {
+    const totalSeconds = Math.max(0, Math.round(milliseconds / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+        return `${hours} h ${minutes} min ${seconds} s`;
+    }
+
+    if (minutes > 0) {
+        return `${minutes} min ${seconds} s`;
+    }
+
+    return `${seconds} s`;
+}
+
 function finishCompetition() {
+    if (endTime) {
+        return;
+    }
+
+    endTime = new Date();
+    closeQuestion();
     mapScreen.classList.add('hidden');
     resultScreen.classList.remove('hidden');
 
     totalScoreElement.textContent = totalScore.toFixed(2);
-    resultSummary.textContent =
-        `Odpověděl jsi na všech ${Object.keys(countries).length} otázek.`;
+
+    const total = Object.keys(countries).length;
+    const answered = answeredCountries.size;
+    const unanswered = total - answered;
+
+    resultSummary.textContent = unanswered > 0
+        ? `Odpověděl jsi na ${answered} z ${total} otázek. ${unanswered} zůstalo nezodpovězených.`
+        : `Odpověděl jsi na všech ${total} otázek.`;
+
+    resultStartTimeElement.textContent = startTime
+        ? formatDateTime(startTime)
+        : '—';
+    resultEndTimeElement.textContent = formatDateTime(endTime);
+    resultDurationElement.textContent = startTime
+        ? formatDuration(endTime - startTime)
+        : '—';
 
     renderQuestionHistory();
 }
 
+function downloadResult() {
+    if (typeof html2canvas !== 'function') {
+        alert('Nepodařilo se načíst nástroj pro stažení výsledku.');
+        return;
+    }
+
+    const excludedElements = resultExport.querySelectorAll('.download-exclude');
+    excludedElements.forEach((element) => {
+        element.classList.add('download-hidden');
+    });
+
+    html2canvas(resultExport, {
+        backgroundColor: getComputedStyle(document.documentElement)
+            .getPropertyValue('--bg')
+            .trim() || '#050607',
+        scale: Math.min(window.devicePixelRatio || 1, 2),
+        useCORS: true
+    })
+        .then((canvas) => {
+            const link = document.createElement('a');
+            const timestamp = new Date()
+                .toISOString()
+                .slice(0, 19)
+                .replace(/[:T]/g, '-');
+
+            link.download = `fraxyho-soutez-${timestamp}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        })
+        .catch(() => {
+            alert('Výsledek se nepodařilo připravit ke stažení.');
+        })
+        .finally(() => {
+            excludedElements.forEach((element) => {
+                element.classList.remove('download-hidden');
+            });
+        });
+}
+
+const mapMarkers = new Map();
+
 function initializeMap() {
+    startTime = new Date();
+
     map = L.map('map', {
         minZoom: 3,
         maxZoom: 8,
@@ -254,9 +357,13 @@ function initializeMap() {
             .addTo(map)
             .bindTooltip(country, {
                 direction: 'top',
-                offset: [0, -8]
+                offset: [0, -8],
+                opacity: 1,
+                sticky: true
             });
 
+        marker.on('mouseover', () => marker.openTooltip());
+        marker.on('mouseout', () => marker.closeTooltip());
         marker.on('click', () => openQuestion(country));
         mapMarkers.set(country, marker);
     });
@@ -279,6 +386,23 @@ document.getElementById('start-map').onclick = () => {
 submitAnswerButton.onclick = submitAnswer;
 closeModalButton.onclick = closeQuestion;
 modalOverlay.onclick = closeQuestion;
+finishEarlyButton.onclick = () => {
+    const unanswered = Object.keys(countries).length - answeredCountries.size;
+
+    if (unanswered > 0) {
+        const confirmed = window.confirm(
+            `Opravdu chceš soutěž ukončit? ${unanswered} otázek zůstane nezodpovězených a dostane za ně 0 bodů.`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+    }
+
+    finishCompetition();
+};
+
+downloadResultButton.onclick = downloadResult;
 
 answerInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
