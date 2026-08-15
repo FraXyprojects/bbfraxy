@@ -4,7 +4,8 @@ export function renderResults({
     players,
     state,
     questionEl,
-    restart
+    restart,
+    onOpenTiebreak
 }) {
     const sorted = [...players].sort((a, b) => b.score - a.score);
     const topScore = sorted[0]?.score ?? 0;
@@ -15,7 +16,8 @@ export function renderResults({
         state,
         questionEl,
         restart,
-        tiedTop
+        tiedTop,
+        onOpenTiebreak
     );
 }
 
@@ -30,6 +32,7 @@ export function renderFinalResults({
         state,
         questionEl,
         restart,
+        null,
         null
     );
 }
@@ -39,7 +42,8 @@ function renderScoreboard(
     state,
     questionEl,
     restart,
-    tiedTop
+    tiedTop,
+    onOpenTiebreak
 ) {
     const headline = tiedTop?.length > 1
         ? `
@@ -66,7 +70,15 @@ function renderScoreboard(
             : '';
 
     const note = tiedTop?.length > 1
-        ? '<div class="decision-hint">O pořadí rozhodne Kolo rozhodnutí níže.</div>'
+        ? '<div class="decision-hint">O pořadí rozhodne Kolo rozhodnutí.</div>'
+        : '';
+
+    const tiebreakButton = tiedTop?.length > 1
+        ? `
+            <button class="btn" id="open-tiebreak">
+                🎡 Kolo rozhodnutí
+            </button>
+        `
         : '';
 
     questionEl.innerHTML = `
@@ -75,6 +87,8 @@ function renderScoreboard(
             <h2>Hra skončila.</h2>
             <p>${headline}</p>
             ${note}
+
+            ${tiebreakButton}
 
             <div class="scorebar">
                 ${players
@@ -110,16 +124,18 @@ function renderScoreboard(
             class="question-history-modal hidden"
             aria-hidden="true"
         ></div>
-
-        ${tiedTop?.length > 1
-            ? '<div id="decision-wheel"></div>'
-            : ''}
     `;
 
     questionEl.querySelector('#restart').onclick = restart;
     questionEl.querySelector('#show-questions').onclick = () => {
         openQuestionHistory({ state, questionEl });
     };
+
+    const tiebreakTrigger = questionEl.querySelector('#open-tiebreak');
+
+    if (tiebreakTrigger && onOpenTiebreak) {
+        tiebreakTrigger.onclick = onOpenTiebreak;
+    }
 }
 
 function openQuestionHistory({ state, questionEl }) {
@@ -130,7 +146,12 @@ function openQuestionHistory({ state, questionEl }) {
     }
 
     modal.innerHTML = `
-        <div class="question-history-dialog" role="dialog" aria-modal="true" aria-labelledby="question-history-title">
+        <div
+            class="question-history-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="question-history-title"
+        >
             <div class="question-history-header">
                 <div>
                     <div class="eyebrow">FRAXY // QUESTION REVIEW</div>
@@ -171,55 +192,17 @@ function openQuestionHistory({ state, questionEl }) {
 }
 
 function renderTopicHistory({ state, topic }) {
-    const questions = Object.values(state.questions)
-        .filter((question) => {
-            const key = Object.keys(state.questions)
-                .find((candidate) => state.questions[candidate] === question);
+    const questions = Object.entries(state.questions)
+        .filter(([key]) => key.startsWith(`${topic}-`))
+        .map(([key, question]) => ({ key, question }))
+        .sort((a, b) => a.question.value - b.question.value);
 
-            return key?.startsWith(`${topic}-`);
-        })
-        .sort((a, b) => a.value - b.value);
-
-    const results = questions.map((question) => {
-        const key = Object.keys(state.questions)
-            .find((candidate) => state.questions[candidate] === question);
-        const result = state.answerHistory[key];
-
-        return `
-            <article class="question-history-item">
-                <div class="question-history-meta">
-                    <span class="question-history-points">
-                        ${question.value} bodů
-                    </span>
-
-                    <span
-                        class="question-status ${result?.correct ? 'correct' : 'wrong'}"
-                        title="${result?.correct ? 'Správně' : 'Špatně'}"
-                    >
-                        ${result?.correct ? '✓' : '✕'}
-                    </span>
-                </div>
-
-                <div class="question-history-question">
-                    ${esc(question.question)}
-                </div>
-
-                <div class="question-history-answer">
-                    Odpověď: ${esc(question.answer)}
-                </div>
-            </article>
-        `;
-    }).join('');
-
-    const correct = questions.reduce((count, question) => {
-        const key = Object.keys(state.questions)
-            .find((candidate) => state.questions[candidate] === question);
-
-        return count + (state.answerHistory[key]?.correct ? 1 : 0);
+    const correctCount = questions.reduce((count, item) => {
+        return count + (state.answerHistory[item.key]?.correct ? 1 : 0);
     }, 0);
 
     const success = questions.length
-        ? Math.round((correct / questions.length) * 100)
+        ? Math.round((correctCount / questions.length) * 100)
         : 0;
 
     return `
@@ -230,7 +213,36 @@ function renderTopicHistory({ state, topic }) {
             </div>
 
             <div class="question-history-list">
-                ${results}
+                ${questions
+                    .map(({ key, question }) => {
+                        const result = state.answerHistory[key];
+
+                        return `
+                            <article class="question-history-item">
+                                <div class="question-history-meta">
+                                    <span class="question-history-points">
+                                        ${question.value} bodů
+                                    </span>
+
+                                    <span
+                                        class="question-status ${result?.correct ? 'correct' : 'wrong'}"
+                                        title="${result?.correct ? 'Správně' : 'Špatně'}"
+                                    >
+                                        ${result?.correct ? '✓' : '✕'}
+                                    </span>
+                                </div>
+
+                                <div class="question-history-question">
+                                    ${esc(question.question)}
+                                </div>
+
+                                <div class="question-history-answer">
+                                    Odpověď: ${esc(question.answer)}
+                                </div>
+                            </article>
+                        `;
+                    })
+                    .join('')}
             </div>
         </section>
     `;
