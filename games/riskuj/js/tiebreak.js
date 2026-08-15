@@ -1,5 +1,11 @@
 import { esc } from './setup.js';
 
+// Compatibility export for the previous flow.
+// The decision round is now opened from the results screen.
+export function startTiebreak() {
+    return;
+}
+
 export function openTiebreak({
     players,
     questionEl,
@@ -53,7 +59,7 @@ export function openTiebreak({
     const closeButton = modal.querySelector('.decision-modal-close');
 
     const close = () => {
-        if (!modal.classList.contains('finished')) {
+        if (!modal.classList.contains('spinning')) {
             modal.remove();
         }
     };
@@ -66,7 +72,6 @@ export function openTiebreak({
     };
 
     const finish = (orderedPlayers) => {
-        modal.classList.add('finished');
         modal.remove();
         renderFinal(orderedPlayers);
     };
@@ -200,7 +205,6 @@ function spin(state, mount, renderFinal) {
     wheel.style.setProperty('--spin-target', `${target}deg`);
     wheel.classList.add('spinning');
     button.disabled = true;
-
     dialog?.classList.add('spinning');
 
     window.setTimeout(() => {
