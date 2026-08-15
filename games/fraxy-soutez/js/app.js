@@ -12,6 +12,7 @@ const resultScreen = document.getElementById('result-screen');
 const remainingCountriesElement = document.getElementById('remaining-countries');
 const progressLabel = document.getElementById('progress-label');
 const progressBar = document.getElementById('progress-bar');
+const mapOverlay = document.getElementById('map-overlay');
 const modalOverlay = document.getElementById('modal-overlay');
 const questionModal = document.getElementById('question-modal');
 const countryName = document.getElementById('country-name');
@@ -21,22 +22,47 @@ const totalScoreElement = document.getElementById('total-score');
 const resultSummary = document.getElementById('result-summary');
 const submitAnswerButton = document.getElementById('submit-answer');
 const closeModalButton = document.getElementById('close-question');
+const questionHistoryElement = document.getElementById('question-history');
 
 let map;
 let totalScore = 0;
 let currentCountry = null;
 const answeredCountries = new Set();
+const answerHistory = new Map();
+const mapMarkers = new Map();
+
+function createMarkerIcon(answered = false) {
+    return L.divIcon({
+        className: '',
+        html: `<span class="custom-marker${answered ? ' answered' : ''}"></span>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+    });
+}
 
 function updateRemaining() {
     remainingCountriesElement.innerHTML = '';
 
     Object.keys(countries).forEach((country) => {
-        if (answeredCountries.has(country)) {
-            return;
+        const item = document.createElement('li');
+        const isAnswered = answeredCountries.has(country);
+
+        item.textContent = country;
+        item.classList.toggle('answered', isAnswered);
+
+        if (isAnswered) {
+            item.setAttribute('aria-disabled', 'true');
+        } else {
+            item.tabIndex = 0;
+            item.addEventListener('click', () => focusCountry(country));
+            item.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    focusCountry(country);
+                }
+            });
         }
 
-        const item = document.createElement('li');
-        item.textContent = country;
         remainingCountriesElement.appendChild(item);
     });
 
@@ -48,6 +74,24 @@ function updateRemaining() {
     progressBar.style.width = `${percentage}%`;
 }
 
+function focusCountry(country) {
+    if (!map) {
+        return;
+    }
+
+    const data = countries[country];
+    map.setView(data.coords, Math.max(map.getZoom(), 6), {
+        animate: true,
+        duration: 0.5
+    });
+
+    const marker = mapMarkers.get(country);
+
+    if (marker) {
+        marker.openTooltip();
+    }
+}
+
 function openQuestion(country) {
     if (answeredCountries.has(country)) {
         return;
@@ -55,6 +99,10 @@ function openQuestion(country) {
 
     const data = countries[country];
     currentCountry = country;
+
+    if (mapOverlay) {
+        mapOverlay.classList.add('map-overlay-hidden');
+    }
 
     countryName.textContent = country;
     questionText.textContent = data.question;
@@ -80,30 +128,29 @@ function submitAnswer() {
         return;
     }
 
-    const correctAnswer = countries[currentCountry].answer;
+    const country = currentCountry;
+    const correctAnswer = countries[country].answer;
     const score = Math.max(
         100 - Math.abs(answer - correctAnswer) / correctAnswer * 100,
         0
     );
+    const roundedScore = Number.parseFloat(score.toFixed(2));
 
-    totalScore += Number.parseFloat(score.toFixed(2));
-    answeredCountries.add(currentCountry);
+    totalScore += roundedScore;
+    answeredCountries.add(country);
+    answerHistory.set(country, {
+        answer,
+        correctAnswer,
+        score: roundedScore
+    });
 
     closeQuestion();
     updateRemaining();
-    updateMarkerAfterAnswer(currentCountry, score);
+    updateMarkerAfterAnswer(country, roundedScore);
 
     if (answeredCountries.size === Object.keys(countries).length) {
         finishCompetition();
     }
-}
-
-function finishCompetition() {
-    mapScreen.classList.add('hidden');
-    resultScreen.classList.remove('hidden');
-
-    totalScoreElement.textContent = totalScore.toFixed(2);
-    resultSummary.textContent = `Odpověděl jsi na všech ${Object.keys(countries).length} otázek.`;
 }
 
 function updateMarkerAfterAnswer(country, score) {
@@ -113,11 +160,75 @@ function updateMarkerAfterAnswer(country, score) {
         return;
     }
 
-    marker.setOpacity(0.55);
+    marker.setIcon(createMarkerIcon(true));
+    marker.setOpacity(1);
     marker.setTooltipContent(`${country} · ${score.toFixed(2)} bodů`);
 }
 
-const mapMarkers = new Map();
+function renderQuestionHistory() {
+    questionHistoryElement.innerHTML = '';
+
+    Object.entries(countries).forEach(([country, data]) => {
+        const history = answerHistory.get(country);
+
+        if (!history) {
+            return;
+        }
+
+        const group = document.createElement('section');
+        group.className = 'question-history-group';
+
+        const title = document.createElement('h3');
+        title.textContent = country;
+
+        const list = document.createElement('div');
+        list.className = 'question-history-list';
+
+        const item = document.createElement('article');
+        item.className = 'question-history-item';
+
+        const details = document.createElement('div');
+
+        const question = document.createElement('div');
+        question.className = 'question-history-question';
+        question.textContent = data.question;
+
+        const answer = document.createElement('div');
+        answer.className = 'question-history-answer';
+        answer.textContent =
+            `Tvoje odpověď: ${formatNumber(history.answer)} · ` +
+            `Správná odpověď: ${formatNumber(history.correctAnswer)}`;
+
+        details.append(question, answer);
+
+        const score = document.createElement('div');
+        score.className = 'question-history-score';
+        score.classList.toggle('low', history.score < 50);
+        score.textContent = `+${history.score.toFixed(2)} b.`;
+
+        item.append(details, score);
+        list.appendChild(item);
+        group.append(title, list);
+        questionHistoryElement.appendChild(group);
+    });
+}
+
+function formatNumber(value) {
+    return new Intl.NumberFormat('cs-CZ', {
+        maximumFractionDigits: 2
+    }).format(value);
+}
+
+function finishCompetition() {
+    mapScreen.classList.add('hidden');
+    resultScreen.classList.remove('hidden');
+
+    totalScoreElement.textContent = totalScore.toFixed(2);
+    resultSummary.textContent =
+        `Odpověděl jsi na všech ${Object.keys(countries).length} otázek.`;
+
+    renderQuestionHistory();
+}
 
 function initializeMap() {
     map = L.map('map', {
@@ -137,14 +248,9 @@ function initializeMap() {
     tiles.addTo(map);
 
     Object.entries(countries).forEach(([country, data]) => {
-        const icon = L.divIcon({
-            className: '',
-            html: '<span class="custom-marker"></span>',
-            iconSize: [18, 18],
-            iconAnchor: [9, 9]
-        });
-
-        const marker = L.marker(data.coords, { icon })
+        const marker = L.marker(data.coords, {
+            icon: createMarkerIcon(false)
+        })
             .addTo(map)
             .bindTooltip(country, {
                 direction: 'top',
