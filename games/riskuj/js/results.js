@@ -1,4 +1,5 @@
 import { esc } from './setup.js';
+import { openTiebreak } from './tiebreak.js';
 
 export function renderResults({
     players,
@@ -133,8 +134,25 @@ function renderScoreboard(
 
     const tiebreakTrigger = questionEl.querySelector('#open-tiebreak');
 
-    if (tiebreakTrigger && onOpenTiebreak) {
-        tiebreakTrigger.onclick = onOpenTiebreak;
+    if (tiebreakTrigger) {
+        tiebreakTrigger.onclick = () => {
+            const open = onOpenTiebreak || (() => {
+                openTiebreak({
+                    players: tiedTop,
+                    questionEl,
+                    renderFinal: (orderedPlayers) => {
+                        renderFinalResults({
+                            players: orderedPlayers,
+                            state,
+                            questionEl,
+                            restart
+                        });
+                    }
+                });
+            });
+
+            open();
+        };
     }
 }
 
