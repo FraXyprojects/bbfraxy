@@ -35,7 +35,7 @@ const icons = {
   discord:
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.8 5.2A15.6 15.6 0 0 0 15 4l-.4.8a14 14 0 0 1 3.3 1.4 11.1 11.1 0 0 0-9.8 0 14 14 0 0 1 3.3-1.4L11 4a15.6 15.6 0 0 0-3.8 1.2c-2.4 3.5-3 6.9-2.7 10.2a15.5 15.5 0 0 0 4.7 2.4l.9-1.5c-.5-.2-1-.5-1.4-.8l.3-.2a11.9 11.9 0 0 0 6 0l.3.2c-.5.3-.9.6-1.4.8l.9 1.5a15.5 15.5 0 0 0 4.7-2.4c.4-3.8-.7-7.1-2.7-10.2ZM9.4 13.4c-.8 0-1.4-.7-1.4-1.6 0-.9.6-1.6 1.4-1.6.8 0 1.4.7 1.4 1.6 0 .9-.6 1.6-1.4 1.6Zm5.2 0c-.8 0-1.4-.7-1.4-1.6 0-.9.6-1.6 1.4-1.6.8 0 1.4.7 1.4 1.6 0 .9-.6 1.6-1.4 1.6Z"/></svg>',
   github:
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z"/></svg>',
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5-.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z"/></svg>',
   steam:
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-9.9 8.8l5.3 2.2a3.1 3.1 0 0 1 1.8-.6l2.4-3.4V9a3.8 3.8 0 1 1 3.8 3.8h-.1l-3.4 2.4a3.1 3.1 0 0 1-6 1.2l-3.8-1.6A10 10 0 1 0 12 2Zm-3.5 15.3-1.7-.7a2.3 2.3 0 0 0 4.5-.6 2.3 2.3 0 0 0-3.1-2.1l1.8.8a1.7 1.7 0 0 1-1.5 3.1Zm6.9-6.2a2.1 2.1 0 1 0 0-4.2 2.1 2.1 0 0 0 0 4.2Zm0-.8a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6Z"/></svg>',
   youtube:
@@ -87,6 +87,7 @@ root.dataset.theme = initialTheme;
 syncThemeToggle();
 renderSocialLinks();
 setupNavigation();
+setupPrivacyFooter();
 setupAmbientCanvas();
 
 function syncThemeToggle() {
@@ -131,6 +132,22 @@ function renderSocialLinks() {
     }
 
     socialContainer.append(element);
+  }
+}
+
+function setupPrivacyFooter() {
+  const footers = document.querySelectorAll(".site-footer");
+
+  for (const footer of footers) {
+    if (footer.querySelector(".privacy-footer-link")) {
+      continue;
+    }
+
+    const link = document.createElement("a");
+    link.className = "privacy-footer-link";
+    link.href = "/privacy/";
+    link.textContent = "Soukromí";
+    footer.append(link);
   }
 }
 
