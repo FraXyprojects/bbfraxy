@@ -10,7 +10,10 @@
     <title>BBFRAXY | FraXyho soutěž</title>
 
     <link rel="stylesheet" href="/assets/css/styles.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    >
     <link rel="stylesheet" href="./css/soutez.css">
 </head>
 <body>
@@ -51,7 +54,7 @@
                             aria-label="GitHub"
                         >
                             <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5-.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.6.8.6A11.3 11.3 0 0 0 12 .7Z" />
+                                <path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5-.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z" />
                             </svg>
                         </a>
 
@@ -142,18 +145,6 @@
                             </a>
                         </div>
                     </article>
-
-                    <aside class="info-card">
-                        <h2>Původní soutěž</h2>
-                        <p>
-                            Zachováváme původní princip hry i otázky. Nový BBFraXy design
-                            pouze sjednocuje rozhraní s ostatními hrami na webu.
-                        </p>
-                        <p class="note">
-                            Původní soutěž byla časově navázaná na konkrétní datum; aktuální
-                            verze zde používá stejné otázky, ale bez starého časového omezení.
-                        </p>
-                    </aside>
                 </div>
             </section>
 
@@ -161,7 +152,7 @@
                 <div class="game-shell">
                     <div class="map-layout">
                         <div class="map-panel">
-                            <div class="map-overlay">
+                            <div class="map-overlay" id="map-overlay">
                                 <div class="eyebrow">FRAXY // EUROPE</div>
                                 <h2>Tipni si.</h2>
                                 <p>
@@ -208,6 +199,15 @@
                             Hrát znovu
                         </button>
                     </div>
+                </article>
+
+                <article class="question-history-card" id="question-history-card">
+                    <div class="eyebrow">FRAXY // REVIEW</div>
+                    <h2>Přehled otázek</h2>
+                    <p class="question-history-intro">
+                        Tvoje odpověď, správná odpověď a počet získaných bodů.
+                    </p>
+                    <div id="question-history"></div>
                 </article>
             </section>
         </main>
