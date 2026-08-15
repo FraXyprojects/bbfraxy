@@ -5,12 +5,16 @@
     min-height: 0;
     width: min(100%, 900px);
     margin: 0 auto;
-    padding: 22px 0 30px;
+    padding: 10px 0 18px;
     text-align: center;
 }
 
+#welcome-screen .hero .eyebrow {
+    margin-bottom: 6px;
+}
+
 #welcome-screen .hero h1 {
-    margin: 8px 0 16px;
+    margin: 4px 0 12px;
 }
 
 #welcome-screen .hero p {
@@ -20,9 +24,9 @@
 
 #welcome-screen .hero-actions {
     justify-content: center;
-    margin-top: 22px;
+    margin-top: 16px;
 }
 
 #welcome-screen .info-grid {
-    margin-top: 30px;
+    margin-top: 20px;
 }
