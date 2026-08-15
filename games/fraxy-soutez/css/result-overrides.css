@@ -1,0 +1,66 @@
+.sidebar-actions {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.sidebar-actions .btn {
+    width: 100%;
+}
+
+.leaflet-tooltip {
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--surface-strong);
+    color: var(--text);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+    font: inherit;
+}
+
+.leaflet-tooltip-top::before {
+    border-top-color: var(--surface-strong);
+}
+
+.result-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.result-meta > div {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-strong);
+    text-align: left;
+}
+
+.result-meta span {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--faint);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.result-meta strong {
+    display: block;
+    color: var(--text);
+    font-size: 0.84rem;
+}
+
+.question-history-answer.unanswered {
+    color: #fb7185;
+}
+
+.download-hidden {
+    display: none !important;
+}
+
+@media (max-width: 700px) {
+    .result-meta {
+        grid-template-columns: 1fr;
+    }
+}
