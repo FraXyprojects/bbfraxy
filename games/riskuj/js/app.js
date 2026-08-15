@@ -1,4 +1,4 @@
-import {PALETTE,esc} from './setup.js';import {state,renderSetup,readBuilt} from './setup-flow.js';import {renderGame,openQuestion,scoreQuestion} from './game.js';import {renderResults} from './results.js';
+import {PALETTE,esc} from './setup.js';import {state,renderSetup,readBuilt} from './setup-flow.js';import {renderGame,openQuestion,scoreQuestion} from './game.js';import {renderResults,renderFinalResults} from './results.js';import {startTiebreak} from './tiebreak.js';
 const $=id=>document.getElementById(id),landing=$('landing'),launch=$('launch'),setupEl=$('setup'),gameEl=$('game');
 landing.querySelector('#launch-game').onclick=()=>{landing.classList.add('hidden');launch.classList.remove('hidden');};
 launch.querySelector('#launch-back').onclick=()=>{launch.classList.add('hidden');landing.classList.remove('hidden');};
@@ -11,4 +11,4 @@ function startGame(){state.seconds=Math.max(1,Math.min(600,Number($('timerSecond
 function updateScores(){$('scores').innerHTML=state.players.map((p,i)=>`<div class="score ${i===state.currentPlayer?'active':''}" style="--player-color:${p.color}"><strong>${esc(p.name)}</strong><br>${p.score} bodů</div>`).join('');$('legend').innerHTML=state.players.map(p=>`<span class="legend-item"><i class="legend-dot" style="--player-color:${p.color}"></i>${esc(p.name)}</span>`).join('');}
 function startTimer(){if(state.timer)clearInterval(state.timer);let left=state.seconds;const el=$('timer');if(el)el.textContent=left;state.timer=setInterval(()=>{left--;const cur=$('timer');if(cur)cur.textContent=left;if(left<=0){clearInterval(state.timer);state.timer=null;if(cur)cur.textContent='ČAS';}},1000);}
 function onPick(btn){openQuestion({state,btn,questionEl:$('question'),startTimer});state._scoreQuestion=ok=>scoreQuestion({state,ok,questionEl:$('question'),updateScores,finishGame});}
-function finishGame(){renderResults({players:state.players,questionEl:$('question'),restart:()=>location.reload()});}
+function finishGame(){renderResults({players:state.players,questionEl:$('question'),restart:()=>location.reload()});startTiebreak({players:state.players,questionEl:$('question'),renderFinal:(ordered)=>renderFinalResults({players:ordered,questionEl:$('question'),restart:()=>location.reload()})});}
