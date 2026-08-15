@@ -24,6 +24,7 @@ export const state = {
     selected: null,
     timer: null,
     seconds: 60,
+    deductOnWrong: true,
     loadedQuiz: false,
     setupState: {
         topics: 5,
@@ -109,19 +110,41 @@ export function renderSetup({
                     </div>
                 `
                 : ''}
-
-            <div class="field">
-                <label>Odpočet v sekundách</label>
-                <input
-                    id="timerSeconds"
-                    type="number"
-                    min="1"
-                    max="600"
-                    value="60"
-                >
-                <span class="setup-note">Časový limit pro jednu otázku.</span>
-            </div>
         </div>
+
+        <details class="advanced-settings">
+            <summary>⚙ Rozšířené nastavení</summary>
+
+            <div class="advanced-settings-grid">
+                <div class="field">
+                    <label for="timerSeconds">Odpočet v sekundách</label>
+                    <input
+                        id="timerSeconds"
+                        type="number"
+                        min="1"
+                        max="600"
+                        value="60"
+                    >
+                    <span class="setup-note">
+                        Časový limit pro jednu otázku.
+                    </span>
+                </div>
+
+                <label class="check-setting">
+                    <input
+                        id="deductWrong"
+                        type="checkbox"
+                        checked
+                    >
+                    <span>
+                        <strong>Odečítat body za špatnou odpověď</strong>
+                        <small>
+                            Při vypnutí zůstane skóre hráče při chybné odpovědi beze změny.
+                        </small>
+                    </span>
+                </label>
+            </div>
+        </details>
 
         <div class="topic-block" style="margin-top: 18px">
             <div class="topline">
