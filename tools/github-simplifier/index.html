@@ -84,8 +84,29 @@
     .analysis-empty, .analysis-disclaimer { color: var(--faint); font-size: .8rem; }
     .analysis-message { width: min(100%, 760px); margin: 16px auto 0; border: 1px solid rgba(255,120,120,.25); border-radius: var(--radius); padding: 13px 16px; color: #ffbcbc; background: rgba(255,80,80,.06); text-align: center; font-size: .82rem; }
     .analysis-disclaimer { margin: 2px 8px 0; text-align: center; line-height: 1.6; }
+    .important-panel { overflow: hidden; }
+    .important-panel > summary { list-style: none; cursor: pointer; }
+    .important-panel > summary::-webkit-details-marker { display: none; }
+    .important-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .important-summary:hover .important-summary-title h3 { color: var(--accent-strong); }
+    .important-summary-title { min-width: 0; }
+    .important-summary-chevron { flex: 0 0 auto; color: var(--faint); font-size: 1.1rem; transition: transform 160ms ease; }
+    .important-panel[open] .important-summary-chevron { transform: rotate(90deg); }
+    .important-list { margin-top: 15px; }
+    .repository-picker { display: grid; gap: 10px; margin-top: 2px; }
+    .repository-picker-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 2px; }
+    .repository-picker-message { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+    .repository-picker-count { color: var(--faint); font-size: .7rem; white-space: nowrap; }
+    .repository-option { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 13px 14px; color: var(--muted); background: rgba(255,255,255,.025); text-align: left; cursor: pointer; transition: border-color 160ms ease, background 160ms ease, transform 160ms ease; }
+    .repository-option:hover, .repository-option:focus-visible { border-color: var(--border-strong); background: rgba(95,231,255,.045); color: var(--text); transform: translateY(-1px); outline: none; }
+    .repository-option-main { min-width: 0; display: grid; gap: 4px; }
+    .repository-option-name { overflow: hidden; color: var(--text); font-size: .85rem; font-weight: 720; text-overflow: ellipsis; white-space: nowrap; }
+    .repository-option-description { overflow: hidden; color: var(--faint); font-size: .7rem; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+    .repository-option-meta { display: flex; align-items: center; gap: 9px; align-self: center; color: var(--faint); font-size: .66rem; white-space: nowrap; }
+    .repository-option-action { color: var(--accent-strong); font-weight: 720; }
+    .repository-option-language { border: 1px solid var(--border); border-radius: 999px; padding: 3px 7px; }
     @media (max-width: 720px) { .simplifier-page { padding: 52px 0 40px; } .analysis-grid { grid-template-columns: 1fr; } .analysis-head { align-items: flex-start; flex-direction: column; } .important-list { grid-template-columns: 1fr; } }
-    @media (max-width: 620px) { .simplifier-form { flex-direction: column; } .simplifier-submit { width: 100%; } .analysis-panel { padding: 17px; } .analysis-panel-heading { align-items: flex-start; flex-direction: column; gap: 8px; } .tree-browser { max-height: 460px; } .editability-pill { display: none; } }
+    @media (max-width: 620px) { .simplifier-form { flex-direction: column; } .simplifier-submit { width: 100%; } .analysis-panel { padding: 17px; } .analysis-panel-heading { align-items: flex-start; flex-direction: column; gap: 8px; } .tree-browser { max-height: 460px; } .editability-pill { display: none; } .important-summary { align-items: flex-start; } .repository-option { grid-template-columns: 1fr; } .repository-option-meta { justify-content: space-between; } }
   </style>
 </head>
 <body>
@@ -119,6 +140,7 @@
     <footer class="site-footer"><span>BBFRAXY</span></footer>
   </div>
   <script src="../../assets/js/main.js" defer></script>
+  <script src="./proxy-fetch.js" defer></script>
   <script src="./analyzer.js" defer></script>
 </body>
 </html>
