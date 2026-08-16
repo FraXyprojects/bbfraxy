@@ -22,7 +22,7 @@
     .simplifier-description { max-width: 610px; margin: 24px auto 0; color: var(--muted); font-size: .94rem; line-height: 1.7; }
     .simplifier-description strong { color: var(--text); font-weight: 650; }
     .simplifier-note { margin: 14px 0 0; color: var(--faint); font-size: .78rem; }
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px 0 0 -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
     .analysis-result { width: min(100%, 900px); margin: 20px auto 0; display: grid; gap: 14px; animation: card-enter 420ms ease both; }
     .analysis-head, .analysis-panel { border: 1px solid var(--border); border-radius: var(--radius); background: linear-gradient(180deg, rgba(255,255,255,.04), transparent 52%), var(--surface); box-shadow: 0 16px 50px var(--shadow); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
     .analysis-head { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px; }
@@ -102,11 +102,37 @@
     .repository-option-main { min-width: 0; display: grid; gap: 4px; }
     .repository-option-name { overflow: hidden; color: var(--text); font-size: .85rem; font-weight: 720; text-overflow: ellipsis; white-space: nowrap; }
     .repository-option-description { overflow: hidden; color: var(--faint); font-size: .7rem; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
-    .repository-option-meta { display: flex; align-items: center; gap: 9px; align-self: center; color: var(--faint); font-size: .66rem; white-space: nowrap; }
-    .repository-option-action { color: var(--accent-strong); font-weight: 720; }
-    .repository-option-language { border: 1px solid var(--border); border-radius: 999px; padding: 3px 7px; }
-    @media (max-width: 720px) { .simplifier-page { padding: 52px 0 40px; } .analysis-grid { grid-template-columns: 1fr; } .analysis-head { align-items: flex-start; flex-direction: column; } .important-list { grid-template-columns: 1fr; } }
-    @media (max-width: 620px) { .simplifier-form { flex-direction: column; } .simplifier-submit { width: 100%; } .analysis-panel { padding: 17px; } .analysis-panel-heading { align-items: flex-start; flex-direction: column; gap: 8px; } .tree-browser { max-height: 460px; } .editability-pill { display: none; } .important-summary { align-items: flex-start; } .repository-option { grid-template-columns: 1fr; } .repository-option-meta { justify-content: space-between; } }
+    .repository-option-meta { display: flex; align-items: center; gap: 8px; color: var(--faint); font-size: .65rem; white-space: nowrap; }
+    .repository-option-language { display: inline-flex; min-height: 23px; align-items: center; border: 1px solid var(--border); border-radius: 999px; padding: 0 7px; }
+    .repository-option-action { color: var(--accent-strong); font-weight: 700; }
+    .live-web-preview { overflow: hidden; }
+    .live-preview-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .live-preview-heading h3 { margin: 0; color: var(--text); font-size: 1.05rem; }
+    .live-preview-sub { margin: 6px 0 0; color: var(--faint); font-size: .7rem; line-height: 1.5; }
+    .live-preview-layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 12px; }
+    .live-preview-stage, .live-preview-files { min-width: 0; border: 1px solid rgba(255,255,255,.07); border-radius: calc(var(--radius) - 3px); background: #05080a; overflow: hidden; }
+    .live-preview-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 42px; padding: 0 10px; border-bottom: 1px solid rgba(255,255,255,.07); color: var(--faint); font-size: .62rem; }
+    .live-preview-actions { display: flex; gap: 6px; }
+    .preview-action { min-height: 29px; border: 1px solid var(--border); border-radius: 8px; padding: 0 9px; color: var(--muted); background: rgba(255,255,255,.025); font: inherit; font-size: .6rem; cursor: pointer; }
+    .preview-action:hover:not(:disabled) { color: var(--text); border-color: var(--border-strong); }
+    .preview-action:disabled { opacity: .4; cursor: default; }
+    .live-preview-frame-wrap { aspect-ratio: 16 / 10; min-height: 460px; background: #050607; }
+    .live-preview-frame { display: block; width: 100%; height: 100%; min-height: 460px; border: 0; background: #fff; }
+    .live-preview-files { display: grid; grid-template-rows: auto minmax(0,1fr); }
+    .live-preview-files-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 11px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .live-preview-files-head strong { color: var(--text); font-size: .7rem; }
+    .live-preview-file-list { min-height: 0; max-height: 520px; overflow: auto; padding: 8px; }
+    .live-preview-file { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 7px 6px; border-radius: 7px; }
+    .live-preview-file:hover { background: rgba(255,255,255,.025); }
+    .live-preview-file input { accent-color: var(--accent); }
+    .live-preview-file-main { min-width: 0; display: grid; gap: 2px; }
+    .live-preview-file-path { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font-size: .62rem; }
+    .live-preview-file-role { color: var(--faint); font-size: .54rem; }
+    .live-preview-file-badge { min-height: 20px; display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 999px; padding: 0 6px; color: var(--faint); font-size: .52rem; }
+    .live-preview-file.is-enabled .live-preview-file-badge { border-color: rgba(95,231,255,.28); color: var(--accent-strong); }
+    .live-preview-note { margin: 10px 0 0; color: var(--faint); font-size: .62rem; line-height: 1.5; }
+    @media (max-width: 800px) { .analysis-grid, .live-preview-layout { grid-template-columns: 1fr; } .live-preview-files { min-height: 260px; } .important-list { grid-template-columns: 1fr; } }
+    @media (max-width: 620px) { .simplifier-form, .analysis-head, .live-preview-heading { flex-direction: column; } .simplifier-submit { width: 100%; } .live-preview-actions { width: 100%; } .preview-action { flex: 1; } }
   </style>
 </head>
 <body>
@@ -117,23 +143,25 @@
         <a class="brand" href="/" aria-label="BBFRAXY home"><span class="brand-mark" aria-hidden="true">B</span><span>BBFRAXY</span></a>
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Open navigation"><span></span><span></span><span></span></button>
         <div class="nav-menu" id="site-menu">
-          <div class="nav-links" aria-label="Site sections"><a href="/games">Games</a><a href="/tools" aria-current="page">Tools</a><a href="/projects">Projects</a><a href="/downloads">Downloads</a></div>
+          <div class="nav-links" aria-label="Site sections">
+            <a href="/games">Games</a><a href="/tools">Tools</a><a href="/projects">Projects</a><a href="/downloads">Downloads</a>
+          </div>
           <div class="nav-actions">
-            <a class="icon-button" href="https://github.com/FraXyprojects" target="_blank" rel="noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z"/></svg></a>
+            <a class="icon-button" href="https://github.com/FraXyprojects" target="_blank" rel="noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5-.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z"/></svg></a>
             <button class="icon-button theme-toggle" type="button" aria-label="Switch theme" aria-pressed="false"><span class="theme-icon" aria-hidden="true"></span></button>
           </div>
         </div>
       </nav>
     </header>
     <main class="simplifier-page" id="main">
-      <section class="simplifier-card" aria-labelledby="simplifier-title">
-        <h1 id="simplifier-title">GitHub Simplifier</h1>
-        <form class="simplifier-form">
+      <section class="simplifier-card">
+        <h1>GitHub Simplifier</h1>
+        <form class="simplifier-form" autocomplete="off">
           <label class="sr-only" for="repository-url">GitHub repository URL</label>
-          <input class="simplifier-input" id="repository-url" name="repository-url" type="url" autocomplete="url" spellcheck="false" placeholder="https://github.com/owner/repository" aria-describedby="simplifier-description">
+          <input id="repository-url" class="simplifier-input" type="url" inputmode="url" placeholder="https://github.com/FraXyprojects/bbfraxy" required>
           <button class="simplifier-submit" type="submit">Analyze</button>
         </form>
-        <p class="simplifier-description" id="simplifier-description">Paste a public GitHub repository and <strong>GitHub Simplifier</strong> will turn its codebase into a clear overview — what the project does, how it is structured, which parts matter and what you can safely edit.</p>
+        <p class="simplifier-description">Paste a public GitHub repository and <strong>GitHub Simplifier</strong> will turn its codebase into a clear overview — what the project does, how it is structured, which parts matter and what you can safely edit.</p>
         <p class="simplifier-note">Public repositories only for now.</p>
       </section>
     </main>
@@ -142,6 +170,7 @@
   <script src="../../assets/js/main.js" defer></script>
   <script src="./proxy-fetch.js" defer></script>
   <script src="./analyzer.js" defer></script>
-  <script src="./web-preview.js" defer></script>
+  <script src="./code-preview.js" defer></script>
+  <script src="./web-preview-v2.js" defer></script>
 </body>
 </html>
