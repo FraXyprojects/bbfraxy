@@ -1,0 +1,43 @@
+#result-export {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+#result-export .result-card,
+#result-export .question-history-card {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.result-middle-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    width: min(100%, 900px);
+    margin: 2px auto 0;
+}
+
+.result-middle-actions .btn {
+    min-width: 150px;
+}
+
+.result-actions.download-exclude {
+    width: min(100%, 900px);
+    margin: 2px auto 0;
+}
+
+@media (max-width: 600px) {
+    .result-middle-actions,
+    .result-actions.download-exclude {
+        width: 100%;
+    }
+
+    .result-middle-actions .btn,
+    .result-actions.download-exclude .btn {
+        width: 100%;
+    }
+}
