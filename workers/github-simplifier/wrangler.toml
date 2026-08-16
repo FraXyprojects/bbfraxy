@@ -1,0 +1,7 @@
+name = "bbfraxy-github-simplifier"
+main = "src/index.js"
+compatibility_date = "2026-08-16"
+
+[vars]
+# The Worker can run without a GitHub token for public repositories,
+# but setting GITHUB_TOKEN as a secret raises the upstream API quota.
