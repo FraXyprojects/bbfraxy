@@ -1,5 +1,6 @@
 // Compatibility loader for the standalone Simplifier header markup.
 // The analyzer talks directly to the BBFRAXY Cloudflare Worker.
+// Preview and experimental recovery modules are intentionally not loaded here.
 (() => {
   const load = () => {
     if (!document.getElementById('bbfraxy-simplifier-header-fix')) {
@@ -110,14 +111,6 @@
         menuToggle.setAttribute('aria-expanded', String(!open));
         siteMenu.classList.toggle('is-open', !open);
       });
-    }
-
-    if (!document.querySelector('script[data-bbfraxy-analyzer-recovery]')) {
-      const script = document.createElement('script');
-      script.src = './analyzer-recovery.js';
-      script.defer = true;
-      script.dataset.bbfraxyAnalyzerRecovery = 'true';
-      document.head.append(script);
     }
   };
 
