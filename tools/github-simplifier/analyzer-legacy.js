@@ -236,7 +236,7 @@ async function fetchReadme(owner, repo, branch) {
   return "";
 }
 
-function renderAnalysis({ repository, readmeText, languages, tree, truncated }) {
+function renderAnalysis({ repository, readmeText, languages, tree, truncated }, { scrollIntoView = true } = {}) {
   document.querySelector(".analysis-result")?.remove();
   document.querySelector(".analysis-message")?.remove();
 
@@ -311,7 +311,7 @@ function renderAnalysis({ repository, readmeText, languages, tree, truncated }) 
   result.querySelectorAll(".important-file").forEach((element) => {
     element.addEventListener("click", () => previewFile(activeTree.find((item) => item.path === element.dataset.path)));
   });
-  safeScrollTo(result);
+  if (scrollIntoView) safeScrollTo(result);
 }
 
 function buildTree(tree) {
@@ -478,29 +478,29 @@ function detectLanguages(tree) {
 
   for (const item of tree) {
     if (item.type !== "blob") continue;
-    const match = item.path.toLowerCase().match(/\.([a-z0-9]+)$/);
-    const language = match ? extensions[match[1]] : null;
+    const extension = item.path.split(".").pop()?.toLowerCase();
+    const language = extension ? extensions[extension] : null;
     if (language) counts.set(language, (counts.get(language) || 0) + 1);
   }
 
-  return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([name]) => name);
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 6)
+    .map(([language]) => language);
 }
 
 function detectProjectType(tree, repository, languages) {
-  const paths = tree.map((item) => item.path.toLowerCase());
-  const description = `${repository.name} ${languages.join(" ")}`.toLowerCase();
-  const has = (name) => paths.some((path) => path === name || path.endsWith(`/${name}`));
+  const paths = tree.filter((item) => item.type === "blob").map((item) => item.path.toLowerCase());
+  const description = String(repository?.description || "").toLowerCase();
 
-  if (has("manifest.json") && (has("package") || description.includes("mod"))) return "Game mod / plugin";
-  if (has("package.json") && (has("vite.config.js") || has("vite.config.ts") || has("next.config.js") || has("next.config.ts") || has("index.html"))) return "Web application";
-  if (has("pyproject.toml") || has("requirements.txt")) return "Python project";
-  if (has("cargo.toml")) return "Rust project";
-  if (has("go.mod")) return "Go project";
-  if (has("pom.xml") || has("build.gradle")) return "Java project";
-  if (languages.includes("C#")) return "C# / .NET project";
-  if (description.includes("game")) return "Game project";
-  if (description.includes("tool") || description.includes("utility")) return "Tool / utility";
-  return languages[0] ? `${languages[0]} project` : "Software project";
+  if (paths.some((path) => path.endsWith(".csproj") || path.endsWith(".sln") || path.includes("bepinex") || path.includes("plugins/"))) return "C# project / game mod";
+  if (paths.includes("package.json") || languages.includes("JavaScript") || languages.includes("TypeScript")) return "JavaScript project";
+  if (paths.some((path) => path.endsWith(".py"))) return "Python project";
+  if (paths.some((path) => path.endsWith(".java") || path.endsWith(".kt"))) return "JVM project";
+  if (paths.some((path) => path.endsWith(".rs"))) return "Rust project";
+  if (description.includes("mod")) return "Game mod project";
+  if (paths.some((path) => path.endsWith(".html"))) return "Web project";
+  return "Software project";
 }
 
 function sortTreeItems(a, b) {
@@ -508,16 +508,16 @@ function sortTreeItems(a, b) {
   return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
 }
 
-function cleanReadme(text) {
-  return text
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/^#{1,6}\s*/gm, "")
-    .replace(/[*>_`~#]/g, " ")
+function cleanReadme(value) {
+  return String(value || "")
+    .replace(/^\s*<!--(?:.|\n)*?-->\s*/g, "")
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[[^\]]+\]\(([^)]+)\)/g, "$1")
+    .replace(/[#*_>`]/g, "")
     .replace(/\s+/g, " ")
     .trim()
-    .slice(0, 420);
+    .slice(0, 700);
 }
 
 function formatNumber(value) {
@@ -588,7 +588,7 @@ function restoreCachedAnalysis() {
     activeRepository = cached.analysis.repository;
     activeTree = cached.analysis.tree || [];
     if (input) input.value = cached.url;
-    renderAnalysis(cached.analysis);
+    renderAnalysis(cached.analysis, { scrollIntoView: false });
   } catch {
     // Ignore malformed or unavailable cache.
   }
