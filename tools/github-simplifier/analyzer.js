@@ -5,9 +5,13 @@ const card = document.querySelector(".simplifier-card");
 
 const apiBase = "https://api.github.com";
 const MAX_TREE_ITEMS = 700;
-const MAX_PREVIEW_BYTES = 180_000;
+const MAX_PREVIEW_BYTES = 180000;
 let activeRepository = null;
 let activeTree = [];
+
+// Keep the analyzer inside the viewport. Long source-code lines must scroll
+// inside the code preview, never expand the document itself.
+installLayoutGuard();
 
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -37,13 +41,32 @@ form?.addEventListener("submit", async (event) => {
     activeRepository = { ...repository, owner: parsed.owner, repo: parsed.repo, branch };
     activeTree = Array.isArray(treeResponse?.tree) ? treeResponse.tree.slice(0, MAX_TREE_ITEMS) : [];
 
-    renderAnalysis({ repository: activeRepository, readme, languages, tree: activeTree, truncated: Boolean(treeResponse?.truncated) });
+    renderAnalysis({
+      repository: activeRepository,
+      readme,
+      languages,
+      tree: activeTree,
+      truncated: Boolean(treeResponse?.truncated),
+    });
   } catch (error) {
     showMessage(error instanceof Error ? error.message : "GitHub could not be analyzed.", "error");
   } finally {
     setLoading(false);
   }
 });
+
+function installLayoutGuard() {
+  const style = document.createElement("style");
+  style.textContent = `
+    html, body { max-width: 100%; overflow-x: hidden; }
+    .site-shell, .simplifier-page, .analysis-result, .analysis-panel, .analysis-head,
+    .analysis-grid, .analysis-panel-heading, .file-preview-panel { min-width: 0; max-width: 100%; }
+    .code-preview { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; overflow-y: auto; }
+    .code-preview pre { width: max-content; min-width: 100%; max-width: none; }
+    .analysis-disclaimer { overflow-wrap: anywhere; }
+  `;
+  document.head.append(style);
+}
 
 function parseRepositoryUrl(value) {
   try {
@@ -60,7 +83,10 @@ function parseRepositoryUrl(value) {
 }
 
 async function githubFetch(path, optional = false) {
-  const response = await fetch(`${apiBase}${path}`, { headers: { Accept: "application/vnd.github+json" } });
+  const response = await fetch(`${apiBase}${path}`, {
+    headers: { Accept: "application/vnd.github+json" },
+  });
+
   if (response.ok) return response.json();
   if (optional && response.status === 404) return null;
   if (response.status === 403) throw new Error("GitHub API rate limit reached. Please wait a little and try again.");
@@ -142,7 +168,14 @@ function renderAnalysis({ repository, readme, languages, tree, truncated }) {
 
   card?.after(result);
   renderTree(tree, result.querySelector("#tree-browser"));
-  result.scrollIntoView({ behavior: "smooth", block: "start" });
+  safeScrollTo(result);
+}
+
+function safeScrollTo(element) {
+  element?.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+  window.setTimeout(() => {
+    if (window.scrollX !== 0) window.scrollTo({ left: 0, behavior: "instant" });
+  }, 120);
 }
 
 function buildTree(tree) {
@@ -180,10 +213,12 @@ function renderTreeNode(node) {
       const details = document.createElement("details");
       details.className = "tree-folder";
       details.open = node.path === "";
+
       const summary = document.createElement("summary");
       summary.className = "tree-row folder-row";
       summary.innerHTML = `<span class="tree-chevron" aria-hidden="true">›</span><span class="tree-icon" aria-hidden="true">▣</span><span class="tree-name">${escapeHtml(child.name)}</span><span class="tree-kind">folder</span>`;
       details.append(summary);
+
       const children = document.createElement("div");
       children.className = "tree-children";
       children.append(renderTreeNode(child));
@@ -199,6 +234,7 @@ function renderTreeNode(node) {
       fragment.append(row);
     }
   }
+
   return fragment;
 }
 
@@ -212,28 +248,31 @@ function renderImportantFile(item) {
 }
 
 function rankImportantFiles(tree, projectType) {
-  const candidates = tree.filter((item) => item.type === "blob");
-  return candidates.map((item) => {
-    const path = item.path.toLowerCase();
-    const base = path.split("/").pop() || path;
-    const parts = path.split("/");
-    let score = 0;
-    let reason = "Relevant project file";
+  return tree
+    .filter((item) => item.type === "blob")
+    .map((item) => {
+      const path = item.path.toLowerCase();
+      const base = path.split("/").pop() || path;
+      const parts = path.split("/");
+      let score = 0;
+      let reason = "Relevant project file";
 
-    if (/^readme(?:\.|$)/i.test(base)) { score = 100; reason = "Project documentation and usage overview"; }
-    else if (/^manifest\.(json|xml|yaml|yml)$/i.test(base)) { score = 95; reason = "Project metadata or mod/plugin manifest"; }
-    else if (base === "package.json") { score = 90; reason = "Dependencies and project scripts"; }
-    else if (/^(vite|next|astro|webpack|rollup)\.config\./.test(base)) { score = 85; reason = "Build and development configuration"; }
-    else if (parts.some((part) => ["config", "configs", "configuration", "settings"].includes(part)) || /^(config|settings)\.(json|yaml|yml|toml|ini|cfg)$/.test(base)) { score = 80; reason = "Likely user-facing configuration"; }
-    else if (/\.(csproj|sln|gradle|pom|cargo|mod)$/.test(base)) { score = 75; reason = "Project or build configuration"; }
-    else if (/^(index|main|app|program)\.[a-z0-9]+$/.test(base)) { score = 70; reason = "Likely application entry point"; }
-    else if (/\.(html|tsx|jsx|vue|svelte)$/.test(base)) { score = 50; reason = "User-facing interface"; }
-    else if (/\.(css|scss|less)$/.test(base)) { score = 45; reason = "Visual styling"; }
-    else if (/\.(cs|java|kt|py|js|ts|cpp|c|rs|go)$/.test(base)) { score = 35; reason = `Source code for ${projectType.toLowerCase()}`; }
+      if (/^readme(?:\.|$)/i.test(base)) { score = 100; reason = "Project documentation and usage overview"; }
+      else if (/^manifest\.(json|xml|yaml|yml)$/.test(base)) { score = 95; reason = "Project metadata or mod/plugin manifest"; }
+      else if (base === "package.json") { score = 90; reason = "Dependencies and project scripts"; }
+      else if (/^(vite|next|astro|webpack|rollup)\.config\./.test(base)) { score = 85; reason = "Build and development configuration"; }
+      else if (parts.some((part) => ["config", "configs", "configuration", "settings"].includes(part)) || /^(config|settings)\.(json|yaml|yml|toml|ini|cfg)$/.test(base)) { score = 80; reason = "Likely user-facing configuration"; }
+      else if (/\.(csproj|sln|gradle|pom|cargo|mod)$/.test(base)) { score = 75; reason = "Project or build configuration"; }
+      else if (/^(index|main|app|program)\.[a-z0-9]+$/.test(base)) { score = 70; reason = "Likely application entry point"; }
+      else if (/\.(html|tsx|jsx|vue|svelte)$/.test(base)) { score = 50; reason = "User-facing interface"; }
+      else if (/\.(css|scss|less)$/.test(base)) { score = 45; reason = "Visual styling"; }
+      else if (/\.(cs|java|kt|py|js|ts|cpp|c|rs|go)$/.test(base)) { score = 35; reason = `Source code for ${projectType.toLowerCase()}`; }
 
-    if (parts.includes("node_modules") || parts.includes("dist") || parts.includes("build") || parts.includes("test") || parts.includes("tests")) score -= 50;
-    return { ...item, score, reason };
-  }).sort((a, b) => b.score - a.score || a.path.localeCompare(b.path)).slice(0, 10);
+      if (parts.includes("node_modules") || parts.includes("dist") || parts.includes("build") || parts.includes("test") || parts.includes("tests")) score -= 50;
+      return { ...item, score, reason };
+    })
+    .sort((a, b) => b.score - a.score || a.path.localeCompare(b.path))
+    .slice(0, 10);
 }
 
 function classifyEditability(path) {
@@ -267,7 +306,7 @@ async function previewFile(item) {
   const editability = classifyEditability(item.path);
   editabilityCard.innerHTML = `<span class="editability-dot ${editability.className}" aria-hidden="true"></span><div><b>${escapeHtml(editability.badge)}</b><p>${escapeHtml(editability.explanation)}</p></div>`;
   preview.innerHTML = `<div class="preview-loading">Loading file preview…</div>`;
-  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  safeScrollTo(panel);
 
   try {
     if (item.size > MAX_PREVIEW_BYTES) {
@@ -275,58 +314,54 @@ async function previewFile(item) {
       return;
     }
 
-    const encodedPath = item.path.split("/").map(encodeURIComponent).join("/");
-    const data = await githubFetch(`/repos/${activeRepository.owner}/${activeRepository.repo}/contents/${encodedPath}?ref=${encodeURIComponent(activeRepository.branch)}`);
-    if (Array.isArray(data) || !data) throw new Error("GitHub did not return a readable file.");
-    if (data.size > MAX_PREVIEW_BYTES) throw new Error("This file is too large for a browser preview.");
+    const data = await githubFetch(`/repos/${activeRepository.owner}/${activeRepository.repo}/contents/${item.path.split("/").map(encodeURIComponent).join("/")}?ref=${encodeURIComponent(activeRepository.branch)}`);
+    const content = data?.content ? decodeBase64(data.content) : "";
 
-    const content = data.content ? decodeBase64(data.content) : "";
-    if (!content) {
-      preview.innerHTML = `<div class="preview-empty">This file has no text content available for preview.</div>`;
+    if (!content && data?.download_url) {
+      preview.innerHTML = `<div class="preview-empty">GitHub did not return inline text for this file. <a class="preview-github" href="${escapeAttribute(data.download_url)}" target="_blank" rel="noreferrer">Open raw file ↗</a></div>`;
       return;
     }
 
-    preview.innerHTML = `<div class="preview-meta">${escapeHtml(detectLanguage(item.path))} · ${formatBytes(data.size || item.size || content.length)}</div><pre><code>${escapeHtml(content.slice(0, 160_000))}</code></pre>`;
+    preview.innerHTML = `<div class="preview-meta">${escapeHtml(fileLanguage(item.path))} · ${formatBytes(item.size || content.length)}</div><pre><code>${escapeHtml(content)}</code></pre>`;
   } catch (error) {
-    preview.innerHTML = `<div class="preview-empty">${escapeHtml(error instanceof Error ? error.message : "File preview failed.")}</div>`;
+    preview.innerHTML = `<div class="preview-empty">${escapeHtml(error instanceof Error ? error.message : "Could not load this file.")}</div>`;
   }
-}
 
-document.addEventListener("click", (event) => {
-  const importantButton = event.target.closest(".important-file");
-  if (!importantButton) return;
-  const path = importantButton.dataset.path;
-  const item = activeTree.find((entry) => entry.path === path);
-  if (item) previewFile(item);
-});
+  // Loading the preview must never change the horizontal document position.
+  window.requestAnimationFrame(() => {
+    if (window.scrollX !== 0) window.scrollTo({ left: 0, behavior: "instant" });
+  });
+}
 
 function detectProjectType(tree, repository, languages) {
   const paths = tree.map((item) => item.path.toLowerCase());
   const description = `${repository.description || ""} ${repository.name || ""} ${(repository.topics || []).join(" ")}`.toLowerCase();
   const languageNames = Object.keys(languages || {}).map((name) => name.toLowerCase());
-  const baseNames = paths.map((path) => path.split("/").pop() || path);
-  const hasBase = (name) => baseNames.includes(name);
+  const has = (name) => paths.some((path) => path === name || path.endsWith(`/${name}`));
 
-  if ((hasBase("manifest.json") || paths.some((path) => /manifest\.(json|xml|yaml|yml)$/.test(path))) && /(mod|plugin|bepinex|valheim|minecraft)/.test(description)) return "Game mod / plugin";
-  if (hasBase("package.json") && paths.some((path) => /(^|\/)vite\.config\.|(^|\/)next\.config\.|(^|\/)astro\.config\./.test(path))) return "Web application";
-  if (hasBase("pyproject.toml") || hasBase("requirements.txt")) return "Python project";
-  if (hasBase("cargo.toml")) return "Rust project";
-  if (hasBase("go.mod")) return "Go project";
-  if (hasBase("pom.xml") || hasBase("build.gradle")) return "Java project";
-  if (languageNames.includes("c#") || languageNames.includes("csharp") || paths.some((path) => path.endsWith(".csproj"))) return "C# / .NET project";
+  if (has("manifest.json") && (description.includes("mod") || description.includes("plugin"))) return "Game mod / plugin";
+  if (paths.some((path) => path.endsWith(".csproj")) || languageNames.includes("c#")) return "C# / .NET project";
+  if (has("package.json") && paths.some((path) => /(^|\/)vite\.config\.|(^|\/)next\.config\./.test(path))) return "Web application";
+  if (has("pyproject.toml") || has("requirements.txt")) return "Python project";
+  if (has("cargo.toml")) return "Rust project";
+  if (has("go.mod")) return "Go project";
+  if (has("pom.xml") || has("build.gradle")) return "Java project";
+  if (description.includes("mod") || description.includes("plugin")) return "Game mod / plugin";
   if (description.includes("game")) return "Game project";
   if (description.includes("tool") || description.includes("utility")) return "Tool / utility";
   return repository.language ? `${repository.language} project` : "Software project";
 }
 
-function detectLanguage(path) {
-  const extension = path.split(".").pop()?.toLowerCase();
-  const map = { js: "JavaScript", mjs: "JavaScript", cjs: "JavaScript", ts: "TypeScript", jsx: "JSX", tsx: "TSX", html: "HTML", css: "CSS", scss: "SCSS", json: "JSON", md: "Markdown", yaml: "YAML", yml: "YAML", py: "Python", cs: "C#", java: "Java", kt: "Kotlin", rs: "Rust", go: "Go", cpp: "C++", c: "C", h: "C/C++ header", toml: "TOML", xml: "XML", ini: "INI", cfg: "Config" };
-  return map[extension] || "Text";
-}
-
 function cleanReadme(text) {
-  return text.replace(/```[\s\S]*?```/g, " ").replace(/!\[[^\]]*\]\([^)]*\)/g, " ").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/^#{1,6}\s*/gm, "").replace(/[*_`>#~-]/g, " ").replace(/\s+/g, " ").trim().slice(0, 420);
+  return text
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/[*_`>#~-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 420);
 }
 
 function decodeBase64(value) {
@@ -339,9 +374,20 @@ function decodeBase64(value) {
   }
 }
 
+function fileLanguage(path) {
+  const extension = path.split(".").pop()?.toLowerCase();
+  const map = {
+    js: "JavaScript", mjs: "JavaScript", cjs: "JavaScript", ts: "TypeScript", jsx: "JSX", tsx: "TSX",
+    html: "HTML", css: "CSS", scss: "SCSS", json: "JSON", md: "Markdown", yaml: "YAML", yml: "YAML",
+    py: "Python", cs: "C#", java: "Java", kt: "Kotlin", rs: "Rust", go: "Go", cpp: "C++", c: "C",
+    h: "C/C++ header", hpp: "C/C++ header", toml: "TOML", xml: "XML", ini: "INI", cfg: "Config",
+  };
+  return map[extension] || "Text";
+}
+
 function sortTreeItems(a, b) {
   if (a.type !== b.type) return a.type === "tree" ? -1 : 1;
-  return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+  return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
 }
 
 function formatNumber(value) {
@@ -349,30 +395,39 @@ function formatNumber(value) {
 }
 
 function formatBytes(bytes) {
-  if (!bytes) return "0 B";
-  const units = ["B", "KB", "MB"];
-  let value = bytes;
-  let index = 0;
-  while (value >= 1024 && index < units.length - 1) { value /= 1024; index += 1; }
-  return `${value.toFixed(index ? 1 : 0)} ${units[index]}`;
+  if (!Number.isFinite(bytes) || bytes < 1024) return `${bytes || 0} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[unit]}`;
 }
 
 function escapeHtml(value) {
-  return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function escapeAttribute(value) { return escapeHtml(value); }
+function escapeAttribute(value) {
+  return escapeHtml(value);
+}
 
 function setLoading(isLoading) {
   if (!button) return;
   button.disabled = isLoading;
-  button.textContent = isLoading ? "Scanning…" : "Analyze";
+  button.textContent = isLoading ? "Analyzing…" : "Analyze";
   input?.toggleAttribute("disabled", isLoading);
 }
 
 function showMessage(message, type = "info") {
   document.querySelector(".analysis-message")?.remove();
-  document.querySelector(".analysis-result")?.remove();
   const element = document.createElement("p");
   element.className = `analysis-message ${type}`;
   element.textContent = message;
