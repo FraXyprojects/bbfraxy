@@ -1,7 +1,5 @@
-// Compatibility loader for the standalone code-preview module.
-// The analyzer itself talks directly to the BBFRAXY Cloudflare Worker.
-// This file no longer intercepts window.fetch; it only applies a small
-// compatibility stylesheet for the legacy Simplifier header markup.
+// Compatibility loader for the standalone Simplifier header markup.
+// The analyzer talks directly to the BBFRAXY Cloudflare Worker.
 (() => {
   const load = () => {
     if (!document.getElementById('bbfraxy-simplifier-header-fix')) {
@@ -112,14 +110,6 @@
         menuToggle.setAttribute('aria-expanded', String(!open));
         siteMenu.classList.toggle('is-open', !open);
       });
-    }
-
-    if (!document.querySelector('script[data-bbfraxy-file-analysis-bridge]')) {
-      const script = document.createElement('script');
-      script.src = './file-analysis-bridge.js';
-      script.defer = true;
-      script.dataset.bbfraxyFileAnalysisBridge = 'true';
-      document.head.append(script);
     }
   };
 
