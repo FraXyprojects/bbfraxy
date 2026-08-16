@@ -1,20 +1,37 @@
 const FILE_SUMMARY_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/github";
 const MAX_SUMMARY_BYTES = 90000;
-const CONCURRENCY = 4;
+const MAX_BINARY_BYTES = 300000;
+const CONCURRENCY = 2;
+const MAX_DEEP_SUMMARIES = 12;
 
 (() => {
   let activeKey = null;
   let generation = 0;
   const cache = new Map();
+  let queued = false;
 
-  const observer = new MutationObserver(sync);
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-  document.addEventListener("click", onDocumentClick, true);
-  sync();
+  document.addEventListener("github-simplifier:analysis-rendered", (event) => {
+    const analysis = event.detail?.analysis || document.querySelector(".analysis-result");
+    if (analysis) schedule(analysis);
+  });
 
-  function sync() {
+  // Fallback for cached/legacy renders. Runs once, not continuously.
+  window.setTimeout(() => {
     const analysis = document.querySelector(".analysis-result");
-    if (!analysis) return;
+    if (analysis) schedule(analysis);
+  }, 0);
+
+  function schedule(analysis) {
+    if (queued) return;
+    queued = true;
+    window.setTimeout(() => {
+      queued = false;
+      mountForAnalysis(analysis);
+    }, 0);
+  }
+
+  function mountForAnalysis(analysis) {
+    if (!analysis?.isConnected) return;
     const repository = parseRepository(analysis);
     if (!repository) return;
 
@@ -26,8 +43,9 @@ const CONCURRENCY = 4;
       installStyles();
     }
 
-    window.setTimeout(() => attachMapSummaries(analysis, repository, key), 0);
-    attachPreviewSummary(analysis, repository, key);
+    const run = generation;
+    attachMapSummaries(analysis, repository, key, run);
+    attachPreviewSummary(analysis, repository, key, run);
   }
 
   function parseRepository(analysis) {
@@ -40,40 +58,38 @@ const CONCURRENCY = 4;
     document.querySelectorAll(".file-analysis-panel").forEach((node) => node.remove());
   }
 
-  async function attachMapSummaries(analysis, repository, key) {
+  async function attachMapSummaries(analysis, repository, key, run) {
     const rows = [...analysis.querySelectorAll("button.file-row")];
+    if (!rows.length) return;
+
+    // Every file gets an immediate path-based summary, so Analyze never waits for file I/O.
     const jobs = [];
-
-    for (const row of rows) {
-      if (row.querySelector(".file-map-summary")) continue;
-      const path = getFilePath(row);
+    rows.forEach((row) => {
+      const path = row.dataset.path || getFilePath(row);
       const name = row.querySelector(":scope > .tree-name");
-      if (!path || !name) continue;
+      if (!path || !name) return;
 
-      const holder = name.cloneNode(true);
-      holder.querySelectorAll(".file-map-summary").forEach((node) => node.remove());
-      name.replaceWith(holder);
+      let summary = row.querySelector(":scope .file-map-summary");
+      if (!summary) {
+        summary = document.createElement("span");
+        summary.className = "file-map-summary";
+        name.append(summary);
+      }
 
-      holder.classList.add("tree-file-info");
-      const summary = document.createElement("span");
-      summary.className = "file-map-summary";
-      summary.textContent = "Analyzing file…";
-      holder.append(summary);
-      row.classList.add("tree-file-row-expanded");
+      const heuristic = summarizeFromPath(path);
+      summary.textContent = heuristic.description;
+      summary.title = heuristic.description;
+      row.dataset.summaryRole = heuristic.role;
+
+      if (isBinaryPath(path) || Number(row.dataset.size || 0) > MAX_SUMMARY_BYTES) return;
+      if (!shouldDeepAnalyze(path)) return;
+      if (jobs.length >= MAX_DEEP_SUMMARIES) return;
       jobs.push({ row, path, summary });
-    }
-
-    if (!jobs.length) return;
-    const run = generation;
+    });
 
     await runLimited(jobs, CONCURRENCY, async ({ row, path, summary }) => {
       if (run !== generation || key !== activeKey || !row.isConnected) return;
       try {
-        const item = findTreeItem(analysis, path);
-        if (item && Number(item.size || 0) > MAX_SUMMARY_BYTES) {
-          summary.textContent = "Large file — open for details";
-          return;
-        }
         const text = await fetchText(repository, path, key);
         if (run !== generation || key !== activeKey || !row.isConnected) return;
         const insight = summarize(path, text);
@@ -81,21 +97,14 @@ const CONCURRENCY = 4;
         summary.title = insight.description;
         row.dataset.summaryRole = insight.role;
       } catch {
-        if (run === generation && key === activeKey && row.isConnected) summary.textContent = "Select the file for details";
+        // Keep the fast path summary. A failed detail request must never block the analyzer.
       }
     });
   }
 
-  function onDocumentClick(event) {
-    const target = event.target instanceof Element ? event.target : null;
-    if (!target || !target.closest("button.file-row, button.important-file")) return;
-    window.setTimeout(sync, 0);
-  }
-
-  async function attachPreviewSummary(analysis, repository, key) {
-    const panel = document.querySelector("#file-preview-panel");
+  async function attachPreviewSummary(analysis, repository, key, run) {
+    const panel = analysis.querySelector("#file-preview-panel");
     if (!panel || panel.hidden) return;
-
     const title = panel.querySelector("#preview-title")?.textContent?.trim();
     if (!title || title === "Select a file") return;
 
@@ -114,14 +123,13 @@ const CONCURRENCY = 4;
     box.dataset.loaded = "0";
     box.innerHTML = `<span class="analysis-label">What does this file do?</span><p class="file-summary-detail-text">Reading the source…</p>`;
 
-    const item = findTreeItem(analysis, title);
-    if (item && Number(item.size || 0) > MAX_SUMMARY_BYTES) {
+    if (isBinaryPath(title)) {
       box.dataset.loaded = "1";
-      box.innerHTML = `<span class="analysis-label">What does this file do?</span><p class="file-summary-detail-text">This file is too large for inline analysis. Open it on GitHub for the full source.</p>`;
+      box.innerHTML = `<span class="analysis-label">File type</span><p class="file-summary-detail-text">${escapeHtml(binaryDescription(title))}</p>`;
       return;
     }
 
-    const run = ++generation;
+    if (run !== generation || key !== activeKey) return;
     try {
       const text = await fetchText(repository, title, key);
       if (run !== generation || key !== activeKey || !box.isConnected) return;
@@ -142,13 +150,8 @@ const CONCURRENCY = 4;
     }
   }
 
-  function findTreeItem(analysis, path) {
-    const row = [...analysis.querySelectorAll("button.file-row")].find((node) => getFilePath(node) === path);
-    return row ? { path, size: Number(row.dataset.size || 0) } : null;
-  }
-
   function getFilePath(row) {
-    const ownName = row.querySelector(":scope > .tree-name")?.childNodes?.[0]?.textContent?.trim() || "";
+    const ownName = row.querySelector(":scope > .tree-name")?.textContent?.trim() || "";
     if (!ownName) return "";
     const parts = [ownName];
     let folder = row.closest("details.tree-folder");
@@ -158,6 +161,23 @@ const CONCURRENCY = 4;
       folder = folder.parentElement?.closest("details.tree-folder") || null;
     }
     return parts.join("/");
+  }
+
+  function isBinaryPath(path) {
+    return /\.(png|jpe?g|gif|webp|bmp|ico|svg|mp3|wav|ogg|mp4|webm|mov|avi|zip|7z|rar|gz|tar|dll|exe|so|dylib|jar|class|wasm|pdf|woff2?|ttf|otf)$/i.test(path);
+  }
+
+  function binaryDescription(path) {
+    const ext = path.split(".").pop()?.toUpperCase() || "binary";
+    return `${ext} asset — source-code analysis is not applicable. The file is treated as a project asset rather than text.`;
+  }
+
+  function shouldDeepAnalyze(path) {
+    const lower = path.toLowerCase();
+    const base = lower.split("/").pop() || lower;
+    return /readme|package\.json|(^|\/)(index|main|app|program)\.(html?|js|mjs|cjs|ts|tsx|jsx|cs)$/i.test(path)
+      || /(^|\/)(config|configs|configuration|settings)(\/|$)/i.test(path)
+      || /\.(json|yaml|yml|toml|ini|cfg|cs|csx|js|mjs|cjs|ts|tsx|jsx|html?|css|scss|less)$/i.test(base);
   }
 
   async function fetchText(repository, path, key) {
@@ -172,6 +192,23 @@ const CONCURRENCY = 4;
     return text;
   }
 
+  function summarizeFromPath(path) {
+    const lower = path.toLowerCase();
+    const base = lower.split("/").pop() || lower;
+    if (isBinaryPath(path)) return { role: "Project asset", description: binaryDescription(path) };
+    if (/^readme(?:\.|$)/i.test(base)) return { role: "Project documentation", description: "Project documentation and usage overview." };
+    if (base === "package.json") return { role: "Project manifest", description: "Project metadata, scripts and dependencies." };
+    if (/\.html?$/.test(base)) return { role: "Web page / entry document", description: "Defines a user-facing web page and its linked assets." };
+    if (/\.(css|scss|less)$/.test(base)) return { role: "Stylesheet", description: "Controls layout, styling and visual presentation." };
+    if (/\.(json|yaml|yml|toml|ini|cfg)$/.test(base)) return { role: "Configuration / structured data", description: "Stores settings, metadata or structured project data." };
+    if (/\.(cs|csx)$/.test(base)) return { role: "C# source code", description: "Contains C# application, library or plugin logic." };
+    if (/\.(js|mjs|cjs|ts|tsx|jsx)$/.test(base)) return { role: "JavaScript / TypeScript source", description: "Contains executable application logic or UI behavior." };
+    if (/\.(py)$/.test(base)) return { role: "Python source code", description: "Contains Python application, utility or automation logic." };
+    if (/\.(java|kt)$/.test(base)) return { role: "JVM source code", description: "Contains Java/Kotlin application or library logic." };
+    if (/\.(csproj|sln|gradle|pom|cargo\.toml)$/.test(base)) return { role: "Build / project configuration", description: "Defines project structure or build configuration." };
+    return { role: "Project file", description: "Part of the project implementation; open the file for a deeper summary." };
+  }
+
   function summarize(path, text) {
     const lower = path.toLowerCase();
     const base = lower.split("/").pop() || lower;
@@ -182,7 +219,7 @@ const CONCURRENCY = 4;
 
     if (/^readme(?:\.|$)/i.test(base)) {
       const description = extractReadmeSummary(source) || "Project documentation describing purpose, setup and usage.";
-      return { role: "Project documentation", description, detailed: description, signals: ["documentation", "project overview", ...headings(source)], editNote };
+      return { role: "Project documentation", description, detailed: description, signals: ["documentation", ...headings(source).slice(0, 3)], editNote };
     }
 
     if (base === "package.json") {
@@ -191,9 +228,8 @@ const CONCURRENCY = 4;
         if (data.name) signals.push(`package: ${data.name}`);
         if (data.scripts) signals.push(`${Object.keys(data.scripts).length} scripts`);
         if (data.dependencies) signals.push(`${Object.keys(data.dependencies).length} dependencies`);
-        if (data.devDependencies) signals.push(`${Object.keys(data.devDependencies).length} dev dependencies`);
         const description = data.description || "Defines project metadata, dependencies and development scripts.";
-        return { role: "Project manifest", description, detailed: `${description}${data.main ? ` The declared main entry is ${data.main}.` : ""}`, signals, editNote };
+        return { role: "Project manifest", description, detailed: data.main ? `${description} Declared main entry: ${data.main}.` : description, signals, editNote };
       } catch {}
     }
 
@@ -204,23 +240,15 @@ const CONCURRENCY = 4;
       if (/^index\.html?$/.test(base)) signals.push("entry page");
       if (scripts.length) signals.push(`${scripts.length} script reference${scripts.length === 1 ? "" : "s"}`);
       if (styles.length) signals.push(`${styles.length} stylesheet reference${styles.length === 1 ? "" : "s"}`);
-      return {
-        role: "Web page / entry document",
-        description: title ? `Renders the “${title}” page.` : "Defines a user-facing HTML page and its local assets.",
-        detailed: `This file defines the page structure${styles.length ? ` and links ${styles.length} stylesheet${styles.length === 1 ? "" : "s"}` : ""}${scripts.length ? ` while loading ${scripts.length} client-side script${scripts.length === 1 ? "" : "s"} for behavior` : ""}.`,
-        signals: [title ? `title: ${title}` : null, ...signals].filter(Boolean),
-        editNote,
-      };
+      return { role: "Web page / entry document", description: title ? `Renders the “${title}” page.` : "Defines a user-facing HTML page and its local assets.", detailed: `Defines the page structure${styles.length ? ` and links ${styles.length} stylesheet${styles.length === 1 ? "" : "s"}` : ""}${scripts.length ? ` while loading ${scripts.length} client-side script${scripts.length === 1 ? "" : "s"}` : ""}.`, signals: [title ? `title: ${title}` : null, ...signals].filter(Boolean), editNote };
     }
 
     if (/\.(css|scss|less)$/.test(base)) {
-      const blocks = (source.match(/[^{}]+\{/g) || []).length;
       const media = (source.match(/@media\b/g) || []).length;
       const variables = (source.match(/--[A-Za-z0-9_-]+\s*:/g) || []).length;
-      if (blocks) signals.push(`${blocks} style blocks`);
       if (media) signals.push(`${media} responsive media quer${media === 1 ? "y" : "ies"}`);
       if (variables) signals.push(`${variables} CSS variables`);
-      return { role: "Stylesheet / visual presentation", description: "Controls layout, spacing, colors and component presentation.", detailed: `Controls the visual presentation of the project${media ? " and includes responsive behavior" : ""}${variables ? ` with ${variables} CSS variables` : ""}.`, signals, editNote };
+      return { role: "Stylesheet / visual presentation", description: "Controls layout, spacing, colors and component presentation.", detailed: `Controls the project's visual presentation${media ? " including responsive behavior" : ""}.`, signals, editNote };
     }
 
     if (/\.(json|yaml|yml|toml|ini|cfg)$/.test(base)) {
@@ -228,8 +256,8 @@ const CONCURRENCY = 4;
       const configLike = /(^|\/)(config|configs|configuration|settings)(\/|$)/i.test(path) || /^(config|settings)/i.test(base) || /\.(ini|cfg)$/.test(base);
       signals.push(...keys.slice(0, 5).map((key) => `key: ${key}`));
       const role = configLike ? "Configuration / settings" : "Structured data / metadata";
-      const description = configLike ? "Defines structured options or settings that can often be changed without editing the main program logic." : "Stores machine-readable project data or metadata.";
-      return { role, description, detailed: `${description}${keys.length ? ` Detected top-level fields include ${keys.slice(0, 6).join(", ")}.` : ""}`, signals, editNote };
+      const description = configLike ? "Defines structured options or settings used by the project." : "Stores machine-readable project data or metadata.";
+      return { role, description, detailed: `${description}${keys.length ? ` Key fields include ${keys.slice(0, 6).join(", ")}.` : ""}`, signals, editNote };
     }
 
     if (/\.(cs|csx)$/.test(base)) {
@@ -241,98 +269,94 @@ const CONCURRENCY = 4;
       if (/Harmony/i.test(source)) signals.push("Harmony");
       const role = /BepInEx|Harmony|Valheim/i.test(source) ? "C# mod/plugin source" : "C# source code";
       const description = /BepInEx/i.test(source) ? "Contains runtime logic for a BepInEx-based plugin or mod, including hooks and mod behavior." : "Contains C# application, library or plugin logic.";
-      return { role, description, detailed: `${description}${classes ? ` The file defines ${classes} class${classes === 1 ? "" : "es"}.` : ""}${methods ? ` It contains about ${methods} method signature${methods === 1 ? "" : "s"}.` : ""}`, signals, editNote };
+      return { role, description, detailed: `${description}${classes ? ` Defines ${classes} class${classes === 1 ? "" : "es"}.` : ""}${methods ? ` Contains about ${methods} method signature${methods === 1 ? "" : "s"}.` : ""}`, signals, editNote };
     }
 
     if (/\.(js|mjs|cjs|ts|tsx|jsx)$/.test(base)) {
       const imports = count(source, /\bimport\b|\brequire\s*\(/g);
       const exports = count(source, /\bexport\b/g);
       const functions = count(source, /\bfunction\s+[A-Za-z_][A-Za-z0-9_]*\s*\(|=>\s*\{/g);
-      const classes = count(source, /\bclass\s+[A-Za-z_][A-Za-z0-9_]*/g);
       if (imports) signals.push(`${imports} import/reference${imports === 1 ? "" : "s"}`);
       if (exports) signals.push(`${exports} export${exports === 1 ? "" : "s"}`);
       if (functions) signals.push(`${functions} function block${functions === 1 ? "" : "s"}`);
-      if (classes) signals.push(`${classes} class${classes === 1 ? "" : "es"}`);
       const behaviors = [];
       if (/addEventListener|querySelector|createElement/.test(source)) behaviors.push("manages UI interactions");
       if (/fetch\s*\(|XMLHttpRequest|axios/.test(source)) behaviors.push("performs network requests");
       if (/localStorage|sessionStorage/.test(source)) behaviors.push("persists client state");
       if (/router|navigate\(|history\.pushState|location\./.test(source)) behaviors.push("handles navigation");
-      if (/BepInEx|Harmony/.test(source)) behaviors.push("contains game/mod hooks");
       const role = /(^|\/)(main|app|index)\.(js|mjs|cjs|ts|tsx|jsx)$/.test(lower) ? "Application entry / controller" : "JavaScript / TypeScript source";
       const description = behaviors.length ? `Contains code that ${humanJoin(behaviors)}.` : "Contains executable project logic and supporting functions.";
-      return { role, description, detailed: `${description}${imports ? ` It references ${imports} imported module${imports === 1 ? "" : "s"}.` : ""}${exports ? ` It exposes ${exports} export${exports === 1 ? "" : "s"}.` : ""}`, signals, editNote };
+      return { role, description, detailed: description, signals, editNote };
     }
 
-    const comment = extractLeadingComment(source);
-    return { role: roleFromPath(path), description: comment || "Part of the project implementation; its exact role is inferred from the path and source structure.", detailed: comment || "The Simplifier could not infer a more specific responsibility from the file yet.", signals, editNote };
+    return summarizeFromPath(path);
+  }
+
+  async function runLimited(items, limit, worker) {
+    let next = 0;
+    const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (next < items.length) {
+        const index = next++;
+        await worker(items[index]);
+      }
+    });
+    await Promise.all(runners);
   }
 
   function extractReadmeSummary(text) {
-    const blocks = text.split(/\n\s*\n/).map((value) => value.trim()).filter(Boolean);
-    const candidate = blocks.find((value) => !/^#{1,6}\s/.test(value) && value.length > 30) || "";
-    return stripMarkdown(candidate.split("\n").slice(0, 3).join(" ")).slice(0, 250);
+    const blocks = text.split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
+    return stripMarkdown(blocks.find((part) => !/^#{1,6}\s/.test(part) && part.length > 30)?.split("\n").slice(0, 3).join(" ") || "").slice(0, 280);
   }
 
   function extractTopLevelKeys(text, base) {
     if (/\.json$/i.test(base)) {
       try { return Object.keys(JSON.parse(text || "{}")); } catch { return []; }
     }
-    return [...text.matchAll(/^\s*([A-Za-z0-9_.-]+)\s*:/gm)].map((match) => match[1]);
-  }
-
-  function extractLeadingComment(text) {
-    return text.match(/^\s*(?:\/\/|#|;|<!--)\s*(.{15,180})/m)?.[1]?.trim() || "";
-  }
-
-  function roleFromPath(path) {
-    const lower = path.toLowerCase();
-    const base = lower.split("/").pop() || lower;
-    if (/(^|\/)tests?(\/|$)/.test(lower)) return "Test / validation code";
-    if (/(config|settings|configuration)/.test(base)) return "Configuration / settings";
-    if (/index\.html?$/.test(base)) return "Web entry document";
-    if (/\.(css|scss|less)$/.test(base)) return "Stylesheet";
-    if (/\.(md|txt)$/.test(base)) return "Documentation / text";
-    return "Project source file";
+    return [...text.matchAll(/^\s*([A-Za-z0-9_.-]+)\s*:/gm)].map((match) => match[1]).slice(0, 8);
   }
 
   function headings(text) {
-    return [...text.matchAll(/^#{1,6}\s+(.+)$/gm)].map((match) => match[1].trim()).slice(0, 3);
+    return [...text.matchAll(/^#{1,3}\s+(.+)$/gm)].map((match) => stripMarkdown(match[1])).slice(0, 5);
   }
 
-  function stripMarkdown(value) { return String(value || "").replace(/[`*_>#~-]/g, "").replace(/\s+/g, " ").trim(); }
-  function stripMarkup(value) { return stripMarkdown(String(value || "").replace(/<[^>]+>/g, "")); }
-  function humanJoin(items) { return items.length <= 1 ? (items[0] || "supports project behavior") : items.length === 2 ? `${items[0]} and ${items[1]}` : `${items.slice(0, -1).join(", ")}, and ${items.at(-1)}`; }
-  function count(text, regex) { return [...text.matchAll(regex)].length; }
+  function count(text, regex) {
+    return [...text.matchAll(regex)].length;
+  }
 
-  async function runLimited(items, limit, worker) {
-    let index = 0;
-    const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-      while (index < items.length) await worker(items[index++]);
-    });
-    await Promise.all(runners);
+  function humanJoin(values) {
+    if (values.length <= 1) return values[0] || "performs project logic";
+    if (values.length === 2) return `${values[0]} and ${values[1]}`;
+    return `${values.slice(0, -1).join(", ")}, and ${values[values.length - 1]}`;
+  }
+
+  function stripMarkup(value) {
+    return String(value || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  }
+
+  function stripMarkdown(value) {
+    return stripMarkup(String(value || "").replace(/[`*_>#-]/g, " ").replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")).replace(/\s+/g, " ").trim();
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
   }
 
   function installStyles() {
-    if (document.getElementById("bbfraxy-file-summary-styles")) return;
+    if (document.querySelector("#file-analysis-inline-styles")) return;
     const style = document.createElement("style");
-    style.id = "bbfraxy-file-summary-styles";
+    style.id = "file-analysis-inline-styles";
     style.textContent = `
-      .tree-file-row-expanded{min-height:56px!important;align-items:flex-start!important;padding-top:7px!important;padding-bottom:7px!important}
-      .tree-file-row-expanded .tree-file-info{display:grid;align-content:center;gap:2px;min-width:0;white-space:normal;line-height:1.25}
-      .file-map-summary{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--faint);font-size:.61rem;font-weight:400;line-height:1.35}
-      .tree-file-row-expanded:hover .file-map-summary,.tree-file-row-expanded:focus-visible .file-map-summary{color:var(--muted)}
-      .file-summary-detail{margin-bottom:14px;border:1px solid var(--border);border-radius:calc(var(--radius) - 3px);padding:14px 15px;background:rgba(95,231,255,.028)}
-      .file-summary-detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
-      .file-summary-detail-head strong{display:block;color:var(--text);font-size:.88rem}
-      .file-summary-detail-text{margin:8px 0 0;color:var(--muted);font-size:.78rem;line-height:1.65}
-      .file-summary-detail-note{margin:9px 0 0;color:var(--faint);font-size:.67rem;line-height:1.5}
-      .file-summary-signals{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px}
-      .file-summary-signals span{border:1px solid var(--border);border-radius:999px;padding:3px 7px;color:var(--faint);background:rgba(255,255,255,.02);font-size:.58rem;white-space:nowrap}
-      @media(max-width:720px){.file-summary-detail-head{display:block}.file-summary-signals{justify-content:flex-start;margin-top:8px}}
+      .tree-file-info { display:grid!important; grid-template-columns:minmax(0,1fr); gap:2px; align-items:start; }
+      .file-map-summary { display:block; overflow:hidden; color:var(--faint); font-size:.62rem; line-height:1.3; font-weight:400; white-space:nowrap; text-overflow:ellipsis; }
+      .tree-file-row-expanded { min-height:46px!important; align-items:center!important; }
+      .file-summary-detail { margin-bottom:14px; border:1px solid var(--border); border-radius:calc(var(--radius) - 3px); padding:14px 16px; background:rgba(255,255,255,.025); }
+      .file-summary-detail-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+      .file-summary-detail-head strong { display:block; color:var(--accent-strong); font-size:.86rem; margin-top:2px; }
+      .file-summary-detail-text { margin:8px 0 0; color:var(--muted); font-size:.78rem; line-height:1.6; }
+      .file-summary-detail-note { margin:8px 0 0; padding-top:8px; border-top:1px solid var(--border); color:var(--faint); font-size:.66rem; line-height:1.5; }
+      .file-summary-signals { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; }
+      .file-summary-signals span { border:1px solid var(--border); border-radius:999px; padding:3px 7px; color:var(--faint); font-size:.58rem; white-space:nowrap; }
     `;
     document.head.append(style);
   }
-
-  function escapeHtml(value) { return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
 })();
