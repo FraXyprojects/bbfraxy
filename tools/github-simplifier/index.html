@@ -29,8 +29,8 @@
     .analysis-kicker, .analysis-label { margin: 0 0 7px; color: var(--faint); font-size: .7rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
     .analysis-head h2 { margin: 0; color: var(--text); font-size: 1.55rem; }
     .analysis-owner { margin: 5px 0 0; color: var(--muted); font-size: .82rem; }
-    .analysis-github { display: inline-flex; min-height: 38px; align-items: center; border: 1px solid var(--border); border-radius: var(--radius); padding: 0 13px; color: var(--text); background: rgba(255,255,255,.035); font-size: .8rem; font-weight: 700; white-space: nowrap; }
-    .analysis-github:hover { border-color: var(--border-strong); color: var(--accent-strong); }
+    .analysis-github, .preview-github { display: inline-flex; min-height: 38px; align-items: center; border: 1px solid var(--border); border-radius: var(--radius); padding: 0 13px; color: var(--text); background: rgba(255,255,255,.035); font-size: .8rem; font-weight: 700; white-space: nowrap; }
+    .analysis-github:hover, .preview-github:hover { border-color: var(--border-strong); color: var(--accent-strong); }
     .analysis-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; }
     .analysis-panel { padding: 22px; }
     .analysis-summary strong { display: block; color: var(--accent-strong); font-size: 1.05rem; }
@@ -41,17 +41,51 @@
     .analysis-tags span, .analysis-count { display: inline-flex; min-height: 25px; align-items: center; border: 1px solid var(--border); border-radius: 999px; padding: 0 9px; color: var(--muted); background: rgba(255,255,255,.03); font-size: .7rem; }
     .analysis-panel-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 15px; }
     .analysis-panel-heading h3 { margin: 0; color: var(--text); font-size: 1.05rem; }
-    .file-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-    .file-item { display: flex; min-width: 0; align-items: center; gap: 9px; min-height: 42px; border: 1px solid transparent; border-radius: calc(var(--radius) - 3px); padding: 0 11px; color: var(--muted); background: rgba(255,255,255,.025); transition: border-color 160ms ease, background 160ms ease, color 160ms ease; }
-    .file-item:hover { border-color: var(--border); background: rgba(95,231,255,.04); color: var(--text); }
-    .file-icon { color: var(--accent); font-size: .9rem; }
-    .file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .82rem; }
-    .file-type { margin-left: auto; color: var(--faint); font-size: .68rem; }
+    .important-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .important-file { display: flex; min-width: 0; align-items: center; gap: 10px; width: 100%; min-height: 62px; border: 1px solid transparent; border-radius: calc(var(--radius) - 3px); padding: 10px 12px; color: var(--muted); background: rgba(255,255,255,.025); text-align: left; cursor: pointer; transition: border-color 160ms ease, background 160ms ease, transform 160ms ease; }
+    .important-file:hover, .important-file:focus-visible { border-color: var(--border); background: rgba(95,231,255,.045); transform: translateY(-1px); outline: none; }
+    .important-file-icon { flex: 0 0 auto; color: var(--accent); }
+    .important-file-main { min-width: 0; flex: 1; display: grid; gap: 4px; }
+    .important-file-main b { overflow: hidden; color: var(--text); text-overflow: ellipsis; white-space: nowrap; font-size: .78rem; }
+    .important-file-main small { color: var(--faint); font-size: .67rem; line-height: 1.35; }
+    .editability-pill { flex: 0 0 auto; border-radius: 999px; padding: 4px 7px; font-size: .62rem; white-space: nowrap; }
+    .edit-safe { color: #8de9bd; background: rgba(75,210,135,.08); border: 1px solid rgba(75,210,135,.2); }
+    .edit-caution { color: #e7d48b; background: rgba(220,190,70,.08); border: 1px solid rgba(220,190,70,.18); }
+    .edit-core { color: #ff9f9f; background: rgba(255,80,80,.07); border: 1px solid rgba(255,80,80,.18); }
+    .edit-unknown { color: var(--faint); background: rgba(255,255,255,.035); border: 1px solid var(--border); }
+    .tree-browser { display: grid; gap: 2px; max-height: 540px; overflow: auto; padding-right: 4px; }
+    .tree-folder { border-radius: 9px; }
+    .tree-folder[open] > .folder-row .tree-chevron { transform: rotate(90deg); }
+    .tree-row { display: flex; min-width: 0; align-items: center; width: 100%; min-height: 36px; gap: 8px; border: 1px solid transparent; border-radius: 8px; padding: 0 9px; color: var(--muted); background: rgba(255,255,255,.018); font: inherit; font-size: .78rem; text-align: left; }
+    .folder-row { cursor: pointer; list-style: none; }
+    .folder-row::-webkit-details-marker { display: none; }
+    .folder-row:hover, .file-row:hover, .file-row:focus-visible { border-color: var(--border); background: rgba(95,231,255,.04); color: var(--text); outline: none; }
+    .tree-chevron { width: 12px; color: var(--faint); transition: transform 140ms ease; }
+    .tree-icon { width: 14px; color: var(--accent); }
+    .tree-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tree-kind { margin-left: auto; color: var(--faint); font-size: .64rem; white-space: nowrap; }
+    .tree-children { display: grid; gap: 2px; margin-left: 18px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,.07); }
+    .file-row { cursor: pointer; }
+    .tree-spacer { width: 12px; flex: 0 0 12px; }
+    .file-preview-panel[hidden] { display: none; }
+    .preview-actions { display: flex; align-items: center; gap: 8px; }
+    .editability-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; border: 1px solid var(--border); border-radius: calc(var(--radius) - 3px); padding: 12px 14px; background: rgba(255,255,255,.025); }
+    .editability-card b { color: var(--text); font-size: .78rem; }
+    .editability-card p { margin: 3px 0 0; color: var(--faint); font-size: .72rem; line-height: 1.5; }
+    .editability-dot { width: 9px; height: 9px; margin-top: 5px; flex: 0 0 auto; border-radius: 50%; }
+    .editability-dot.edit-safe { background: #64d99c; box-shadow: 0 0 10px rgba(75,210,135,.35); }
+    .editability-dot.edit-caution { background: #d6bd55; box-shadow: 0 0 10px rgba(220,190,70,.28); }
+    .editability-dot.edit-core { background: #ff7777; box-shadow: 0 0 10px rgba(255,80,80,.28); }
+    .editability-dot.edit-unknown { background: #75808b; }
+    .code-preview { overflow: auto; border: 1px solid rgba(255,255,255,.07); border-radius: calc(var(--radius) - 3px); background: #05080a; }
+    .code-preview pre { margin: 0; padding: 18px; color: #d8e4e8; font: .72rem/1.65 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; tab-size: 2; white-space: pre; }
+    .preview-meta { padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,.07); color: var(--faint); font-size: .66rem; }
+    .preview-loading, .preview-empty { padding: 28px 18px; color: var(--faint); text-align: center; font-size: .78rem; }
     .analysis-empty, .analysis-disclaimer { color: var(--faint); font-size: .8rem; }
     .analysis-message { width: min(100%, 760px); margin: 16px auto 0; border: 1px solid rgba(255,120,120,.25); border-radius: var(--radius); padding: 13px 16px; color: #ffbcbc; background: rgba(255,80,80,.06); text-align: center; font-size: .82rem; }
     .analysis-disclaimer { margin: 2px 8px 0; text-align: center; line-height: 1.6; }
-    @media (max-width: 720px) { .simplifier-page { padding: 52px 0 40px; } .analysis-grid { grid-template-columns: 1fr; } .analysis-head { align-items: flex-start; flex-direction: column; } .file-list { grid-template-columns: 1fr; } }
-    @media (max-width: 620px) { .simplifier-form { flex-direction: column; } .simplifier-submit { width: 100%; } }
+    @media (max-width: 720px) { .simplifier-page { padding: 52px 0 40px; } .analysis-grid { grid-template-columns: 1fr; } .analysis-head { align-items: flex-start; flex-direction: column; } .important-list { grid-template-columns: 1fr; } }
+    @media (max-width: 620px) { .simplifier-form { flex-direction: column; } .simplifier-submit { width: 100%; } .analysis-panel { padding: 17px; } .analysis-panel-heading { align-items: flex-start; flex-direction: column; gap: 8px; } .tree-browser { max-height: 460px; } .editability-pill { display: none; } }
   </style>
 </head>
 <body>
