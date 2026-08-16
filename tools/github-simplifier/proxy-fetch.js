@@ -71,18 +71,25 @@
     });
   };
 
-  const loadLegacyAnalyzer = () => {
-    if (document.querySelector('script[data-bbfraxy-legacy-analyzer]')) return;
-    const script = document.createElement('script');
-    script.src = './analyzer-legacy.js';
-    script.defer = true;
-    script.dataset.bbfraxyLegacyAnalyzer = 'true';
-    document.head.append(script);
+  const loadScripts = () => {
+    const scripts = [
+      ["./analyzer-legacy.js", "data-bbfraxy-legacy-analyzer"],
+      ["./seo-content.js", "data-bbfraxy-seo-content"],
+    ];
+
+    for (const [src, attribute] of scripts) {
+      if (document.querySelector(`script[${attribute}]`)) continue;
+      const script = document.createElement("script");
+      script.src = src;
+      script.defer = true;
+      script.setAttribute(attribute, "true");
+      document.head.append(script);
+    }
   };
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadLegacyAnalyzer, { once: true });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadScripts, { once: true });
   } else {
-    loadLegacyAnalyzer();
+    loadScripts();
   }
 })();
