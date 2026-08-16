@@ -7,8 +7,10 @@ const GITHUB_API = "https://api.github.com";
 const DEFAULT_REPO_LIMIT = 100;
 const MAX_REPO_LIMIT = 100;
 const MAX_TREE_ITEMS = 7000;
+const MAX_FILE_BYTES = 180000;
 const REPO_CACHE_TTL = 300;
 const USER_CACHE_TTL = 300;
+const FILE_CACHE_TTL = 300;
 
 export default {
   async fetch(request, env, ctx) {
@@ -23,13 +25,22 @@ export default {
     }
 
     if (url.pathname === "/health") {
-      return json({ ok: true, service: "bbfraxy-github-simplifier" }, 200, { "cache-control": "no-store" });
+      return json(
+        { ok: true, service: "bbfraxy-github-simplifier" },
+        200,
+        { "cache-control": "no-store" },
+      );
     }
 
     const userMatch = url.pathname.match(/^\/v1\/github\/user\/([^/]+)\/repos\/?$/);
     if (userMatch) {
       const owner = decodeURIComponent(userMatch[1]);
-      const limit = clampNumber(url.searchParams.get("limit"), DEFAULT_REPO_LIMIT, 1, MAX_REPO_LIMIT);
+      const limit = clampNumber(
+        url.searchParams.get("limit"),
+        DEFAULT_REPO_LIMIT,
+        1,
+        MAX_REPO_LIMIT,
+      );
       return handleUserRepos(owner, limit, env, ctx);
     }
 
@@ -40,14 +51,26 @@ export default {
       return handleRepoTree(owner, repo, env, ctx);
     }
 
-    return json({
-      error: "Not found.",
-      endpoints: [
-        "GET /health",
-        "GET /v1/github/user/:owner/repos?limit=100",
-        "GET /v1/github/repo/:owner/:repo/tree",
-      ],
-    }, 404);
+    const fileMatch = url.pathname.match(/^\/v1\/github\/repo\/([^/]+)\/([^/]+)\/file\/(.+)$/);
+    if (fileMatch) {
+      const owner = decodeURIComponent(fileMatch[1]);
+      const repo = decodeURIComponent(fileMatch[2]);
+      const path = fileMatch[3].split("/").map(decodeURIComponent).join("/");
+      return handleRepoFile(owner, repo, path, url.searchParams.get("branch") || "main", env, ctx);
+    }
+
+    return json(
+      {
+        error: "Not found.",
+        endpoints: [
+          "GET /health",
+          "GET /v1/github/user/:owner/repos?limit=100",
+          "GET /v1/github/repo/:owner/:repo/tree",
+          "GET /v1/github/repo/:owner/:repo/file/:path?branch=main",
+        ],
+      },
+      404,
+    );
   },
 };
 
@@ -56,21 +79,25 @@ async function handleUserRepos(owner, limit, env, ctx) {
     return json({ error: "Invalid GitHub username." }, 400);
   }
 
-  const cacheKey = new Request(`https://cache.bbfraxy.local/user/${encodeURIComponent(owner)}?limit=${limit}`);
+  const cacheKey = new Request(
+    `https://cache.bbfraxy.local/user/${encodeURIComponent(owner)}?limit=${limit}`,
+  );
   const cached = await caches.default.match(cacheKey);
   if (cached) return withCors(cached);
 
-  const apiUrl = `${GITHUB_API}/users/${encodeURIComponent(owner)}/repos?type=public&sort=updated&per_page=${limit}`;
+  const apiUrl =
+    `${GITHUB_API}/users/${encodeURIComponent(owner)}/repos` +
+    `?type=public&sort=updated&per_page=${limit}`;
   const response = await githubFetch(apiUrl, env);
 
   if (response.status === 404) {
-    return json({ error: `GitHub user “${owner}” was not found.`, code: "USER_NOT_FOUND" }, 404);
-  }
-
-  if (response.status === 403 || response.status === 429) {
-    const stale = await findStaleCache(cacheKey);
-    if (stale) return withCors(stale);
-    return proxyGithubError(response, "Could not load public repositories.");
+    return json(
+      {
+        error: `GitHub user “${owner}” was not found.`,
+        code: "USER_NOT_FOUND",
+      },
+      404,
+    );
   }
 
   if (!response.ok) {
@@ -97,41 +124,44 @@ async function handleRepoTree(owner, repo, env, ctx) {
     return json({ error: "Invalid GitHub repository name." }, 400);
   }
 
-  const cacheKey = new Request(`https://cache.bbfraxy.local/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/tree`);
+  const cacheKey = new Request(
+    `https://cache.bbfraxy.local/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/tree`,
+  );
   const cached = await caches.default.match(cacheKey);
   if (cached) return withCors(cached);
 
-  const repositoryResponse = await githubFetch(`${GITHUB_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`, env);
+  const repositoryResponse = await githubFetch(
+    `${GITHUB_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+    env,
+  );
 
   if (repositoryResponse.status === 404) {
     return json({ error: "Repository was not found.", code: "REPO_NOT_FOUND" }, 404);
   }
 
-  if (repositoryResponse.status === 403 || repositoryResponse.status === 429) {
-    const stale = await findStaleCache(cacheKey);
-    if (stale) return withCors(stale);
-    return proxyGithubError(repositoryResponse, "Could not load repository metadata.");
-  }
-
   if (!repositoryResponse.ok) {
-    return proxyGithubError(repositoryResponse, "Could not load repository metadata.");
+    return proxyGithubError(
+      repositoryResponse,
+      "Could not load repository metadata.",
+    );
   }
 
   const repository = await repositoryResponse.json();
   const branch = repository.default_branch || "main";
-  const treeResponse = await githubFetch(`${GITHUB_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`, env);
+
+  const treeResponse = await githubFetch(
+    `${GITHUB_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
+    env,
+  );
 
   if (treeResponse.status === 404 && branch !== "master") {
-    const fallbackResponse = await githubFetch(`${GITHUB_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/master?recursive=1`, env);
+    const fallbackResponse = await githubFetch(
+      `${GITHUB_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/master?recursive=1`,
+      env,
+    );
     if (fallbackResponse.ok) {
       return cacheTreeResponse(owner, repo, "master", fallbackResponse, ctx, cacheKey);
     }
-  }
-
-  if (treeResponse.status === 403 || treeResponse.status === 429) {
-    const stale = await findStaleCache(cacheKey);
-    if (stale) return withCors(stale);
-    return proxyGithubError(treeResponse, "Could not load the repository tree.");
   }
 
   if (!treeResponse.ok) {
@@ -139,6 +169,73 @@ async function handleRepoTree(owner, repo, env, ctx) {
   }
 
   return cacheTreeResponse(owner, repo, branch, treeResponse, ctx, cacheKey);
+}
+
+async function handleRepoFile(owner, repo, path, branch, env, ctx) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000) {
+    return json({ error: "Invalid GitHub file path." }, 400);
+  }
+
+  const normalizedBranch = isSafeRef(branch) ? branch : "main";
+  const cacheKey = new Request(
+    `https://cache.bbfraxy.local/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/file/${encodeURIComponent(normalizedBranch)}/${path}`,
+  );
+  const cached = await caches.default.match(cacheKey);
+  if (cached) return withCors(cached);
+
+  const apiUrl =
+    `${GITHUB_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/` +
+    path.split("/").map(encodeURIComponent).join("/") +
+    `?ref=${encodeURIComponent(normalizedBranch)}`;
+
+  const response = await githubFetch(apiUrl, env);
+
+  if (response.status === 404) {
+    return json({ error: "File was not found.", code: "FILE_NOT_FOUND" }, 404);
+  }
+
+  if (!response.ok) {
+    return proxyGithubError(response, "Could not load the file preview.");
+  }
+
+  const payload = await response.json();
+  if (Array.isArray(payload) || payload.type !== "file") {
+    return json({ error: "The selected path is not a file.", code: "NOT_A_FILE" }, 400);
+  }
+
+  const size = Number(payload.size || 0);
+  if (size > MAX_FILE_BYTES) {
+    return json(
+      {
+        error: "File is too large for preview.",
+        code: "FILE_TOO_LARGE",
+        size,
+        maxSize: MAX_FILE_BYTES,
+      },
+      413,
+    );
+  }
+
+  if (payload.encoding !== "base64" || typeof payload.content !== "string") {
+    return json({ error: "GitHub did not return previewable text content.", code: "UNSUPPORTED_CONTENT" }, 415);
+  }
+
+  let text;
+  try {
+    text = decodeBase64Utf8(payload.content);
+  } catch {
+    return json({ error: "File content could not be decoded.", code: "DECODE_FAILED" }, 500);
+  }
+
+  const result = jsonResponse(
+    JSON.stringify({ owner, repo, branch: normalizedBranch, path, size, text }),
+    200,
+    {
+      "cache-control": `public, max-age=60, s-maxage=${FILE_CACHE_TTL}, stale-while-revalidate=86400`,
+    },
+  );
+  ctx.waitUntil(caches.default.put(cacheKey, result.clone()));
+  return result;
 }
 
 async function cacheTreeResponse(owner, repo, branch, response, ctx, cacheKey) {
@@ -158,10 +255,6 @@ async function cacheTreeResponse(owner, repo, branch, response, ctx, cacheKey) {
   });
   ctx.waitUntil(caches.default.put(cacheKey, result.clone()));
   return result;
-}
-
-async function findStaleCache(cacheKey) {
-  return caches.default.match(cacheKey);
 }
 
 async function githubFetch(url, env) {
@@ -195,16 +288,22 @@ function normalizeRepository(repo) {
 
 function proxyGithubError(response, fallback) {
   if (response.status === 403 || response.status === 429) {
-    return json({
-      error: "GitHub temporarily rate-limited the Simplifier. Please try again later.",
-      code: "GITHUB_RATE_LIMIT",
-    }, 429);
+    return json(
+      {
+        error: "GitHub temporarily rate-limited the Simplifier. Please try again later.",
+        code: "GITHUB_RATE_LIMIT",
+      },
+      429,
+    );
   }
 
-  return json({
-    error: fallback,
-    code: `GITHUB_${response.status}`,
-  }, response.status >= 500 ? 502 : response.status);
+  return json(
+    {
+      error: fallback,
+      code: `GITHUB_${response.status}`,
+    },
+    response.status >= 500 ? 502 : response.status,
+  );
 }
 
 function json(data, status = 200, extraHeaders = {}) {
@@ -246,6 +345,17 @@ function corsHeaders() {
 
 function isSafeGithubName(value) {
   return /^[A-Za-z0-9_.-]+$/.test(value) && value.length <= 100;
+}
+
+function isSafeRef(value) {
+  return /^[A-Za-z0-9._\/-]+$/.test(value) && value.length <= 200;
+}
+
+function decodeBase64Utf8(value) {
+  const normalized = value.replace(/\s+/g, "");
+  const binary = atob(normalized);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder("utf-8", { fatal: false }).decode(bytes);
 }
 
 function clampNumber(value, fallback, min, max) {
