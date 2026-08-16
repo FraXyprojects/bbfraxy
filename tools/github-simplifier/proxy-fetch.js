@@ -113,6 +113,14 @@
         siteMenu.classList.toggle('is-open', !open);
       });
     }
+
+    if (!document.querySelector('script[data-bbfraxy-file-analysis-bridge]')) {
+      const script = document.createElement('script');
+      script.src = './file-analysis-bridge.js';
+      script.defer = true;
+      script.dataset.bbfraxyFileAnalysisBridge = 'true';
+      document.head.append(script);
+    }
   };
 
   if (document.readyState === 'loading') {
