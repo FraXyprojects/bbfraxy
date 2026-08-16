@@ -1,122 +1,88 @@
-// Compatibility loader for the standalone Simplifier header markup.
-// The analyzer talks directly to the BBFRAXY Cloudflare Worker.
-// Preview and experimental recovery modules are intentionally not loaded here.
 (() => {
-  const load = () => {
-    if (!document.getElementById('bbfraxy-simplifier-header-fix')) {
-      const style = document.createElement('style');
-      style.id = 'bbfraxy-simplifier-header-fix';
-      style.textContent = `
-        .site-header-inner {
-          display: flex;
-          width: min(100%, 980px);
-          min-height: 58px;
-          align-items: center;
-          justify-content: space-between;
-          gap: 18px;
-          padding: 8px;
-          border: 1px solid var(--border);
-          border-radius: var(--radius);
-          background: color-mix(in srgb, var(--surface) 86%, transparent);
-          box-shadow: 0 18px 50px var(--shadow), 0 0 36px rgba(95, 231, 255, 0.06);
-          -webkit-backdrop-filter: blur(18px);
-          backdrop-filter: blur(18px);
-        }
-        .site-menu {
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          gap: 16px;
-        }
-        .site-menu > a {
-          display: inline-flex;
-          min-height: 42px;
-          align-items: center;
-          border-radius: var(--radius);
-          padding: 0 13px;
-          color: var(--muted);
-          font-size: .93rem;
-          transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
-        }
-        .site-menu > a:hover,
-        .site-menu > a:focus-visible {
-          color: var(--text);
-          background: rgba(95, 231, 255, .08);
-          box-shadow: 0 0 18px rgba(95, 231, 255, .08);
-        }
-        .site-menu-divider { display: none; }
-        .site-menu-socials,
-        .site-menu-socials#social-links {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-        .site-menu-socials .social-link,
-        #social-links .social-link {
-          width: 42px;
-          height: 42px;
-          margin: 0;
-        }
-        .site-menu .theme-toggle {
-          display: inline-grid;
-          width: 42px;
-          height: 42px;
-          place-items: center;
-          border: 1px solid transparent;
-          border-radius: var(--radius);
-          color: var(--muted);
-          background: transparent;
-          cursor: pointer;
-        }
-        .site-menu .theme-toggle:hover,
-        .site-menu .theme-toggle:focus-visible {
-          color: var(--accent-strong);
-          border-color: var(--border-strong);
-          background: rgba(95, 231, 255, .08);
-          box-shadow: 0 0 22px var(--glow);
-        }
-        @media (max-width: 760px) {
-          .site-header-inner { width: min(100%, 980px); }
-          .site-menu {
-            display: none;
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            left: 0;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 4px;
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--surface-strong);
-            box-shadow: 0 18px 50px var(--shadow);
-            -webkit-backdrop-filter: blur(18px);
-            backdrop-filter: blur(18px);
-          }
-          .site-menu.is-open { display: flex; }
-          .site-menu > a { justify-content: flex-start; }
-          .site-menu-socials { justify-content: flex-start; }
-        }
-      `;
-      document.head.append(style);
-    }
+  const originalFetch = window.fetch.bind(window);
+  const githubApiBase = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/github";
+  const rawProxyBase = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
+  const githubApiPrefix = "https://api.github.com";
+  const rawGithubPrefix = "https://raw.githubusercontent.com";
 
-    const menuToggle = document.querySelector('.menu-toggle');
-    const siteMenu = document.querySelector('.site-menu');
-    if (menuToggle && siteMenu && !menuToggle.dataset.headerFixBound) {
-      menuToggle.dataset.headerFixBound = 'true';
-      menuToggle.addEventListener('click', () => {
-        const open = menuToggle.getAttribute('aria-expanded') === 'true';
-        menuToggle.setAttribute('aria-expanded', String(!open));
-        siteMenu.classList.toggle('is-open', !open);
+  window.fetch = async (input, init) => {
+    const requestUrl = input instanceof Request ? input.url : String(input);
+
+    if (requestUrl.startsWith(rawGithubPrefix)) {
+      const url = new URL(requestUrl);
+      const rawPath = url.pathname.replace(/^\//, "");
+      return originalFetch(`${rawProxyBase}/${rawPath}${url.search}`, {
+        method: "GET",
+        headers: { Accept: "*/*" },
+        cache: "no-store",
       });
     }
+
+    if (!requestUrl.startsWith(githubApiPrefix)) {
+      return originalFetch(input, init);
+    }
+
+    const url = new URL(requestUrl);
+
+    if (url.pathname.startsWith("/users/") && url.pathname.endsWith("/repos")) {
+      const owner = decodeURIComponent(url.pathname.split("/")[2] || "");
+      const limit = url.searchParams.get("per_page") || "100";
+      const response = await originalFetch(
+        `${githubApiBase}/user/${encodeURIComponent(owner)}/repos?limit=${encodeURIComponent(limit)}&_=${Date.now()}`,
+        { method: "GET", headers: { Accept: "application/json" }, cache: "no-store" },
+      );
+
+      if (!response.ok) return response;
+      const payload = await response.json();
+      const repositories = Array.isArray(payload) ? payload : payload.repositories;
+      return new Response(JSON.stringify(Array.isArray(repositories) ? repositories : []), {
+        status: 200,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
+
+    const treeMatch = url.pathname.match(/^\/repos\/([^/]+)\/([^/]+)\/git\/trees\/([^/]+)$/);
+    if (treeMatch) {
+      const owner = decodeURIComponent(treeMatch[1]);
+      const repo = decodeURIComponent(treeMatch[2]);
+      const response = await originalFetch(
+        `${githubApiBase}/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/tree?_=${Date.now()}`,
+        { method: "GET", headers: { Accept: "application/json" }, cache: "no-store" },
+      );
+
+      if (!response.ok) return response;
+      const payload = await response.json();
+      return new Response(JSON.stringify({
+        tree: payload.tree || [],
+        truncated: Boolean(payload.truncated),
+        branch: payload.branch,
+      }), {
+        status: 200,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
+
+    return new Response(JSON.stringify({
+      error: "This GitHub API operation is not exposed by the Simplifier proxy.",
+      code: "UNSUPPORTED_GITHUB_OPERATION",
+    }), {
+      status: 501,
+      headers: { "content-type": "application/json; charset=utf-8" },
+    });
+  };
+
+  const loadLegacyAnalyzer = () => {
+    if (document.querySelector('script[data-bbfraxy-legacy-analyzer]')) return;
+    const script = document.createElement('script');
+    script.src = './analyzer-legacy.js';
+    script.defer = true;
+    script.dataset.bbfraxyLegacyAnalyzer = 'true';
+    document.head.append(script);
   };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', load, { once: true });
+    document.addEventListener('DOMContentLoaded', loadLegacyAnalyzer, { once: true });
   } else {
-    load();
+    loadLegacyAnalyzer();
   }
 })();
