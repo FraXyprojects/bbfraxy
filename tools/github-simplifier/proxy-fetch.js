@@ -14,6 +14,7 @@
       return originalFetch(`${rawProxyBase}/${rawPath}${url.search}`, {
         method: "GET",
         headers: { Accept: "*/*" },
+        cache: "no-store",
       });
     }
 
@@ -26,20 +27,41 @@
     if (url.pathname.startsWith("/users/") && url.pathname.endsWith("/repos")) {
       const owner = decodeURIComponent(url.pathname.split("/")[2] || "");
       const limit = url.searchParams.get("per_page") || "100";
-      return originalFetch(
-        `${githubApiBase}/user/${encodeURIComponent(owner)}/repos?limit=${encodeURIComponent(limit)}`,
-        { method: "GET", headers: { Accept: "application/json" } },
+      const response = await originalFetch(
+        `${githubApiBase}/user/${encodeURIComponent(owner)}/repos?limit=${encodeURIComponent(limit)}&_=${Date.now()}`,
+        { method: "GET", headers: { Accept: "application/json" }, cache: "no-store" },
       );
+
+      if (!response.ok) return response;
+
+      const payload = await response.json();
+      const repositories = Array.isArray(payload) ? payload : payload.repositories;
+      return new Response(JSON.stringify(Array.isArray(repositories) ? repositories : []), {
+        status: 200,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
     }
 
     const treeMatch = url.pathname.match(/^\/repos\/([^/]+)\/([^/]+)\/git\/trees\/([^/]+)$/);
     if (treeMatch) {
       const owner = decodeURIComponent(treeMatch[1]);
       const repo = decodeURIComponent(treeMatch[2]);
-      return originalFetch(
-        `${githubApiBase}/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/tree`,
-        { method: "GET", headers: { Accept: "application/json" } },
+      const response = await originalFetch(
+        `${githubApiBase}/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/tree?_=${Date.now()}`,
+        { method: "GET", headers: { Accept: "application/json" }, cache: "no-store" },
       );
+
+      if (!response.ok) return response;
+
+      const payload = await response.json();
+      return new Response(JSON.stringify({
+        tree: payload.tree || [],
+        truncated: Boolean(payload.truncated),
+        branch: payload.branch,
+      }), {
+        status: 200,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
     }
 
     return new Response(
