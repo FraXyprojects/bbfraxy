@@ -7,6 +7,7 @@ const apiBase = "https://api.github.com";
 const MAX_TREE_ITEMS = 700;
 const MAX_PREVIEW_BYTES = 180000;
 const CACHE_KEY = "bbfraxy.github-simplifier.v2";
+const REPOSITORY_LIST_LIMIT = 100;
 let activeRepository = null;
 let activeTree = [];
 
@@ -26,15 +27,35 @@ form?.addEventListener("submit", async (event) => {
   setLoading(true);
 
   try {
-    // V2.1 deliberately avoids the repository metadata, languages and branch
-    // endpoints. The recursive tree is the main API request; README and file
-    // previews use raw.githubusercontent.com instead and do not consume the
-    // GitHub REST API quota.
-    const treeResponse = await fetchRepositoryTree(parsed.owner, parsed.repo);
-    const tree = Array.isArray(treeResponse.tree) ? treeResponse.tree.slice(0, MAX_TREE_ITEMS) : [];
+    if (!parsed.repo) {
+      const repositories = await fetchUserRepositories(parsed.owner);
+      if (!repositories.length) {
+        throw new Error(`No public repositories were found for ${parsed.owner}.`);
+      }
+      renderRepositoryPicker({ owner: parsed.owner, repositories, message: `Select a repository from ${parsed.owner}.` });
+      return;
+    }
+
+    const treeResult = await fetchRepositoryTree(parsed.owner, parsed.repo);
+
+    if (!treeResult) {
+      const repositories = await fetchUserRepositories(parsed.owner);
+      if (repositories.length) {
+        renderRepositoryPicker({
+          owner: parsed.owner,
+          repositories,
+          message: `Repository “${parsed.repo}” was not found. Here are the public repositories for ${parsed.owner}.`,
+        });
+        return;
+      }
+
+      throw new Error("Repository was not found. Make sure the repository is public and the URL is correct.");
+    }
+
+    const tree = Array.isArray(treeResult.tree) ? treeResult.tree.slice(0, MAX_TREE_ITEMS) : [];
     if (!tree.length) throw new Error("GitHub returned an empty repository tree.");
 
-    const branch = treeResponse.branch;
+    const branch = treeResult.branch;
     const repository = {
       owner: parsed.owner,
       repo: parsed.repo,
@@ -50,7 +71,7 @@ form?.addEventListener("submit", async (event) => {
     activeRepository = repository;
     activeTree = tree;
 
-    const analysis = { repository, readmeText, languages, tree, truncated: Boolean(treeResponse.truncated) };
+    const analysis = { repository, readmeText, languages, tree, truncated: Boolean(treeResult.truncated) };
     saveCachedAnalysis(input.value.trim(), analysis);
     renderAnalysis(analysis);
   } catch (error) {
@@ -78,8 +99,22 @@ function installLayoutGuard() {
     .important-summary-chevron { flex: 0 0 auto; color: var(--faint); font-size: 1.1rem; transition: transform 160ms ease; }
     .important-panel[open] .important-summary-chevron { transform: rotate(90deg); }
     .important-list { margin-top: 15px; }
+    .repository-picker { display: grid; gap: 10px; margin-top: 2px; }
+    .repository-picker-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 2px; }
+    .repository-picker-message { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+    .repository-picker-count { color: var(--faint); font-size: .7rem; white-space: nowrap; }
+    .repository-option { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; width: 100%; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 13px 14px; color: var(--muted); background: rgba(255,255,255,.025); text-align: left; cursor: pointer; transition: border-color 160ms ease, background 160ms ease, transform 160ms ease; }
+    .repository-option:hover, .repository-option:focus-visible { border-color: var(--border-strong); background: rgba(95,231,255,.045); color: var(--text); transform: translateY(-1px); outline: none; }
+    .repository-option-main { min-width: 0; display: grid; gap: 4px; }
+    .repository-option-name { overflow: hidden; color: var(--text); font-size: .85rem; font-weight: 720; text-overflow: ellipsis; white-space: nowrap; }
+    .repository-option-description { overflow: hidden; color: var(--faint); font-size: .7rem; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+    .repository-option-meta { display: flex; align-items: center; gap: 9px; align-self: center; color: var(--faint); font-size: .66rem; white-space: nowrap; }
+    .repository-option-action { color: var(--accent-strong); font-weight: 720; }
+    .repository-option-language { border: 1px solid var(--border); border-radius: 999px; padding: 3px 7px; }
     @media (max-width: 620px) {
       .important-summary { align-items: flex-start; }
+      .repository-option { grid-template-columns: 1fr; }
+      .repository-option-meta { justify-content: space-between; }
     }
   `;
   document.head.append(style);
@@ -89,11 +124,10 @@ function parseRepositoryUrl(value) {
   try {
     const url = new URL(value.trim());
     if (url.hostname.toLowerCase() !== "github.com") return null;
-    const parts = url.pathname.split("/").filter(Boolean);
-    if (parts.length < 2) return null;
-    const owner = parts[0];
-    const repo = parts[1].replace(/\.git$/, "");
-    return owner && repo ? { owner, repo } : null;
+    const parts = url.pathname.split("/").filter(Boolean).map((part) => decodeURIComponent(part));
+    if (!parts.length) return null;
+    if (parts.length === 1) return { owner: parts[0], repo: null };
+    return { owner: parts[0], repo: parts[1].replace(/\.git$/, "") };
   } catch {
     return null;
   }
@@ -101,7 +135,6 @@ function parseRepositoryUrl(value) {
 
 async function fetchRepositoryTree(owner, repo) {
   const branches = ["main", "master"];
-  let lastStatus = null;
 
   for (const branch of branches) {
     const response = await fetch(`${apiBase}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`, {
@@ -113,17 +146,80 @@ async function fetchRepositoryTree(owner, repo) {
       return { ...data, branch };
     }
 
-    lastStatus = response.status;
     if (response.status === 403) {
-      throw new Error("GitHub API rate limit reached. Try again later. The analyzer now uses only one REST request for the repository scan.");
+      throw new Error("GitHub API rate limit reached. Try again later.");
     }
-    if (response.status !== 404) break;
+
+    if (response.status !== 404) {
+      throw new Error(`GitHub returned an error (${response.status}). Please try again.`);
+    }
   }
 
-  if (lastStatus === 404) {
-    throw new Error("Repository or default branch was not found. Make sure the repository is public and uses a main or master branch.");
+  return null;
+}
+
+async function fetchUserRepositories(owner) {
+  const response = await fetch(`${apiBase}/users/${encodeURIComponent(owner)}/repos?type=public&sort=updated&per_page=${REPOSITORY_LIST_LIMIT}`, {
+    headers: { Accept: "application/vnd.github+json" },
+  });
+
+  if (response.ok) {
+    const repositories = await response.json();
+    return Array.isArray(repositories) ? repositories : [];
   }
-  throw new Error(`GitHub returned an error (${lastStatus || "unknown"}). Please try again.`);
+
+  if (response.status === 403) throw new Error("GitHub API rate limit reached. Try again later.");
+  if (response.status === 404) throw new Error(`GitHub user “${owner}” was not found.`);
+  throw new Error(`GitHub returned an error (${response.status}). Please try again.`);
+}
+
+function renderRepositoryPicker({ owner, repositories, message }) {
+  document.querySelector(".analysis-result")?.remove();
+  document.querySelector(".analysis-message")?.remove();
+
+  const result = document.createElement("section");
+  result.className = "analysis-result repository-picker-result";
+  result.setAttribute("aria-live", "polite");
+  result.innerHTML = `
+    <article class="analysis-panel">
+      <div class="repository-picker-head">
+        <div>
+          <span class="analysis-label">Repository selection</span>
+          <p class="repository-picker-message">${escapeHtml(message)}</p>
+        </div>
+        <span class="repository-picker-count">${repositories.length} public repos</span>
+      </div>
+      <div class="repository-picker" id="repository-picker"></div>
+    </article>
+  `;
+
+  card?.after(result);
+
+  const container = result.querySelector("#repository-picker");
+  repositories.forEach((repo) => {
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = "repository-option";
+    option.innerHTML = `
+      <span class="repository-option-main">
+        <span class="repository-option-name">${escapeHtml(repo.name)}</span>
+        <span class="repository-option-description">${escapeHtml(repo.description || "No description available.")}</span>
+      </span>
+      <span class="repository-option-meta">
+        ${repo.language ? `<span class="repository-option-language">${escapeHtml(repo.language)}</span>` : ""}
+        <span>★ ${formatNumber(repo.stargazers_count)}</span>
+        <span class="repository-option-action">Analyze →</span>
+      </span>
+    `;
+    option.addEventListener("click", () => {
+      input.value = repo.html_url;
+      result.remove();
+      form?.requestSubmit();
+    });
+    container?.append(option);
+  });
+
+  safeScrollTo(result);
 }
 
 async function fetchReadme(owner, repo, branch) {
@@ -134,7 +230,7 @@ async function fetchReadme(owner, repo, branch) {
       const response = await fetch(url, { cache: "no-store" });
       if (response.ok) return cleanReadme(await response.text());
     } catch {
-      // README is optional. Keep the analyzer useful if raw content is unavailable.
+      // README is optional.
     }
   }
   return "";
@@ -328,84 +424,83 @@ function classifyEditability(path) {
   if (["package-lock.json", "pnpm-lock.yaml", "yarn.lock", "composer.lock", "cargo.lock"].includes(base)) return { badge: "Caution", className: "edit-caution", explanation: "Lockfiles represent dependency state. Prefer changing the dependency definition instead." };
   if (/\.(json|yaml|yml|toml)$/.test(base)) return { badge: "Likely safe", className: "edit-safe", explanation: "Structured configuration or metadata is often editable, but the exact effect depends on the project." };
   if (/\.(css|scss|less|html|tsx|jsx|vue|svelte)$/.test(base)) return { badge: "Caution", className: "edit-caution", explanation: "This is likely user-facing code. It is editable, but changes can affect behavior or presentation." };
-  if (/\.(js|ts|py|cs|java|kt|cpp|c|rs|go)$/.test(base)) return { badge: "Core", className: "edit-core", explanation: "Core source code. It can be edited, but changes may alter application behavior." };
-  return { badge: "Unknown", className: "edit-unknown", explanation: "The analyzer cannot confidently classify this file." };
+  if (/\.(js|ts|py|cs|java|kt|rs|go|cpp|c|h|hpp)$/.test(base)) return { badge: "Caution", className: "edit-caution", explanation: "Source code is editable, but changes may alter program behavior or introduce errors." };
+  return { badge: "Unknown", className: "edit-unknown", explanation: "There is not enough evidence from the path alone to classify this file safely." };
 }
 
 async function previewFile(item) {
-  if (!item || item.type !== "blob" || !activeRepository) return;
-
   const panel = document.querySelector("#file-preview-panel");
   const title = document.querySelector("#preview-title");
   const actions = document.querySelector("#preview-actions");
   const editabilityCard = document.querySelector("#editability-card");
-  const code = document.querySelector("#code-preview");
-  if (!panel || !title || !actions || !editabilityCard || !code) return;
+  const preview = document.querySelector("#code-preview");
+  if (!panel || !title || !actions || !editabilityCard || !preview || !item || !activeRepository) return;
 
   panel.hidden = false;
   title.textContent = item.path;
-  actions.innerHTML = `<a class="preview-github" href="https://github.com/${encodeURIComponent(activeRepository.owner)}/${encodeURIComponent(activeRepository.repo)}/blob/${encodeURIComponent(activeRepository.branch)}/${item.path.split("/").map(encodeURIComponent).join("/")}" target="_blank" rel="noreferrer">Open on GitHub ↗</a>`;
+  actions.innerHTML = `<a class="preview-github" href="${escapeAttribute(`${activeRepository.html_url}/blob/${encodeURIComponent(activeRepository.branch)}/${item.path.split("/").map(encodeURIComponent).join("/")}`)}" target="_blank" rel="noreferrer">Open on GitHub ↗</a>`;
 
   const editability = classifyEditability(item.path);
   editabilityCard.innerHTML = `<span class="editability-dot ${editability.className}" aria-hidden="true"></span><div><b>${escapeHtml(editability.badge)}</b><p>${escapeHtml(editability.explanation)}</p></div>`;
-  code.innerHTML = `<div class="preview-loading">Loading ${escapeHtml(item.path)}…</div>`;
+  preview.innerHTML = `<div class="preview-loading">Loading file preview…</div>`;
   safeScrollTo(panel);
 
-  const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(activeRepository.owner)}/${encodeURIComponent(activeRepository.repo)}/${encodeURIComponent(activeRepository.branch)}/${item.path.split("/").map(encodeURIComponent).join("/")}`;
   try {
-    const response = await fetch(rawUrl, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Could not load this file (${response.status}).`);
-    const content = await response.text();
-    if (content.length > MAX_PREVIEW_BYTES) {
-      code.innerHTML = `<div class="preview-empty">This file is too large for an inline preview. Open it on GitHub instead.</div>`;
+    if (item.size > MAX_PREVIEW_BYTES) {
+      preview.innerHTML = `<div class="preview-empty">This file is too large for a browser preview (${formatBytes(item.size)}). Open it on GitHub instead.</div>`;
       return;
     }
-    const bytes = new Blob([content]).size;
-    code.innerHTML = `<div class="preview-meta">${escapeHtml(getLanguageLabel(item.path))} · ${formatBytes(bytes)}</div><pre>${escapeHtml(content)}</pre>`;
+
+    const url = `https://raw.githubusercontent.com/${encodeURIComponent(activeRepository.owner)}/${encodeURIComponent(activeRepository.repo)}/${encodeURIComponent(activeRepository.branch)}/${item.path.split("/").map(encodeURIComponent).join("/")}`;
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Preview could not be loaded (${response.status}).`);
+    const text = await response.text();
+
+    if (/\.(png|jpe?g|gif|webp|svg|ico|bmp)$/i.test(item.path)) {
+      preview.innerHTML = `<div class="preview-empty">Binary/image file. Open it on GitHub to view the original asset.</div>`;
+      return;
+    }
+
+    preview.innerHTML = `<div class="preview-meta">${escapeHtml(getFileType(item.path))} · ${formatBytes(item.size || text.length)}</div><pre><code>${escapeHtml(text)}</code></pre>`;
   } catch (error) {
-    code.innerHTML = `<div class="preview-empty">${escapeHtml(error instanceof Error ? error.message : "Unable to preview this file.")}</div>`;
+    preview.innerHTML = `<div class="preview-empty">${escapeHtml(error instanceof Error ? error.message : "Preview could not be loaded.")}</div>`;
   }
 }
 
 function detectLanguages(tree) {
   const counts = new Map();
   const extensions = {
-    cs: "C#", js: "JavaScript", jsx: "JavaScript", ts: "TypeScript", tsx: "TypeScript", py: "Python", java: "Java", kt: "Kotlin", cpp: "C++", c: "C", h: "C/C++", rs: "Rust", go: "Go", php: "PHP", rb: "Ruby", swift: "Swift", html: "HTML", css: "CSS", scss: "SCSS", vue: "Vue", svelte: "Svelte", json: "JSON", yaml: "YAML", yml: "YAML", md: "Markdown" };
-  tree.filter((item) => item.type === "blob").forEach((item) => {
-    const match = item.path.match(/\.([^.\/]+)$/);
-    const language = match ? extensions[match[1].toLowerCase()] : null;
-    if (language) counts.set(language, (counts.get(language) || 0) + (item.size || 1));
-  });
+    js: "JavaScript", mjs: "JavaScript", cjs: "JavaScript", ts: "TypeScript", tsx: "TypeScript", jsx: "JavaScript",
+    html: "HTML", css: "CSS", scss: "SCSS", less: "Less", py: "Python", cs: "C#", java: "Java", kt: "Kotlin",
+    rs: "Rust", go: "Go", cpp: "C++", c: "C", h: "C/C++", hpp: "C++", php: "PHP", rb: "Ruby", swift: "Swift",
+    json: "JSON", yaml: "YAML", yml: "YAML", toml: "TOML", xml: "XML", md: "Markdown"
+  };
+
+  for (const item of tree) {
+    if (item.type !== "blob") continue;
+    const match = item.path.toLowerCase().match(/\.([a-z0-9]+)$/);
+    const language = match ? extensions[match[1]] : null;
+    if (language) counts.set(language, (counts.get(language) || 0) + 1);
+  }
+
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([name]) => name);
 }
 
 function detectProjectType(tree, repository, languages) {
   const paths = tree.map((item) => item.path.toLowerCase());
-  const name = repository.name.toLowerCase();
-  if (paths.some((path) => path.endsWith("manifest.json")) && paths.some((path) => path.includes("plugins/"))) return "Game mod / plugin";
-  if (paths.some((path) => path.endsWith("package.json"))) return "JavaScript / web project";
-  if (paths.some((path) => path.endsWith(".csproj")) || languages.includes("C#")) return "C# project";
-  if (paths.some((path) => path.endsWith(".sln"))) return ".NET solution";
-  if (paths.some((path) => path.endsWith("requirements.txt")) || languages.includes("Python")) return "Python project";
-  if (paths.some((path) => path.endsWith("index.html")) && (languages.includes("HTML") || languages.includes("CSS"))) return "Web project";
-  if (name.includes("mod") || name.includes("plugin")) return "Mod / plugin project";
-  return languages[0] ? `${languages[0]} project` : "Software project";
-}
+  const description = `${repository.name} ${languages.join(" ")}`.toLowerCase();
+  const has = (name) => paths.some((path) => path === name || path.endsWith(`/${name}`));
 
-function cleanReadme(text) {
-  return text
-    .replace(/^\s*#.*$/gm, "")
-    .replace(/```[\s\S]*?```/g, "")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/[*_`>#~-]/g, "")
-    .replace(/\r/g, "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .slice(0, 5)
-    .join(" ")
-    .slice(0, 520);
+  if (has("manifest.json") && (has("package") || description.includes("mod"))) return "Game mod / plugin";
+  if (has("package.json") && (has("vite.config.js") || has("vite.config.ts") || has("next.config.js") || has("next.config.ts") || has("index.html"))) return "Web application";
+  if (has("pyproject.toml") || has("requirements.txt")) return "Python project";
+  if (has("cargo.toml")) return "Rust project";
+  if (has("go.mod")) return "Go project";
+  if (has("pom.xml") || has("build.gradle")) return "Java project";
+  if (languages.includes("C#")) return "C# / .NET project";
+  if (description.includes("game")) return "Game project";
+  if (description.includes("tool") || description.includes("utility")) return "Tool / utility";
+  return languages[0] ? `${languages[0]} project` : "Software project";
 }
 
 function sortTreeItems(a, b) {
@@ -413,52 +508,62 @@ function sortTreeItems(a, b) {
   return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
 }
 
-function getLanguageLabel(path) {
-  const ext = (path.split(".").pop() || "").toLowerCase();
-  const map = { cs: "C#", js: "JavaScript", ts: "TypeScript", jsx: "JavaScript", tsx: "TypeScript", json: "JSON", md: "Markdown", html: "HTML", css: "CSS", yaml: "YAML", yml: "YAML", py: "Python", java: "Java", rs: "Rust", cpp: "C++", c: "C", xml: "XML", ini: "INI", cfg: "Config" };
-  return map[ext] || (ext ? ext.toUpperCase() : "Text");
+function cleanReadme(text) {
+  return text
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/[*>_`~#]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 420);
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(value || 0);
 }
 
 function formatBytes(bytes) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function saveCachedAnalysis(url, analysis) {
-  try {
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ url, analysis, savedAt: Date.now() }));
-  } catch {
-    // Cache is an enhancement only.
+  if (!Number.isFinite(bytes) || bytes < 1024) return `${Math.max(0, Math.round(bytes || 0))} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let index = 0;
+  while (value >= 1024 && index < units.length - 1) {
+    value /= 1024;
+    index += 1;
   }
+  return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[index]}`;
 }
 
-function restoreCachedAnalysis() {
-  try {
-    const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
-    if (!cached?.analysis?.repository || !Array.isArray(cached.analysis.tree)) return;
-    if (input && cached.url) input.value = cached.url;
-    activeRepository = cached.analysis.repository;
-    activeTree = cached.analysis.tree;
-    renderAnalysis(cached.analysis);
-  } catch {
-    // Ignore invalid or unavailable session storage.
-  }
+function getFileType(path) {
+  const extension = path.split(".").pop()?.toLowerCase();
+  const map = { js: "JavaScript", mjs: "JavaScript", cjs: "JavaScript", ts: "TypeScript", jsx: "JSX", tsx: "TSX", html: "HTML", css: "CSS", scss: "SCSS", json: "JSON", md: "Markdown", yaml: "YAML", yml: "YAML", py: "Python", cs: "C#", java: "Java", kt: "Kotlin", rs: "Rust", go: "Go", cpp: "C++", c: "C", h: "C/C++ header", toml: "TOML", xml: "XML", ini: "INI", cfg: "Config" };
+  return map[extension] || "Text";
 }
 
-function setLoading(loading) {
+function escapeHtml(value) {
+  return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value);
+}
+
+function setLoading(isLoading) {
   if (!button) return;
-  button.disabled = loading;
-  button.textContent = loading ? "Analyzing…" : "Analyze";
+  button.disabled = isLoading;
+  button.textContent = isLoading ? "Analyzing…" : "Analyze";
+  input?.toggleAttribute("disabled", isLoading);
 }
 
-function showMessage(message) {
-  document.querySelector(".analysis-message")?.remove();
-  const result = document.querySelector(".analysis-result");
-  const element = document.createElement("div");
-  element.className = "analysis-message";
+function showMessage(message, type = "info") {
+  const existing = document.querySelector(".analysis-message");
+  existing?.remove();
+  const element = document.createElement("p");
+  element.className = `analysis-message ${type}`;
   element.textContent = message;
-  (result || card)?.after(element);
+  card?.after(element);
 }
 
 function safeScrollTo(element) {
@@ -468,14 +573,23 @@ function safeScrollTo(element) {
   }, 120);
 }
 
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
+function saveCachedAnalysis(url, analysis) {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ url, analysis, savedAt: Date.now() }));
+  } catch {
+    // Cache is optional.
+  }
 }
 
-function escapeAttribute(value) {
-  return escapeHtml(value).replace(/`/g, "&#96;");
-}
-
-function formatNumber(value) {
-  return new Intl.NumberFormat("en-US").format(Number(value) || 0);
+function restoreCachedAnalysis() {
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
+    if (!cached?.analysis || !cached?.url) return;
+    activeRepository = cached.analysis.repository;
+    activeTree = cached.analysis.tree || [];
+    if (input) input.value = cached.url;
+    renderAnalysis(cached.analysis);
+  } catch {
+    // Ignore malformed or unavailable cache.
+  }
 }
