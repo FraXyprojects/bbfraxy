@@ -111,6 +111,14 @@
         siteMenu.classList.toggle('is-open', !open);
       });
     }
+
+    if (!document.querySelector('script[data-bbfraxy-analyzer-recovery]')) {
+      const script = document.createElement('script');
+      script.src = './analyzer-recovery.js';
+      script.defer = true;
+      script.dataset.bbfraxyAnalyzerRecovery = 'true';
+      document.head.append(script);
+    }
   };
 
   if (document.readyState === 'loading') {
