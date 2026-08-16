@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="./css/result-overrides.css?v=3">
     <link rel="stylesheet" href="./css/landing-fix.css?v=3">
     <link rel="stylesheet" href="./css/progress-layout.css?v=1">
+    <link rel="stylesheet" href="./css/result-layout-fix.css?v=1">
 </head>
 <body>
     <div class="site-shell">
@@ -210,6 +211,15 @@
                         <p class="result-note" id="result-summary"></p>
                     </article>
 
+                    <div class="result-middle-actions download-exclude">
+                        <button class="btn" id="download-score-result" type="button">
+                            Stáhnout výsledek
+                        </button>
+                        <button class="btn secondary" id="restart-competition" type="button">
+                            Hrát znovu
+                        </button>
+                    </div>
+
                     <article class="question-history-card" id="question-history-card">
                         <div class="eyebrow">FRAXY // REVIEW</div>
                         <h2>Přehled otázek</h2>
@@ -222,10 +232,7 @@
 
                 <div class="result-actions download-exclude">
                     <button class="btn" id="download-result" type="button">
-                        Stáhnout výsledek
-                    </button>
-                    <button class="btn secondary" id="restart-competition" type="button">
-                        Hrát znovu
+                        Stáhnout mé odpovědi
                     </button>
                 </div>
             </section>
@@ -277,5 +284,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="/assets/js/main.js" defer></script>
     <script type="module" src="./js/app.js?v=9"></script>
+    <script type="module" src="./js/result-downloads.js?v=1"></script>
 </body>
 </html>
