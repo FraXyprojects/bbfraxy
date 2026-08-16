@@ -15,7 +15,7 @@ export default {
     const url = new URL(request.url);
 
     if (request.method !== "GET" && request.method !== "OPTIONS") {
-      return json({ error: "Method not allowed." }, 405, { "allow": "GET, OPTIONS" });
+      return json({ error: "Method not allowed." }, 405, { allow: "GET, OPTIONS" });
     }
 
     if (request.method === "OPTIONS") {
@@ -67,6 +67,12 @@ async function handleUserRepos(owner, limit, env, ctx) {
     return json({ error: `GitHub user “${owner}” was not found.`, code: "USER_NOT_FOUND" }, 404);
   }
 
+  if (response.status === 403 || response.status === 429) {
+    const stale = await findStaleCache(cacheKey);
+    if (stale) return withCors(stale);
+    return proxyGithubError(response, "Could not load public repositories.");
+  }
+
   if (!response.ok) {
     return proxyGithubError(response, "Could not load public repositories.");
   }
@@ -101,6 +107,12 @@ async function handleRepoTree(owner, repo, env, ctx) {
     return json({ error: "Repository was not found.", code: "REPO_NOT_FOUND" }, 404);
   }
 
+  if (repositoryResponse.status === 403 || repositoryResponse.status === 429) {
+    const stale = await findStaleCache(cacheKey);
+    if (stale) return withCors(stale);
+    return proxyGithubError(repositoryResponse, "Could not load repository metadata.");
+  }
+
   if (!repositoryResponse.ok) {
     return proxyGithubError(repositoryResponse, "Could not load repository metadata.");
   }
@@ -114,6 +126,12 @@ async function handleRepoTree(owner, repo, env, ctx) {
     if (fallbackResponse.ok) {
       return cacheTreeResponse(owner, repo, "master", fallbackResponse, ctx, cacheKey);
     }
+  }
+
+  if (treeResponse.status === 403 || treeResponse.status === 429) {
+    const stale = await findStaleCache(cacheKey);
+    if (stale) return withCors(stale);
+    return proxyGithubError(treeResponse, "Could not load the repository tree.");
   }
 
   if (!treeResponse.ok) {
@@ -140,6 +158,10 @@ async function cacheTreeResponse(owner, repo, branch, response, ctx, cacheKey) {
   });
   ctx.waitUntil(caches.default.put(cacheKey, result.clone()));
   return result;
+}
+
+async function findStaleCache(cacheKey) {
+  return caches.default.match(cacheKey);
 }
 
 async function githubFetch(url, env) {
