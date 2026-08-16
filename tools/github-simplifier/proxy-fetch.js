@@ -12,55 +12,41 @@
 
     const url = new URL(requestUrl);
 
+    // Repository list: /users/:owner/repos
     if (url.pathname.startsWith("/users/") && url.pathname.endsWith("/repos")) {
       const owner = decodeURIComponent(url.pathname.split("/")[2] || "");
       const limit = url.searchParams.get("per_page") || "100";
-      const response = await originalFetch(
+      return originalFetch(
         `${proxyBase}/user/${encodeURIComponent(owner)}/repos?limit=${encodeURIComponent(limit)}`,
-        {
-          method: "GET",
-          headers: { Accept: "application/json" },
-        },
+        { method: "GET", headers: { Accept: "application/json" } },
       );
-
-      if (!response.ok) {
-        return response;
-      }
-
-      const payload = await response.json();
-      return new Response(JSON.stringify(payload.repositories || []), {
-        status: 200,
-        headers: { "content-type": "application/json; charset=utf-8" },
-      });
     }
 
-    const treeMatch = url.pathname.match(/^\/repos\/([^/]+)\/([^/]+)\/git\/trees\/([^/]+)$/);
+    // Deep repository tree: /repos/:owner/:repo/git/trees/:branch
+    const treeMatch = url.pathname.match(
+      /^\/repos\/([^/]+)\/([^/]+)\/git\/trees\/([^/]+)$/,
+    );
 
     if (treeMatch) {
       const owner = decodeURIComponent(treeMatch[1]);
       const repo = decodeURIComponent(treeMatch[2]);
-      const response = await originalFetch(
+      return originalFetch(
         `${proxyBase}/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/tree`,
-        {
-          method: "GET",
-          headers: { Accept: "application/json" },
-        },
+        { method: "GET", headers: { Accept: "application/json" } },
       );
-
-      if (!response.ok) {
-        return response;
-      }
-
-      const payload = await response.json();
-      return new Response(JSON.stringify({
-        tree: payload.tree || [],
-        truncated: Boolean(payload.truncated),
-      }), {
-        status: 200,
-        headers: { "content-type": "application/json; charset=utf-8" },
-      });
     }
 
-    return originalFetch(input, init);
+    // Keep unsupported GitHub API requests out of the analyzer's normal flow.
+    // The current Simplifier only needs the two routes above.
+    return new Response(
+      JSON.stringify({
+        error: "This GitHub API operation is not exposed by the Simplifier proxy.",
+        code: "UNSUPPORTED_GITHUB_OPERATION",
+      }),
+      {
+        status: 501,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      },
+    );
   };
 })();
