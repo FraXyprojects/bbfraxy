@@ -1,6 +1,9 @@
 (() => {
-  const root = document.documentElement;
+  const normalizePath = (path) => path.replace(/\/+$/, "") || "/";
   const currentPath = normalizePath(window.location.pathname);
+  const header = document.querySelector(".site-header");
+
+  if (!header) return;
 
   const navItems = [
     { key: "games", label: "Games", href: "/games/" },
@@ -9,12 +12,11 @@
     { key: "downloads", label: "Downloads", href: "/downloads/" },
   ];
 
-  const header = document.querySelector(".site-header");
-  if (!header) {
-    return;
-  }
-
-  const activeKey = getActiveSection(currentPath);
+  let activeKey = null;
+  if (currentPath === "/games" || currentPath.startsWith("/games/")) activeKey = "games";
+  else if (currentPath === "/tools" || currentPath.startsWith("/tools/")) activeKey = "tools";
+  else if (currentPath === "/projects" || currentPath.startsWith("/projects/")) activeKey = "projects";
+  else if (currentPath === "/downloads" || currentPath.startsWith("/downloads/")) activeKey = "downloads";
 
   header.innerHTML = `
     <nav class="navbar" aria-label="Primary navigation">
@@ -37,70 +39,4 @@
       </div>
     </nav>
   `;
-
-  const menuToggle = header.querySelector(".menu-toggle");
-  const navMenu = header.querySelector("#site-menu");
-  const themeToggle = header.querySelector(".theme-toggle");
-
-  if (themeToggle) {
-    syncThemeToggle(themeToggle);
-    themeToggle.addEventListener("click", () => {
-      const nextTheme = root.dataset.theme === "light" ? "dark" : "light";
-      root.dataset.theme = nextTheme;
-      try {
-        localStorage.setItem("bbfraxy-theme", nextTheme);
-      } catch {
-        // Ignore storage errors; the theme still changes for this page view.
-      }
-      syncThemeToggle(themeToggle);
-    });
-  }
-
-  if (menuToggle && navMenu) {
-    menuToggle.addEventListener("click", () => {
-      const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
-      menuToggle.setAttribute("aria-expanded", String(!isOpen));
-      menuToggle.setAttribute("aria-label", isOpen ? "Open navigation" : "Close navigation");
-      navMenu.classList.toggle("is-open", !isOpen);
-      root.classList.toggle("nav-open", !isOpen);
-    });
-
-    navMenu.addEventListener("click", (event) => {
-      if (event.target instanceof HTMLAnchorElement) {
-        closeNavigation(menuToggle, navMenu);
-      }
-    });
-
-    window.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        closeNavigation(menuToggle, navMenu);
-      }
-    });
-  }
-
-  function syncThemeToggle(button) {
-    const isLight = root.dataset.theme === "light";
-    button.setAttribute("aria-pressed", String(isLight));
-    button.setAttribute("aria-label", isLight ? "Switch to dark theme" : "Switch to light theme");
-  }
-
-  function closeNavigation(button, menu) {
-    button.setAttribute("aria-expanded", "false");
-    button.setAttribute("aria-label", "Open navigation");
-    menu.classList.remove("is-open");
-    root.classList.remove("nav-open");
-  }
-
-  function getActiveSection(path) {
-    if (path === "/games" || path.startsWith("/games/")) return "games";
-    if (path === "/tools" || path.startsWith("/tools/")) return "tools";
-    if (path === "/projects" || path.startsWith("/projects/")) return "projects";
-    if (path === "/downloads" || path.startsWith("/downloads/")) return "downloads";
-    return null;
-  }
-
-  function normalizePath(path) {
-    const normalized = path.replace(/\/+$/, "");
-    return normalized || "/";
-  }
 })();
