@@ -5,73 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="FraXy´s Trivia — BBFRAXY společenská trivia hra.">
     <title>BBFRAXY | FraXy´s Trivia</title>
-
     <link rel="stylesheet" href="/assets/css/styles.css">
     <link rel="stylesheet" href="./css/trivia.css">
 </head>
 <body>
     <div class="site-shell">
-        <header class="site-header">
-            <nav class="navbar" aria-label="Primary navigation">
-                <a class="brand" href="/" aria-label="BBFRAXY home">
-                    <span class="brand-mark">F</span>
-                    <span>BBFRAXY</span>
-                </a>
-
-                <button
-                    class="menu-toggle"
-                    type="button"
-                    aria-expanded="false"
-                    aria-controls="site-menu"
-                    aria-label="Open navigation"
-                >
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-
-                <div class="nav-menu" id="site-menu">
-                    <div class="nav-links">
-                        <a href="/games/" aria-current="page">Games</a>
-                        <a href="/tools">Tools</a>
-                        <a href="/projects">Projects</a>
-                        <a href="/downloads">Downloads</a>
-                    </div>
-
-                    <div class="nav-actions">
-                        <a
-                            class="icon-button"
-                            href="https://github.com/FraXyprojects"
-                            target="_blank"
-                            rel="noreferrer"
-                            aria-label="GitHub"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5-.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z" />
-                            </svg>
-                        </a>
-
-                        <button
-                            class="icon-button theme-toggle"
-                            type="button"
-                            aria-label="Switch theme"
-                            aria-pressed="false"
-                        >
-                            <span class="theme-icon" aria-hidden="true"></span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
-        </header>
+        <header class="site-header"></header>
 
         <main class="trivia-page">
             <section class="trivia-hero">
                 <div class="trivia-eyebrow">FRAXY // TRIVIA</div>
                 <h1>FraXy´s Trivia</h1>
-                <p>
-                    Projdi herní pole, odpovídej na otázky a dostaň se až do cíle.
-                    Každá chyba tě může vrátit o krok zpět.
-                </p>
+                <p>Projdi herní pole, odpovídej na otázky a dostaň se až do cíle. Každá chyba tě může vrátit o krok zpět.</p>
             </section>
 
             <section class="trivia-layout">
@@ -79,11 +24,8 @@
                     <div class="trivia-panel">
                         <div class="panel-label">GAME STATUS</div>
                         <div id="timer" class="timer">Čas: 0s</div>
-                        <p class="panel-note">
-                            Klikni na START a začni svou cestu.
-                        </p>
+                        <p class="panel-note">Klikni na START a začni svou cestu.</p>
                     </div>
-
                     <div class="trivia-panel trivia-rules">
                         <div class="panel-label">HOW IT WORKS</div>
                         <p>Správná odpověď tě posune vpřed.</p>
@@ -95,73 +37,32 @@
                 <section class="trivia-main-panel">
                     <div id="question-container" class="question-container">
                         <div class="panel-label">CURRENT QUESTION</div>
-                        <p id="question-text">
-                            Pro spuštění hry klikni na políčko START
-                        </p>
+                        <p id="question-text">Pro spuštění hry klikni na políčko START</p>
                         <div id="answer-buttons" class="answer-buttons" style="display: none;"></div>
                     </div>
-
                     <div class="board-shell">
                         <div class="board-header">
-                            <div>
-                                <div class="panel-label">GAME BOARD</div>
-                                <h2>Tvá cesta</h2>
-                            </div>
+                            <div><div class="panel-label">GAME BOARD</div><h2>Tvá cesta</h2></div>
                             <div class="board-status">START → CÍL</div>
                         </div>
-
                         <div id="game-board">
                             <div class="square start">START</div>
-
-                            <div class="square" data-theme="math">1</div>
-                            <div class="square" data-theme="math">2</div>
-                            <div class="square" data-theme="math">3</div>
-                            <div class="square" data-theme="math">4</div>
-                            <div class="square" data-theme="math">5</div>
-                            <div class="square" data-theme="math">6</div>
-                            <div class="square" data-theme="math">7</div>
-                            <div class="square" data-theme="math">8</div>
-                            <div class="square" data-theme="math">9</div>
-                            <div class="square" data-theme="math">10</div>
-                            <div class="square" data-theme="math">11</div>
-                            <div class="square" data-theme="math">12</div>
-
+                            <div class="square" data-theme="math">1</div><div class="square" data-theme="math">2</div><div class="square" data-theme="math">3</div><div class="square" data-theme="math">4</div><div class="square" data-theme="math">5</div><div class="square" data-theme="math">6</div><div class="square" data-theme="math">7</div><div class="square" data-theme="math">8</div><div class="square" data-theme="math">9</div><div class="square" data-theme="math">10</div><div class="square" data-theme="math">11</div><div class="square" data-theme="math">12</div>
                             <div class="square goal">CÍL</div>
                         </div>
                     </div>
-
                     <div id="result" class="result-card">
                         <div class="panel-label">FRAXY // RESULTS</div>
                         <p class="success">Vyhrál jsi!</p>
-
-                        <p class="details">
-                            Dokončil jsi kvíz s
-                            <span class="highlight" id="wrong-answers">0</span>
-                            špatnými odpověďmi.
-                            <br>
-                            Trvalo ti to
-                            <span class="highlight" id="completion-time">0</span>
-                            sekund.
-                        </p>
-
-                        <div id="result-buttons">
-                            <button class="btn btn-download">
-                                Stáhnout výsledek
-                            </button>
-                            <button class="btn btn-restart">
-                                Restartovat
-                            </button>
-                        </div>
+                        <p class="details">Dokončil jsi kvíz s <span class="highlight" id="wrong-answers">0</span> špatnými odpověďmi.<br>Trvalo ti to <span class="highlight" id="completion-time">0</span> sekund.</p>
+                        <div id="result-buttons"><button class="btn btn-download">Stáhnout výsledek</button><button class="btn btn-restart">Restartovat</button></div>
                     </div>
                 </section>
             </section>
         </main>
-
-        <footer class="site-footer">
-            <span>BBFRAXY</span>
-        </footer>
+        <footer class="site-footer"><span>BBFRAXY</span></footer>
     </div>
-
+    <script src="/assets/js/header.js" defer></script>
     <script src="/assets/js/main.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script type="module" src="./js/app.js"></script>
