@@ -3,17 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta
-        name="description"
-        content="FraXyho soutěž — tipovací hra po mapě Evropy."
-    >
+    <meta name="description" content="FraXyho soutěž — tipovací hra po mapě Evropy.">
     <title>BBFRAXY | FraXyho soutěž</title>
-
     <link rel="stylesheet" href="/assets/css/styles.css">
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-    >
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
     <link rel="stylesheet" href="./css/soutez.css?v=5">
     <link rel="stylesheet" href="./css/result-overrides.css?v=3">
     <link rel="stylesheet" href="./css/landing-fix.css?v=3">
@@ -22,266 +15,18 @@
 </head>
 <body>
     <div class="site-shell">
-        <header class="site-header">
-            <nav class="navbar" aria-label="Primary navigation">
-                <a class="brand" href="/" aria-label="BBFRAXY home">
-                    <span class="brand-mark">F</span>
-                    <span>BBFRAXY</span>
-                </a>
-
-                <button
-                    class="menu-toggle"
-                    type="button"
-                    aria-expanded="false"
-                    aria-controls="site-menu"
-                    aria-label="Open navigation"
-                >
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-
-                <div class="nav-menu" id="site-menu">
-                    <div class="nav-links">
-                        <a href="/games/" aria-current="page">Games</a>
-                        <a href="/tools">Tools</a>
-                        <a href="/projects">Projects</a>
-                        <a href="/downloads">Downloads</a>
-                    </div>
-
-                    <div class="nav-actions">
-                        <a
-                            class="icon-button"
-                            href="https://github.com/FraXyprojects"
-                            target="_blank"
-                            rel="noreferrer"
-                            aria-label="GitHub"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.6 2.5 3.3 1.8.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.6 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.5-.1-3 0 0 1-.3 3.1 1.2a10.7 10.7 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.4-2.7 5.3-5.3 5.6.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A11.3 11.3 0 0 0 12 .7Z" />
-                            </svg>
-                        </a>
-
-                        <button
-                            class="icon-button theme-toggle"
-                            type="button"
-                            aria-label="Switch theme"
-                            aria-pressed="false"
-                        >
-                            <span class="theme-icon" aria-hidden="true"></span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
-        </header>
-
+        <header class="site-header"></header>
         <main>
-            <section class="screen" id="welcome-screen">
-                <div class="hero">
-                    <div class="eyebrow">FRAXY // GUESSING GAME</div>
-                    <h1>FraXyho soutěž</h1>
-                    <p>
-                        Tipovací soutěž po mapě Evropy. Klikni na zemi, odhadni správné číslo
-                        a získej co nejvyšší skóre.
-                    </p>
-
-                    <div class="hero-actions">
-                        <button class="btn" id="start-rules" type="button">
-                            Začít soutěž →
-                        </button>
-                    </div>
-                </div>
-
-                <div class="info-grid">
-                    <article class="info-card">
-                        <h2>Jak to funguje?</h2>
-                        <p>
-                            Na mapě Evropy dostaneš otázky typu „Tipni si“. Čím blíž se trefíš
-                            ke skutečné hodnotě, tím vyšší skóre získáš.
-                        </p>
-                    </article>
-
-                    <article class="info-card">
-                        <h2>Hra na jeden průchod</h2>
-                        <p>
-                            Každou zemi lze zodpovědět jednou. Po zodpovězení všech otázek
-                            se zobrazí výsledné skóre.
-                        </p>
-                    </article>
-                </div>
-            </section>
-
-            <section class="screen hidden" id="rules-screen">
-                <div class="rules-grid">
-                    <article class="rules-card rules-copy">
-                        <div class="eyebrow">FRAXY // RULES</div>
-                        <h2>Vítej ve FraXyho soutěži.</h2>
-                        <p>
-                            Dostaneš sérii otázek „Tipni si“ ke každé evropské zemi.
-                            Tvým úkolem je přiblížit se co nejvíce skutečnosti.
-                        </p>
-
-                        <div class="rules-list">
-                            <div class="rules-item">
-                                <strong>1.</strong>
-                                <span>Vyber zemi na mapě.</span>
-                            </div>
-                            <div class="rules-item">
-                                <strong>2.</strong>
-                                <span>Zadej číselný odhad.</span>
-                            </div>
-                            <div class="rules-item">
-                                <strong>3.</strong>
-                                <span>Za každou zemi získáš až 100 bodů podle přesnosti.</span>
-                            </div>
-                            <div class="rules-item">
-                                <strong>4.</strong>
-                                <span>Po zodpovězení všech zemí uvidíš svůj celkový výsledek.</span>
-                            </div>
-                        </div>
-
-                        <div class="actions">
-                            <button class="btn" id="start-map" type="button">
-                                Otevřít mapu →
-                            </button>
-                            <a class="btn secondary" href="/games/">
-                                Zpět na Games
-                            </a>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <section id="map-screen" class="hidden">
-                <div class="game-shell">
-                    <div class="map-layout">
-                        <div class="map-panel">
-                            <div class="map-overlay" id="map-overlay">
-                                <div class="eyebrow">FRAXY // EUROPE</div>
-                                <h2>Tipni si.</h2>
-                                <p>
-                                    Klikni na bod na mapě a zkus co nejpřesněji odhadnout odpověď.
-                                </p>
-                            </div>
-                            <div id="map"></div>
-                        </div>
-
-                        <aside id="sidebar">
-                            <div class="sidebar-top">
-                                <div>
-                                    <div class="eyebrow">PROGRESS</div>
-                                    <h2>Zbývá zodpovědět</h2>
-                                </div>
-                                <button class="btn secondary" id="back-to-rules" type="button">
-                                    ← Zpět
-                                </button>
-                            </div>
-
-                            <div id="progress-label" class="note">
-                                0 / 0 zodpovězeno
-                            </div>
-                            <div class="progress" aria-hidden="true">
-                                <span id="progress-bar"></span>
-                            </div>
-
-                            <ul id="remaining-countries"></ul>
-
-                            <div class="sidebar-actions">
-                                <button
-                                    class="btn danger"
-                                    id="finish-early"
-                                    type="button"
-                                >
-                                    Ukončit a vyhodnotit
-                                </button>
-                            </div>
-                        </aside>
-                    </div>
-                </div>
-            </section>
-
-            <section class="screen result-screen hidden" id="result-screen">
-                <div id="result-export">
-                    <article class="result-card">
-                        <div class="eyebrow">FRAXY // RESULTS</div>
-                        <h2>Soutěž dokončena.</h2>
-                        <div class="result-score" id="total-score">0.00</div>
-                        <p class="result-note">bodů ze všech zodpovězených otázek</p>
-                        <p class="result-note" id="competition-duration">Trvání: —</p>
-                        <p class="result-note" id="result-summary"></p>
-                    </article>
-
-                    <div class="result-middle-actions download-exclude">
-                        <button class="btn" id="download-score-result" type="button">
-                            Stáhnout výsledek
-                        </button>
-                        <button class="btn secondary" id="restart-competition" type="button">
-                            Hrát znovu
-                        </button>
-                    </div>
-
-                    <article class="question-history-card" id="question-history-card">
-                        <div class="eyebrow">FRAXY // REVIEW</div>
-                        <h2>Přehled otázek</h2>
-                        <p class="question-history-intro">
-                            Tvoje odpověď, správná odpověď, rozdíl a počet získaných bodů.
-                        </p>
-                        <div id="question-history"></div>
-                    </article>
-                </div>
-
-                <div class="result-actions download-exclude">
-                    <button class="btn" id="download-result" type="button">
-                        Stáhnout mé odpovědi
-                    </button>
-                </div>
-            </section>
+            <section class="screen" id="welcome-screen"><div class="hero"><div class="eyebrow">FRAXY // GUESSING GAME</div><h1>FraXyho soutěž</h1><p>Tipovací soutěž po mapě Evropy. Klikni na zemi, odhadni správné číslo a získej co nejvyšší skóre.</p><div class="hero-actions"><button class="btn" id="start-rules" type="button">Začít soutěž →</button></div></div><div class="info-grid"><article class="info-card"><h2>Jak to funguje?</h2><p>Na mapě Evropy dostaneš otázky typu „Tipni si“. Čím blíž se trefíš ke skutečné hodnotě, tím vyšší skóre získáš.</p></article><article class="info-card"><h2>Hra na jeden průchod</h2><p>Každou zemi lze zodpovědět jednou. Po zodpovězení všech otázek se zobrazí výsledné skóre.</p></article></div></section>
+            <section class="screen hidden" id="rules-screen"><div class="rules-grid"><article class="rules-card rules-copy"><div class="eyebrow">FRAXY // RULES</div><h2>Vítej ve FraXyho soutěži.</h2><p>Dostaneš sérii otázek „Tipni si“ ke každé evropské zemi. Tvým úkolem je přiblížit se co nejvíce skutečnosti.</p><div class="rules-list"><div class="rules-item"><strong>1.</strong><span>Vyber zemi na mapě.</span></div><div class="rules-item"><strong>2.</strong><span>Zadej číselný odhad.</span></div><div class="rules-item"><strong>3.</strong><span>Za každou zemi získáš až 100 bodů podle přesnosti.</span></div><div class="rules-item"><strong>4.</strong><span>Po zodpovězení všech zemí uvidíš svůj celkový výsledek.</span></div></div><div class="actions"><button class="btn" id="start-map" type="button">Otevřít mapu →</button><a class="btn secondary" href="/games/">Zpět na Games</a></div></article></div></section>
+            <section id="map-screen" class="hidden"><div class="game-shell"><div class="map-layout"><div class="map-panel"><div class="map-overlay" id="map-overlay"><div class="eyebrow">FRAXY // EUROPE</div><h2>Tipni si.</h2><p>Klikni na bod na mapě a zkus co nejpřesněji odhadnout odpověď.</p></div><div id="map"></div></div><aside id="sidebar"><div class="sidebar-top"><div><div class="eyebrow">PROGRESS</div><h2>Zbývá zodpovědět</h2></div><button class="btn secondary" id="back-to-rules" type="button">← Zpět</button></div><div id="progress-label" class="note">0 / 0 zodpovězeno</div><div class="progress" aria-hidden="true"><span id="progress-bar"></span></div><ul id="remaining-countries"></ul><div class="sidebar-actions"><button class="btn danger" id="finish-early" type="button">Ukončit a vyhodnotit</button></div></aside></div></div></section>
+            <section class="screen result-screen hidden" id="result-screen"><div id="result-export"><article class="result-card"><div class="eyebrow">FRAXY // RESULTS</div><h2>Soutěž dokončena.</h2><div class="result-score" id="total-score">0.00</div><p class="result-note">bodů ze všech zodpovězených otázek</p><p class="result-note" id="competition-duration">Trvání: —</p><p class="result-note" id="result-summary"></p></article><div class="result-middle-actions download-exclude"><button class="btn" id="download-score-result" type="button">Stáhnout výsledek</button><button class="btn secondary" id="restart-competition" type="button">Hrát znovu</button></div><article class="question-history-card" id="question-history-card"><div class="eyebrow">FRAXY // REVIEW</div><h2>Přehled otázek</h2><p class="question-history-intro">Tvoje odpověď, správná odpověď, rozdíl a počet získaných bodů.</p><div id="question-history"></div></article></div><div class="result-actions download-exclude"><button class="btn" id="download-result" type="button">Stáhnout mé odpovědi</button></div></section>
         </main>
-
-        <div class="modal-overlay hidden" id="modal-overlay"></div>
-
-        <section
-            class="question-modal hidden"
-            id="question-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="country-name"
-        >
-            <div class="question-modal-header">
-                <div>
-                    <div class="eyebrow">FRAXY // QUESTION</div>
-                    <h2 id="country-name">Otázka</h2>
-                </div>
-
-                <button
-                    class="modal-close"
-                    id="close-question"
-                    type="button"
-                    aria-label="Zavřít"
-                >
-                    ×
-                </button>
-            </div>
-
-            <p id="question-text">Text otázky</p>
-
-            <div class="answer-row">
-                <input
-                    type="number"
-                    inputmode="decimal"
-                    id="answer"
-                    placeholder="Zadej odpověď"
-                    autocomplete="off"
-                >
-                <button class="btn" id="submit-answer" type="button">
-                    Odeslat →
-                </button>
-            </div>
-        </section>
+        <div class="modal-overlay hidden" id="modal-overlay"></div><section class="question-modal hidden" id="question-modal" role="dialog" aria-modal="true" aria-labelledby="country-name"><div class="question-modal-header"><div><div class="eyebrow">FRAXY // QUESTION</div><h2 id="country-name">Otázka</h2></div><button class="modal-close" id="close-question" type="button" aria-label="Zavřít">×</button></div><p id="question-text">Text otázky</p><div class="answer-row"><input type="number" inputmode="decimal" id="answer" placeholder="Zadej odpověď" autocomplete="off"><button class="btn" id="submit-answer" type="button">Odeslat →</button></div></section>
     </div>
-
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="/assets/js/header.js" defer></script>
     <script src="/assets/js/main.js" defer></script>
     <script type="module" src="./js/app.js?v=9"></script>
     <script type="module" src="./js/result-downloads.js?v=1"></script>
