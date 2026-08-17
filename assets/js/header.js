@@ -39,4 +39,8 @@
       </div>
     </nav>
   `;
+
+  if (currentPath.startsWith("/games/")) {
+    document.querySelectorAll(".eyebrow, .trivia-eyebrow").forEach((element) => element.remove());
+  }
 })();
