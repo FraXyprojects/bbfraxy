@@ -2,7 +2,7 @@ import { rankGames } from "./matcher.js";
 
 const state = {
   players: null,
-  time: null,
+  time: 120,
   platform: null,
   tags: new Set(),
   challenge: 3,
@@ -23,6 +23,19 @@ results.innerHTML = `
 `;
 
 document.querySelector(".coop-card")?.after(results);
+
+const timeRange = document.querySelector("#time-range");
+const timeLabel = document.querySelector("#time-value-label");
+
+if (timeRange && timeLabel) {
+  const syncTime = () => {
+    state.time = Number(timeRange.value);
+    timeLabel.textContent = formatMinutes(state.time);
+  };
+
+  timeRange.addEventListener("input", syncTime);
+  syncTime();
+}
 
 for (const group of document.querySelectorAll("[data-group]")) {
   const groupName = group.dataset.group;
@@ -57,10 +70,10 @@ document.querySelector("#find-games")?.addEventListener("click", async () => {
 
   if (!resultGrid || !summary) return;
 
-  if (!state.players || !state.time || !state.platform) {
-    summary.textContent = "Choose players, time and platform first.";
+  if (!state.players || !state.platform) {
+    summary.textContent = "Choose players and platform first.";
     results.hidden = false;
-    resultGrid.innerHTML = `<div class="coop-empty">We need the basics before we can find your matches.</div>`;
+    resultGrid.innerHTML = `<div class="coop-empty">We need the player count and platform before we can find your matches.</div>`;
     results.scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
@@ -82,7 +95,7 @@ document.querySelector("#find-games")?.addEventListener("click", async () => {
 
     if (!matches.length) {
       summary.textContent = "No direct matches yet.";
-      resultGrid.innerHTML = `<div class="coop-empty">Nothing in the current seed database fits all your hard requirements. Try another platform or player count.</div>`;
+      resultGrid.innerHTML = `<div class="coop-empty">Nothing in the current database fits all your hard requirements. Try another platform or player count.</div>`;
       return;
     }
 
@@ -93,6 +106,62 @@ document.querySelector("#find-games")?.addEventListener("click", async () => {
     summary.textContent = "The database could not be loaded.";
     resultGrid.innerHTML = `<div class="coop-empty">Something went wrong while loading the game database. Try again in a moment.</div>`;
   }
+});
+
+const missingTrigger = document.querySelector("#missing-trigger");
+const missingPanel = document.querySelector("#missing-game-panel");
+const missingClose = document.querySelector("#missing-close");
+const missingForm = document.querySelector("#missing-form");
+
+function setMissingOpen(open) {
+  if (!missingPanel || !missingTrigger) return;
+  missingPanel.classList.toggle("is-open", open);
+  missingPanel.setAttribute("aria-hidden", String(!open));
+  if (open) {
+    document.querySelector("#missing-title")?.focus();
+  }
+}
+
+missingTrigger?.addEventListener("click", () => {
+  setMissingOpen(!missingPanel?.classList.contains("is-open"));
+});
+missingClose?.addEventListener("click", () => setMissingOpen(false));
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") setMissingOpen(false);
+});
+
+document.addEventListener("click", (event) => {
+  if (!missingPanel?.classList.contains("is-open")) return;
+  if (missingPanel.contains(event.target) || missingTrigger?.contains(event.target)) return;
+  setMissingOpen(false);
+});
+
+missingForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const title = document.querySelector("#missing-title")?.value.trim();
+  const note = document.querySelector("#missing-note")?.value.trim();
+  if (!title) return;
+
+  const issueTitle = `Coop Finder: ${title}`;
+  const issueBody = [
+    "## Suggested game",
+    title,
+    "",
+    note || "No additional details provided.",
+    "",
+    "---",
+    "Submitted from BBFRAXY Coop Finder.",
+  ].join("\n");
+
+  const url = new URL("https://github.com/FraXyprojects/bbfraxy/issues/new");
+  url.searchParams.set("title", issueTitle);
+  url.searchParams.set("body", issueBody);
+
+  window.open(url.toString(), "_blank", "noopener,noreferrer");
+  missingForm.reset();
+  setMissingOpen(false);
 });
 
 function renderMatch(match) {
@@ -122,7 +191,7 @@ function renderMatch(match) {
           <span>Players ${match.breakdown.players}%</span>
           <span>Platform ${match.breakdown.platform}%</span>
           <span>Time ${match.breakdown.time}%</span>
-          <span>Preferences ${match.breakdown.tags}%</span>
+          <span>Preferences ${match.breakdown.preferences}%</span>
           <span>Challenge ${match.breakdown.challenge}%</span>
         </div>
       </details>
@@ -130,8 +199,16 @@ function renderMatch(match) {
   `;
 }
 
+function formatMinutes(value) {
+  const minutes = Number(value) || 0;
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  return remainder ? `${hours} h ${remainder} min` : `${hours} h`;
+}
+
 function escapeHtml(value) {
-  return String(value).replace(/[&<>\"]/g, (char) => ({
+  return String(value).replace(/[&<>\\"]/g, (char) => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
