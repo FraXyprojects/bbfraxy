@@ -1,5 +1,7 @@
 import { rankGames } from "./matcher.js";
 
+const API_BASE = "https://bbfraxy-api.fraxy.workers.dev";
+
 const state = {
   players: null,
   time: 120,
@@ -112,14 +114,13 @@ const missingTrigger = document.querySelector("#missing-trigger");
 const missingPanel = document.querySelector("#missing-game-panel");
 const missingClose = document.querySelector("#missing-close");
 const missingForm = document.querySelector("#missing-form");
+const missingStatus = document.querySelector("#missing-status");
 
 function setMissingOpen(open) {
   if (!missingPanel || !missingTrigger) return;
   missingPanel.classList.toggle("is-open", open);
   missingPanel.setAttribute("aria-hidden", String(!open));
-  if (open) {
-    document.querySelector("#missing-title")?.focus();
-  }
+  if (open) document.querySelector("#missing-title")?.focus();
 }
 
 missingTrigger?.addEventListener("click", () => {
@@ -137,31 +138,54 @@ document.addEventListener("click", (event) => {
   setMissingOpen(false);
 });
 
-missingForm?.addEventListener("submit", (event) => {
+missingForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const title = document.querySelector("#missing-title")?.value.trim();
-  const note = document.querySelector("#missing-note")?.value.trim();
-  if (!title) return;
+  const titleInput = document.querySelector("#missing-title");
+  const noteInput = document.querySelector("#missing-note");
+  const honeypotInput = document.querySelector("#missing-website");
+  const submit = missingForm.querySelector(".missing-submit");
 
-  const issueTitle = `Coop Finder: ${title}`;
-  const issueBody = [
-    "## Suggested game",
-    title,
-    "",
-    note || "No additional details provided.",
-    "",
-    "---",
-    "Submitted from BBFRAXY Coop Finder.",
-  ].join("\n");
+  const game = titleInput?.value.trim() || "";
+  const note = noteInput?.value.trim() || "";
+  const website = honeypotInput?.value.trim() || "";
 
-  const url = new URL("https://github.com/FraXyprojects/bbfraxy/issues/new");
-  url.searchParams.set("title", issueTitle);
-  url.searchParams.set("body", issueBody);
+  if (!game) return;
 
-  window.open(url.toString(), "_blank", "noopener,noreferrer");
-  missingForm.reset();
-  setMissingOpen(false);
+  const originalText = submit?.textContent || "Send game suggestion →";
+  if (submit) {
+    submit.disabled = true;
+    submit.textContent = "Sending…";
+  }
+  if (missingStatus) missingStatus.textContent = "";
+
+  try {
+    const response = await fetch(`${API_BASE}/v1/coop/suggest`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ game, note, website }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || "Could not send the suggestion.");
+
+    missingForm.innerHTML = `
+      <div class="coop-empty">
+        <strong>Thanks! We got it.</strong><br>
+        We’ll verify the game and consider adding it to the database.
+      </div>
+    `;
+  } catch (error) {
+    console.error(error);
+    if (missingStatus) {
+      missingStatus.textContent = error.message || "Could not send the suggestion. Please try again later.";
+    }
+  } finally {
+    if (submit && document.body.contains(submit)) {
+      submit.disabled = false;
+      submit.textContent = originalText;
+    }
+  }
 });
 
 function renderMatch(match) {
