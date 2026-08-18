@@ -12,33 +12,45 @@ const MAX_FILE_BYTES = 180000;
 const REPO_CACHE_TTL = 300;
 const USER_CACHE_TTL = 300;
 const FILE_CACHE_TTL = 300;
+const SUGGESTION_COOLDOWN_SECONDS = 1200;
+const MAX_GAME_NAME_LENGTH = 120;
+const MAX_SUGGESTION_LENGTH = 1200;
+const ALLOWED_ORIGINS = new Set(["https://bbfraxy.com", "https://www.bbfraxy.com"]);
+const ISSUE_REPOSITORY = "FraXyprojects/bbfraxy";
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const origin = getAllowedOrigin(request.headers.get("origin"));
 
-    if (request.method !== "GET" && request.method !== "OPTIONS") {
-      return json({ error: "Method not allowed." }, 405, { allow: "GET, OPTIONS" });
+    if (request.method !== "GET" && request.method !== "POST" && request.method !== "OPTIONS") {
+      return json({ error: "Method not allowed." }, 405, { allow: "GET, POST, OPTIONS" }, origin);
     }
 
-    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders() });
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: corsHeaders(origin) });
+    }
 
     if (url.pathname === "/health") {
-      return json({ ok: true, service: "bbfraxy-github-simplifier" }, 200, { "cache-control": "no-store" });
+      return json({ ok: true, service: "bbfraxy-api" }, 200, { "cache-control": "no-store" }, origin);
+    }
+
+    if (request.method === "POST" && url.pathname === "/v1/coop/suggest") {
+      return handleCoopSuggestion(request, env, ctx, origin);
     }
 
     const userMatch = url.pathname.match(/^\/v1\/github\/user\/([^/]+)\/repos\/?$/);
     if (userMatch) {
       const owner = decodeURIComponent(userMatch[1]);
       const limit = clampNumber(url.searchParams.get("limit"), DEFAULT_REPO_LIMIT, 1, MAX_REPO_LIMIT);
-      return handleUserRepos(owner, limit, env, ctx);
+      return handleUserRepos(owner, limit, env, ctx, origin);
     }
 
     const treeMatch = url.pathname.match(/^\/v1\/github\/repo\/([^/]+)\/([^/]+)\/tree\/?$/);
     if (treeMatch) {
       const owner = decodeURIComponent(treeMatch[1]);
       const repo = decodeURIComponent(treeMatch[2]);
-      return handleRepoTree(owner, repo, env, ctx);
+      return handleRepoTree(owner, repo, env, ctx, origin);
     }
 
     const fileMatch = url.pathname.match(/^\/v1\/github\/repo\/([^/]+)\/([^/]+)\/file\/(.+)$/);
@@ -46,7 +58,7 @@ export default {
       const owner = decodeURIComponent(fileMatch[1]);
       const repo = decodeURIComponent(fileMatch[2]);
       const path = fileMatch[3].split("/").map(decodeURIComponent).join("/");
-      return handleRepoFile(owner, repo, path, url.searchParams.get("branch") || "main", env, ctx);
+      return handleRepoFile(owner, repo, path, url.searchParams.get("branch") || "main", env, ctx, origin);
     }
 
     const rawMatch = url.pathname.match(/^\/v1\/raw\/(.+)$/);
@@ -60,39 +72,120 @@ export default {
         "GET /v1/github/repo/:owner/:repo/tree",
         "GET /v1/github/repo/:owner/:repo/file/:path?branch=main",
         "GET /v1/raw/:owner/:repo/:ref/:path",
+        "POST /v1/coop/suggest",
       ],
-    }, 404);
+    }, 404, {}, origin);
   },
 };
 
-async function handleUserRepos(owner, limit, env, ctx) {
-  if (!isSafeGithubName(owner)) return json({ error: "Invalid GitHub username." }, 400);
+async function handleCoopSuggestion(request, env, ctx, origin) {
+  if (!env.GITHUB_ISSUE_TOKEN) {
+    return json({ error: "Suggestion service is not configured.", code: "SUGGESTION_NOT_CONFIGURED" }, 503, {}, origin);
+  }
+
+  const ip = request.headers.get("cf-connecting-ip") || "unknown";
+  const rateLimitKey = new Request(`https://cache.bbfraxy.local/coop-suggestion/${hashKey(ip)}`);
+  const existing = await caches.default.match(rateLimitKey);
+  if (existing) {
+    return json({ error: "Please wait a little before sending another suggestion.", code: "RATE_LIMITED" }, 429, { "retry-after": String(SUGGESTION_COOLDOWN_SECONDS) }, origin);
+  }
+
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return json({ error: "Invalid JSON body." }, 400, {}, origin);
+  }
+
+  const game = normalizeSuggestionText(payload?.game);
+  const note = normalizeSuggestionText(payload?.note);
+  const honeypot = normalizeSuggestionText(payload?.website);
+
+  if (honeypot) {
+    return json({ ok: true }, 202, { "cache-control": "no-store" }, origin);
+  }
+
+  if (!game || game.length > MAX_GAME_NAME_LENGTH) {
+    return json({ error: "Please enter a valid game title." }, 400, {}, origin);
+  }
+  if (note.length > MAX_SUGGESTION_LENGTH) {
+    return json({ error: `Additional details must be ${MAX_SUGGESTION_LENGTH} characters or fewer.` }, 400, {}, origin);
+  }
+
+  const issueBody = [
+    "## Coop Finder suggestion",
+    "",
+    `**Game:** ${game}`,
+    note ? `**Note:** ${note}` : "**Note:** _No additional note provided._",
+    "",
+    `**Source:** BBFRAXY Coop Finder`,
+    `**Submitted:** ${new Date().toISOString()}`,
+    `**Origin:** ${request.headers.get("origin") || "unknown"}`,
+  ].join("\n");
+
+  const response = await fetch(`${GITHUB_API}/repos/${ISSUE_REPOSITORY}/issues`, {
+    method: "POST",
+    headers: {
+      accept: "application/vnd.github+json",
+      "content-type": "application/json",
+      "user-agent": "BBFRAXY-API/1.0",
+      authorization: `Bearer ${env.GITHUB_ISSUE_TOKEN}`,
+    },
+    body: JSON.stringify({
+      title: `[Coop Suggestion] ${game}`,
+      body: issueBody,
+      labels: ["coop-suggestion"],
+    }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      return json({ error: "Suggestion service authorization failed.", code: "GITHUB_ISSUE_AUTH" }, 502, {}, origin);
+    }
+    if (response.status === 404) {
+      return json({ error: "Suggestion repository was not found.", code: "GITHUB_ISSUE_REPO" }, 502, {}, origin);
+    }
+    return json({ error: "Could not submit the game suggestion.", code: `GITHUB_${response.status}` }, 502, {}, origin);
+  }
+
+  const issue = await response.json();
+  const rateResponse = new Response("1", {
+    status: 200,
+    headers: { "cache-control": `public, max-age=${SUGGESTION_COOLDOWN_SECONDS}` },
+  });
+  ctx.waitUntil(caches.default.put(rateLimitKey, rateResponse));
+
+  return json({ ok: true, issue: { number: issue.number, url: issue.html_url } }, 201, { "cache-control": "no-store" }, origin);
+}
+
+async function handleUserRepos(owner, limit, env, ctx, origin) {
+  if (!isSafeGithubName(owner)) return json({ error: "Invalid GitHub username." }, 400, {}, origin);
   const cacheKey = new Request(`https://cache.bbfraxy.local/user/${encodeURIComponent(owner)}?limit=${limit}`);
   const cached = await caches.default.match(cacheKey);
-  if (cached) return withCors(cached);
+  if (cached) return withCors(cached, origin);
 
   const apiUrl = `${GITHUB_API}/users/${encodeURIComponent(owner)}/repos?type=public&sort=updated&per_page=${limit}`;
   const response = await githubFetch(apiUrl, env);
-  if (response.status === 404) return json({ error: `GitHub user “${owner}” was not found.`, code: "USER_NOT_FOUND" }, 404);
-  if (!response.ok) return proxyGithubError(response, "Could not load public repositories.");
+  if (response.status === 404) return json({ error: `GitHub user “${owner}” was not found.`, code: "USER_NOT_FOUND" }, 404, {}, origin);
+  if (!response.ok) return proxyGithubError(response, "Could not load public repositories.", origin);
 
   const payload = await response.json();
   const repositories = Array.isArray(payload) ? payload : [];
   const body = JSON.stringify({ owner, count: repositories.length, repositories: repositories.map(normalizeRepository) });
-  const result = jsonResponse(body, 200, { "cache-control": `public, max-age=60, s-maxage=${USER_CACHE_TTL}, stale-while-revalidate=86400` });
+  const result = jsonResponse(body, 200, { "cache-control": `public, max-age=60, s-maxage=${USER_CACHE_TTL}, stale-while-revalidate=86400` }, origin);
   ctx.waitUntil(caches.default.put(cacheKey, result.clone()));
   return result;
 }
 
-async function handleRepoTree(owner, repo, env, ctx) {
-  if (!isSafeGithubName(owner) || !isSafeGithubName(repo)) return json({ error: "Invalid GitHub repository name." }, 400);
+async function handleRepoTree(owner, repo, env, ctx, origin) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo)) return json({ error: "Invalid GitHub repository name." }, 400, {}, origin);
   const cacheKey = new Request(`https://cache.bbfraxy.local/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/tree`);
   const cached = await caches.default.match(cacheKey);
-  if (cached) return withCors(cached);
+  if (cached) return withCors(cached, origin);
 
   const repositoryResponse = await githubFetch(`${GITHUB_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`, env);
-  if (repositoryResponse.status === 404) return json({ error: "Repository was not found.", code: "REPO_NOT_FOUND" }, 404);
-  if (!repositoryResponse.ok) return proxyGithubError(repositoryResponse, "Could not load repository metadata.");
+  if (repositoryResponse.status === 404) return json({ error: "Repository was not found.", code: "REPO_NOT_FOUND" }, 404, {}, origin);
+  if (!repositoryResponse.ok) return proxyGithubError(repositoryResponse, "Could not load repository metadata.", origin);
 
   const repository = await repositoryResponse.json();
   const branch = repository.default_branch || "main";
@@ -100,54 +193,54 @@ async function handleRepoTree(owner, repo, env, ctx) {
 
   if (treeResponse.status === 404 && branch !== "master") {
     const fallbackResponse = await githubFetch(`${GITHUB_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/master?recursive=1`, env);
-    if (fallbackResponse.ok) return cacheTreeResponse(owner, repo, "master", fallbackResponse, ctx, cacheKey);
+    if (fallbackResponse.ok) return cacheTreeResponse(owner, repo, "master", fallbackResponse, ctx, cacheKey, origin);
   }
 
-  if (!treeResponse.ok) return proxyGithubError(treeResponse, "Could not load the repository tree.");
-  return cacheTreeResponse(owner, repo, branch, treeResponse, ctx, cacheKey);
+  if (!treeResponse.ok) return proxyGithubError(treeResponse, "Could not load the repository tree.", origin);
+  return cacheTreeResponse(owner, repo, branch, treeResponse, ctx, cacheKey, origin);
 }
 
-async function handleRepoFile(owner, repo, path, branch, env, ctx) {
+async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
   if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000) {
-    return json({ error: "Invalid GitHub file path." }, 400);
+    return json({ error: "Invalid GitHub file path." }, 400, {}, origin);
   }
 
   const normalizedBranch = isSafeRef(branch) ? branch : "main";
   const cacheKey = new Request(`https://cache.bbfraxy.local/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/file/${encodeURIComponent(normalizedBranch)}/${path}`);
   const cached = await caches.default.match(cacheKey);
-  if (cached) return withCors(cached);
+  if (cached) return withCors(cached, origin);
 
   const apiUrl = `${GITHUB_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split("/").map(encodeURIComponent).join("/")}?ref=${encodeURIComponent(normalizedBranch)}`;
   const response = await githubFetch(apiUrl, env);
-  if (response.status === 404) return json({ error: "File was not found.", code: "FILE_NOT_FOUND" }, 404);
-  if (!response.ok) return proxyGithubError(response, "Could not load the file preview.");
+  if (response.status === 404) return json({ error: "File was not found.", code: "FILE_NOT_FOUND" }, 404, {}, origin);
+  if (!response.ok) return proxyGithubError(response, "Could not load the file preview.", origin);
 
   const payload = await response.json();
-  if (Array.isArray(payload) || payload.type !== "file") return json({ error: "The selected path is not a file.", code: "NOT_A_FILE" }, 400);
+  if (Array.isArray(payload) || payload.type !== "file") return json({ error: "The selected path is not a file.", code: "NOT_A_FILE" }, 400, {}, origin);
 
   const size = Number(payload.size || 0);
-  if (size > MAX_FILE_BYTES) return json({ error: "File is too large for preview.", code: "FILE_TOO_LARGE", size, maxSize: MAX_FILE_BYTES }, 413);
-  if (payload.encoding !== "base64" || typeof payload.content !== "string") return json({ error: "GitHub did not return previewable text content.", code: "UNSUPPORTED_CONTENT" }, 415);
+  if (size > MAX_FILE_BYTES) return json({ error: "File is too large for preview.", code: "FILE_TOO_LARGE", size, maxSize: MAX_FILE_BYTES }, 413, {}, origin);
+  if (payload.encoding !== "base64" || typeof payload.content !== "string") return json({ error: "GitHub did not return previewable text content.", code: "UNSUPPORTED_CONTENT" }, 415, {}, origin);
 
   let text;
-  try { text = decodeBase64Utf8(payload.content); } catch { return json({ error: "File content could not be decoded.", code: "DECODE_FAILED" }, 500); }
+  try { text = decodeBase64Utf8(payload.content); } catch { return json({ error: "File content could not be decoded.", code: "DECODE_FAILED" }, 500, {}, origin); }
 
   const result = jsonResponse(JSON.stringify({ owner, repo, branch: normalizedBranch, path, size, text }), 200, {
     "cache-control": `public, max-age=60, s-maxage=${FILE_CACHE_TTL}, stale-while-revalidate=86400`,
-  });
+  }, origin);
   ctx.waitUntil(caches.default.put(cacheKey, result.clone()));
   return result;
 }
 
 async function handleRawContent(rawPath, ctx) {
-  if (!rawPath || rawPath.length > 2000 || rawPath.includes("..")) return json({ error: "Invalid raw content path." }, 400);
+  if (!rawPath || rawPath.length > 2000 || rawPath.includes("..")) return json({ error: "Invalid raw content path." }, 400, {}, "*");
 
   const cacheKey = new Request(`https://cache.bbfraxy.local/raw/${rawPath}`);
   const cached = await caches.default.match(cacheKey);
   if (cached) return withCors(cached, "*");
 
   const response = await fetch(`${RAW_GITHUB}/${rawPath}`, {
-    headers: { "user-agent": "BBFRAXY-GitHub-Simplifier/1.0" },
+    headers: { "user-agent": "BBFRAXY-API/1.0" },
   });
   if (!response.ok) return new Response("", { status: response.status, headers: corsHeaders("*") });
 
@@ -164,19 +257,19 @@ async function handleRawContent(rawPath, ctx) {
   return result;
 }
 
-async function cacheTreeResponse(owner, repo, branch, response, ctx, cacheKey) {
+async function cacheTreeResponse(owner, repo, branch, response, ctx, cacheKey, origin) {
   const payload = await response.json();
   const sourceTree = Array.isArray(payload.tree) ? payload.tree : [];
   const tree = sourceTree.slice(0, MAX_TREE_ITEMS);
   const body = JSON.stringify({ owner, repo, branch, truncated: Boolean(payload.truncated) || sourceTree.length > MAX_TREE_ITEMS, tree });
-  const result = jsonResponse(body, 200, { "cache-control": `public, max-age=60, s-maxage=${REPO_CACHE_TTL}, stale-while-revalidate=86400` });
+  const result = jsonResponse(body, 200, { "cache-control": `public, max-age=60, s-maxage=${REPO_CACHE_TTL}, stale-while-revalidate=86400` }, origin);
   ctx.waitUntil(caches.default.put(cacheKey, result.clone()));
   return result;
 }
 
 async function githubFetch(url, env) {
-  const headers = { accept: "application/vnd.github+json", "user-agent": "BBFRAXY-GitHub-Simplifier/1.0" };
-  if (env.GITHUB_TOKEN) headers.authorization = `Bearer ${env.GITHUB_TOKEN}`;
+  const headers = { accept: "application/vnd.github+json", "user-agent": "BBFRAXY-API/1.0" };
+  if (env.GITHUB_READ_TOKEN) headers.authorization = `Bearer ${env.GITHUB_READ_TOKEN}`;
   return fetch(url, { headers });
 }
 
@@ -196,17 +289,17 @@ function normalizeRepository(repo) {
   };
 }
 
-function proxyGithubError(response, fallback) {
-  if (response.status === 403 || response.status === 429) return json({ error: "GitHub temporarily rate-limited the Simplifier. Please try again later.", code: "GITHUB_RATE_LIMIT" }, 429);
-  return json({ error: fallback, code: `GITHUB_${response.status}` }, response.status >= 500 ? 502 : response.status);
+function proxyGithubError(response, fallback, origin) {
+  if (response.status === 403 || response.status === 429) return json({ error: "GitHub temporarily rate-limited the API. Please try again later.", code: "GITHUB_RATE_LIMIT" }, 429, {}, origin);
+  return json({ error: fallback, code: `GITHUB_${response.status}` }, response.status >= 500 ? 502 : response.status, {}, origin);
 }
 
-function json(data, status = 200, extraHeaders = {}) {
-  return new Response(JSON.stringify(data), { status, headers: { ...JSON_HEADERS, ...corsHeaders(), ...extraHeaders } });
+function json(data, status = 200, extraHeaders = {}, origin = "https://bbfraxy.com") {
+  return new Response(JSON.stringify(data), { status, headers: { ...JSON_HEADERS, ...corsHeaders(origin), ...extraHeaders } });
 }
 
-function jsonResponse(body, status, extraHeaders = {}) {
-  return new Response(body, { status, headers: { ...JSON_HEADERS, ...corsHeaders(), ...extraHeaders } });
+function jsonResponse(body, status, extraHeaders = {}, origin = "https://bbfraxy.com") {
+  return new Response(body, { status, headers: { ...JSON_HEADERS, ...corsHeaders(origin), ...extraHeaders } });
 }
 
 function withCors(response, origin = "https://bbfraxy.com") {
@@ -216,12 +309,17 @@ function withCors(response, origin = "https://bbfraxy.com") {
 }
 
 function corsHeaders(origin = "https://bbfraxy.com") {
+  const resolvedOrigin = origin === "*" ? "*" : (origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://bbfraxy.com");
   return {
-    "access-control-allow-origin": origin,
-    "access-control-allow-methods": "GET, OPTIONS",
+    "access-control-allow-origin": resolvedOrigin,
+    "access-control-allow-methods": "GET, POST, OPTIONS",
     "access-control-allow-headers": "content-type",
     vary: "Origin",
   };
+}
+
+function getAllowedOrigin(origin) {
+  return origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://bbfraxy.com";
 }
 
 function isSafeGithubName(value) {
@@ -243,4 +341,14 @@ function clampNumber(value, fallback, min, max) {
   const parsed = Number.parseInt(value || "", 10);
   if (!Number.isFinite(parsed)) return fallback;
   return Math.min(max, Math.max(min, parsed));
+}
+
+function normalizeSuggestionText(value) {
+  return typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "";
+}
+
+async function hashKey(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
