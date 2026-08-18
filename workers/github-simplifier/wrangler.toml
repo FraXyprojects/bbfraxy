@@ -1,7 +1,9 @@
-name = "bbfraxy-github-simplifier"
+name = "bbfraxy-api"
 main = "src/index.js"
 compatibility_date = "2026-08-16"
 
 [vars]
-# The Worker can run without a GitHub token for public repositories,
-# but setting GITHUB_TOKEN as a secret raises the upstream API quota.
+# GitHub API credentials are stored as Cloudflare Secrets.
+# Required secret names:
+# - GITHUB_READ_TOKEN
+# - GITHUB_ISSUE_TOKEN
