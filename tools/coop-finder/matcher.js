@@ -77,11 +77,30 @@ function scoreTime(game, selected) {
 
 function scoreTags(game, requestedTags) {
   if (!requestedTags?.length) return 70;
-  const matched = requestedTags.filter((tag) => tagMatchesGame(tag, game)).length;
-  return Math.round((matched / requestedTags.length) * 100);
+
+  const scores = requestedTags.map((tag) => scorePreferenceTag(tag, game));
+  return Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length);
+}
+
+function scorePreferenceTag(tag, game) {
+  // Puzzle is an intensity preference, not a binary genre match.
+  // This prevents games with only light puzzle elements from tying with
+  // dedicated puzzle games.
+  if (tag === "puzzle") {
+    const intensity = Number(game.puzzleIntensity ?? 0);
+    return Math.max(0, Math.min(100, intensity * 20));
+  }
+
+  if (game.genres.includes(tag) || game.tags.includes(tag)) return 100;
+  if (tag === "chaos") {
+    return game.tags.includes("chaos") || game.genres.includes("action") ? 70 : 0;
+  }
+
+  return 0;
 }
 
 function tagMatchesGame(tag, game) {
+  if (tag === "puzzle") return Number(game.puzzleIntensity ?? 0) >= 4;
   if (game.genres.includes(tag)) return true;
   if (tag === "chaos") return game.tags.includes("chaos") || game.genres.includes("action");
   return game.tags.includes(tag);
@@ -102,10 +121,19 @@ function buildReasons(game, preferences, scores) {
   if (scores.platformScore === 100) {
     reasons.push(`Available on ${platformLabel(preferences.platform)}.`);
   }
-  if (requestedTags.some((tag) => tagMatchesGame(tag, game))) {
-    const matched = requestedTags.filter((tag) => tagMatchesGame(tag, game));
+
+  const matched = requestedTags.filter((tag) => tagMatchesGame(tag, game));
+  if (matched.length) {
     reasons.push(`Matches ${matched.slice(0, 2).map(tagLabel).join(" and ")}.`);
   }
+
+  if (requestedTags.includes("puzzle")) {
+    const intensity = Number(game.puzzleIntensity ?? 0);
+    if (intensity >= 5) reasons.push("Strong puzzle focus.");
+    else if (intensity >= 4) reasons.push("Puzzle-focused gameplay.");
+    else if (intensity >= 2) reasons.push("Includes some puzzle elements.");
+  }
+
   if (scores.timeScore >= 90) {
     reasons.push("Works well within your available play time.");
   }
