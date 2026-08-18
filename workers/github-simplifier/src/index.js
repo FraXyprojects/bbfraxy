@@ -84,7 +84,8 @@ async function handleCoopSuggestion(request, env, ctx, origin) {
   }
 
   const ip = request.headers.get("cf-connecting-ip") || "unknown";
-  const rateLimitKey = new Request(`https://cache.bbfraxy.local/coop-suggestion/${hashKey(ip)}`);
+  const ipHash = await hashKey(ip);
+  const rateLimitKey = new Request(`https://cache.bbfraxy.local/coop-suggestion/${ipHash}`);
   const existing = await caches.default.match(rateLimitKey);
   if (existing) {
     return json({ error: "Please wait a little before sending another suggestion.", code: "RATE_LIMITED" }, 429, { "retry-after": String(SUGGESTION_COOLDOWN_SECONDS) }, origin);
@@ -118,7 +119,7 @@ async function handleCoopSuggestion(request, env, ctx, origin) {
     `**Game:** ${game}`,
     note ? `**Note:** ${note}` : "**Note:** _No additional note provided._",
     "",
-    `**Source:** BBFRAXY Coop Finder`,
+    "**Source:** BBFRAXY Coop Finder",
     `**Submitted:** ${new Date().toISOString()}`,
     `**Origin:** ${request.headers.get("origin") || "unknown"}`,
   ].join("\n");
@@ -134,7 +135,6 @@ async function handleCoopSuggestion(request, env, ctx, origin) {
     body: JSON.stringify({
       title: `[Coop Suggestion] ${game}`,
       body: issueBody,
-      labels: ["coop-suggestion"],
     }),
   });
 
@@ -233,7 +233,7 @@ async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
 }
 
 async function handleRawContent(rawPath, ctx) {
-  if (!rawPath || rawPath.length > 2000 || rawPath.includes("..")) return json({ error: "Invalid raw content path." }, 400, {}, "*");
+  if (!rawPath || rawPath.length > 2000 || rawPath.includes("..")) return new Response(JSON.stringify({ error: "Invalid raw content path." }), { status: 400, headers: { ...JSON_HEADERS, ...corsHeaders("*") } });
 
   const cacheKey = new Request(`https://cache.bbfraxy.local/raw/${rawPath}`);
   const cached = await caches.default.match(cacheKey);
