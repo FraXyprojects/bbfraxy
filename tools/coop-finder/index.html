@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Coop Finder — find cooperative games that fit your group, time and preferences.">
+  <meta name="theme-color" content="#050607">
+  <title>Coop Finder | BBFRAXY</title>
+  <link rel="canonical" href="https://bbfraxy.com/tools/coop-finder/">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/css/styles.css">
+  <style>
+    .coop-page{width:min(100%,980px);margin:0 auto;padding:52px 0 52px}.coop-hero{width:min(100%,760px);margin:0 auto 28px}.coop-hero h1{margin:0;color:var(--text);font-size:clamp(2.1rem,5vw,3.1rem);line-height:1.05;font-weight:820;letter-spacing:-.035em}.coop-hero p{max-width:650px;margin:12px 0 0;color:var(--muted);font-size:1rem;line-height:1.7}.coop-card{width:min(100%,760px);margin:0 auto;padding:clamp(24px,5vw,38px);border:1px solid var(--border);border-radius:var(--radius);background:radial-gradient(circle at 88% 8%,rgba(95,231,255,.08),transparent 34%),linear-gradient(180deg,rgba(255,255,255,.045),transparent 46%),var(--surface);box-shadow:0 22px 70px var(--shadow),0 0 50px rgba(95,231,255,.055);backdrop-filter:blur(18px)}.coop-step{padding:18px 0;border-top:1px solid var(--border)}.coop-step:first-child{padding-top:0;border-top:0}.coop-label{margin:0 0 12px;color:var(--faint);font-size:.72rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase}.choice-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.choice{min-height:44px;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);background:rgba(255,255,255,.035);font:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:border-color 160ms ease,color 160ms ease,background 160ms ease,transform 160ms ease}.choice:hover{transform:translateY(-1px);color:var(--text);border-color:var(--border-strong);background:rgba(95,231,255,.07)}.choice.is-selected{color:var(--text);border-color:var(--border-strong);background:rgba(95,231,255,.11);box-shadow:0 0 20px var(--glow)}.tag-grid{display:flex;flex-wrap:wrap;gap:8px}.tag{min-height:38px;padding:0 13px;border:1px solid var(--border);border-radius:999px;color:var(--muted);background:rgba(255,255,255,.035);font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:border-color 160ms ease,color 160ms ease,background 160ms ease}.tag.is-selected{color:var(--text);border-color:var(--border-strong);background:rgba(95,231,255,.1)}.coop-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}.coop-button{min-height:46px;border:1px solid var(--border-strong);border-radius:var(--radius);padding:0 18px;color:#031014;background:var(--accent);font:inherit;font-size:.88rem;font-weight:800;cursor:pointer;box-shadow:0 0 22px var(--glow)}.coop-note{margin:14px 0 0;color:var(--faint);font-size:.78rem;line-height:1.6}@media(max-width:760px){.coop-page{padding:52px 0}.choice-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:480px){.choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.coop-actions{justify-content:stretch}.coop-button{width:100%}}
+  </style>
+</head>
+<body>
+  <canvas class="ambient-canvas" id="ambient-canvas" aria-hidden="true"></canvas>
+  <div class="site-shell">
+    <header class="site-header"></header>
+    <main class="coop-page" id="main">
+      <section class="coop-hero">
+        <h1>Coop Finder</h1>
+        <p>Tell us who is playing, how much time you have and what kind of experience you want. We’ll use that to find games that fit your group.</p>
+      </section>
+      <section class="coop-card" aria-label="Coop Finder setup">
+        <div class="coop-step">
+          <p class="coop-label">01 · Players</p>
+          <div class="choice-grid" data-group="players">
+            <button class="choice" type="button" data-value="1">1</button><button class="choice" type="button" data-value="2">2</button><button class="choice" type="button" data-value="3">3</button><button class="choice" type="button" data-value="4">4</button><button class="choice" type="button" data-value="5+">5+</button>
+          </div>
+        </div>
+        <div class="coop-step">
+          <p class="coop-label">02 · Time available</p>
+          <div class="choice-grid" data-group="time">
+            <button class="choice" type="button" data-value="30">30 min</button><button class="choice" type="button" data-value="60">1 h</button><button class="choice" type="button" data-value="120">2 h</button><button class="choice" type="button" data-value="180">3 h</button><button class="choice" type="button" data-value="300">5 h+</button>
+          </div>
+        </div>
+        <div class="coop-step">
+          <p class="coop-label">03 · What sounds fun?</p>
+          <div class="tag-grid" data-group="tags">
+            <button class="tag" type="button" data-value="puzzle">Puzzle</button><button class="tag" type="button" data-value="action">Action</button><button class="tag" type="button" data-value="adventure">Adventure</button><button class="tag" type="button" data-value="horror">Horror</button><button class="tag" type="button" data-value="chaos">Funny / chaotic</button><button class="tag" type="button" data-value="story">Story</button><button class="tag" type="button" data-value="strategy">Strategy</button><button class="tag" type="button" data-value="survival">Survival</button>
+          </div>
+        </div>
+        <div class="coop-step">
+          <p class="coop-label">04 · Platform</p>
+          <div class="choice-grid" data-group="platform">
+            <button class="choice" type="button" data-value="pc">PC</button><button class="choice" type="button" data-value="playstation">PlayStation</button><button class="choice" type="button" data-value="xbox">Xbox</button><button class="choice" type="button" data-value="switch">Switch</button><button class="choice" type="button" data-value="crossplay">Crossplay</button>
+          </div>
+        </div>
+        <div class="coop-actions"><button class="coop-button" type="button" id="find-games">Find games →</button></div>
+        <p class="coop-note">This first version is a foundation for the recommendation engine. Game matching and the database come next.</p>
+      </section>
+    </main>
+    <footer class="site-footer"><span>BBFRAXY</span></footer>
+  </div>
+  <script src="../../assets/js/header.js" defer></script>
+  <script src="../../assets/js/main.js" defer></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>
