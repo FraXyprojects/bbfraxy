@@ -1,7 +1,8 @@
 (() => {
   const originalFetch = window.fetch.bind(window);
-  const githubApiBase = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/github";
-  const rawProxyBase = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
+  const apiBase = "https://bbfraxy-api.fraxy.workers.dev";
+  const githubApiBase = `${apiBase}/v1/github`;
+  const rawProxyBase = `${apiBase}/v1/raw`;
   const githubApiPrefix = "https://api.github.com";
   const rawGithubPrefix = "https://raw.githubusercontent.com";
 
@@ -63,7 +64,7 @@
     }
 
     return new Response(JSON.stringify({
-      error: "This GitHub API operation is not exposed by the Simplifier proxy.",
+      error: "This GitHub API operation is not exposed by the BBFRAXY API.",
       code: "UNSUPPORTED_GITHUB_OPERATION",
     }), {
       status: 501,
