@@ -156,6 +156,7 @@ async function handleCoopSuggestion(request, env, ctx, origin) {
     body: JSON.stringify({
       title: `[Coop Suggestion] ${game}`,
       body: issueBody,
+      labels: ["coop-suggestion", "needs-review"],
     }),
   });
 
