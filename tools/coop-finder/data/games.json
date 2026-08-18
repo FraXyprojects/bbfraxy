@@ -79,7 +79,7 @@
     "tags": ["chaos", "cooperative", "short-sessions"],
     "idealSessionMinutes": 90,
     "difficulty": 3,
-    "puzzleIntensity": 2,
+    "puzzleIntensity": 1,
     "story": 2,
     "description": "A colorful cooperative action game where everyone runs different stations on one spaceship."
   },
@@ -111,11 +111,11 @@
     "title": "Phasmophobia",
     "players": { "min": 1, "max": 4 },
     "platforms": ["pc", "playstation", "xbox"],
-    "genres": ["horror", "puzzle", "survival"],
+    "genres": ["horror", "survival"],
     "tags": ["communication", "replayability", "short-sessions"],
     "idealSessionMinutes": 60,
     "difficulty": 4,
-    "puzzleIntensity": 3,
+    "puzzleIntensity": 2,
     "story": 1,
     "description": "Investigate haunted locations as a team and identify the ghost from clues and behavior."
   },
@@ -127,7 +127,7 @@
     "tags": ["funny", "chaos", "short-sessions"],
     "idealSessionMinutes": 60,
     "difficulty": 2,
-    "puzzleIntensity": 3,
+    "puzzleIntensity": 4,
     "story": 1,
     "description": "Physics-based cooperative puzzle platforming where solving the level is only half the fun."
   },
