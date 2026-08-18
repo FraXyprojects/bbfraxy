@@ -2,9 +2,24 @@ const WEIGHTS = {
   players: 30,
   platform: 20,
   time: 15,
-  tags: 25,
+  preferences: 25,
   challenge: 10,
 };
+
+const PREFERENCE_FIELDS = [
+  "puzzle",
+  "action",
+  "adventure",
+  "horror",
+  "survival",
+  "strategy",
+  "story",
+  "chaos",
+  "exploration",
+  "creativity",
+  "relaxing",
+  "competition",
+];
 
 export function rankGames(games, preferences) {
   return games
@@ -12,14 +27,14 @@ export function rankGames(games, preferences) {
       const playerScore = scorePlayers(game, preferences.players);
       const platformScore = scorePlatform(game, preferences.platform);
       const timeScore = scoreTime(game, preferences.time);
-      const tagScore = scoreTags(game, preferences.tags);
+      const preferenceScore = scorePreferences(game, preferences.tags);
       const challengeScore = scoreChallenge(game, preferences.challenge ?? 3);
 
       const weighted =
         (playerScore * WEIGHTS.players +
           platformScore * WEIGHTS.platform +
           timeScore * WEIGHTS.time +
-          tagScore * WEIGHTS.tags +
+          preferenceScore * WEIGHTS.preferences +
           challengeScore * WEIGHTS.challenge) /
         100;
 
@@ -33,14 +48,14 @@ export function rankGames(games, preferences) {
           players: playerScore,
           platform: platformScore,
           time: timeScore,
-          tags: tagScore,
+          preferences: preferenceScore,
           challenge: challengeScore,
         },
         reasons: buildReasons(game, preferences, {
           playerScore,
           platformScore,
           timeScore,
-          tagScore,
+          preferenceScore,
           challengeScore,
         }),
       };
@@ -53,57 +68,44 @@ function scorePlayers(game, selected) {
   if (!selected) return 65;
   const count = selected === "5+" ? 5 : Number(selected);
   if (count < game.players.min || count > game.players.max) return 0;
-  if (count === game.players.max) return 100;
-  return 92;
+  if (count === game.players.max || count === game.players.min) return 100;
+  return 94;
 }
 
 function scorePlatform(game, selected) {
   if (!selected) return 70;
-  if (selected === "crossplay") return game.platforms.length > 1 ? 100 : 35;
+  if (selected === "crossplay") {
+    return game.platforms.length > 1 ? 100 : 35;
+  }
   return game.platforms.includes(selected) ? 100 : 0;
 }
 
 function scoreTime(game, selected) {
   if (!selected) return 65;
+
   const available = Number(selected);
-  const ideal = game.idealSessionMinutes;
-  const ratio = available / ideal;
-  if (ratio >= 1) return 100;
-  if (ratio >= 0.75) return 90;
-  if (ratio >= 0.5) return 72;
-  if (ratio >= 0.33) return 55;
-  return 35;
+  const ideal = Number(game.idealSessionMinutes) || 60;
+  const difference = Math.abs(available - ideal);
+
+  if (difference === 0) return 100;
+  if (difference <= 30) return 96;
+  if (difference <= 60) return 90;
+  if (difference <= 90) return 82;
+  if (difference <= 120) return 72;
+  if (difference <= 180) return 58;
+  return 45;
 }
 
-function scoreTags(game, requestedTags) {
-  if (!requestedTags?.length) return 70;
+function scorePreferences(game, requestedPreferences) {
+  if (!requestedPreferences?.length) return 70;
 
-  const scores = requestedTags.map((tag) => scorePreferenceTag(tag, game));
-  return Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length);
-}
+  const intensity = getIntensity(game);
+  const scores = requestedPreferences.map((preference) => {
+    const value = Number(intensity[preference] ?? 0);
+    return value * 20;
+  });
 
-function scorePreferenceTag(tag, game) {
-  // Puzzle is an intensity preference, not a binary genre match.
-  // This prevents games with only light puzzle elements from tying with
-  // dedicated puzzle games.
-  if (tag === "puzzle") {
-    const intensity = Number(game.puzzleIntensity ?? 0);
-    return Math.max(0, Math.min(100, intensity * 20));
-  }
-
-  if (game.genres.includes(tag) || game.tags.includes(tag)) return 100;
-  if (tag === "chaos") {
-    return game.tags.includes("chaos") || game.genres.includes("action") ? 70 : 0;
-  }
-
-  return 0;
-}
-
-function tagMatchesGame(tag, game) {
-  if (tag === "puzzle") return Number(game.puzzleIntensity ?? 0) >= 4;
-  if (game.genres.includes(tag)) return true;
-  if (tag === "chaos") return game.tags.includes("chaos") || game.genres.includes("action");
-  return game.tags.includes(tag);
+  return Math.round(scores.reduce((sum, value) => sum + value, 0) / scores.length);
 }
 
 function scoreChallenge(game, preferred) {
@@ -111,32 +113,44 @@ function scoreChallenge(game, preferred) {
   return Math.max(35, 100 - distance * 20);
 }
 
+function getIntensity(game) {
+  if (game.intensity) return game.intensity;
+
+  return Object.fromEntries(
+    PREFERENCE_FIELDS.map((field) => [field, field === "puzzle" ? Number(game.puzzleIntensity ?? 0) : 0])
+  );
+}
+
 function buildReasons(game, preferences, scores) {
   const reasons = [];
-  const requestedTags = preferences.tags ?? [];
+  const requested = preferences.tags ?? [];
+  const intensity = getIntensity(game);
 
   if (scores.playerScore === 100) {
     reasons.push(`Fits ${preferences.players} players exactly.`);
   }
+
   if (scores.platformScore === 100) {
     reasons.push(`Available on ${platformLabel(preferences.platform)}.`);
   }
 
-  const matched = requestedTags.filter((tag) => tagMatchesGame(tag, game));
-  if (matched.length) {
-    reasons.push(`Matches ${matched.slice(0, 2).map(tagLabel).join(" and ")}.`);
-  }
+  if (requested.length) {
+    const strongest = [...requested]
+      .sort((a, b) => Number(intensity[b] ?? 0) - Number(intensity[a] ?? 0))
+      .slice(0, 2)
+      .filter((key) => Number(intensity[key] ?? 0) >= 3);
 
-  if (requestedTags.includes("puzzle")) {
-    const intensity = Number(game.puzzleIntensity ?? 0);
-    if (intensity >= 5) reasons.push("Strong puzzle focus.");
-    else if (intensity >= 4) reasons.push("Puzzle-focused gameplay.");
-    else if (intensity >= 2) reasons.push("Includes some puzzle elements.");
+    if (strongest.length) {
+      reasons.push(`Strong ${strongest.map(intensityLabel).join(" and ")} focus.`);
+    } else {
+      reasons.push("Includes some of the things you selected.");
+    }
   }
 
   if (scores.timeScore >= 90) {
-    reasons.push("Works well within your available play time.");
+    reasons.push("Fits your available play time well.");
   }
+
   if (!reasons.length) {
     reasons.push("A reasonable match for your group.");
   }
@@ -154,15 +168,19 @@ function platformLabel(value) {
   }[value] ?? value);
 }
 
-function tagLabel(value) {
+function intensityLabel(value) {
   return ({
     puzzle: "puzzle",
     action: "action",
     adventure: "adventure",
     horror: "horror",
-    chaos: "chaos",
-    story: "story",
-    strategy: "strategy",
     survival: "survival",
+    strategy: "strategy",
+    story: "story",
+    chaos: "chaos",
+    exploration: "exploration",
+    creativity: "creative",
+    relaxing: "relaxing",
+    competition: "competitive",
   }[value] ?? value);
 }
