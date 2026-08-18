@@ -1,0 +1,24 @@
+name: Coop Finder — Missing game
+description: Suggest a cooperative game for the BBFRAXY Coop Finder database.
+title: "Coop Finder: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Coop Finder. We'll verify the game and its metadata before adding it to the database.
+  - type: input
+    id: game
+    attributes:
+      label: Game title
+      placeholder: e.g. Bokura
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Useful details
+      description: Player count, platforms, genre, or why it belongs here.
+      placeholder: 2 players, PC, puzzle/communication...
+    validations:
+      required: false
