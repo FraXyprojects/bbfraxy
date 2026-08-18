@@ -12,7 +12,8 @@ const MAX_FILE_BYTES = 180000;
 const REPO_CACHE_TTL = 300;
 const USER_CACHE_TTL = 300;
 const FILE_CACHE_TTL = 300;
-const SUGGESTION_COOLDOWN_SECONDS = 1200;
+const SUGGESTION_WINDOW_SECONDS = 1200;
+const MAX_SUGGESTIONS_PER_WINDOW = 3;
 const MAX_GAME_NAME_LENGTH = 120;
 const MAX_SUGGESTION_LENGTH = 1200;
 const ALLOWED_ORIGINS = new Set(["https://bbfraxy.com", "https://www.bbfraxy.com"]);
@@ -83,14 +84,6 @@ async function handleCoopSuggestion(request, env, ctx, origin) {
     return json({ error: "Suggestion service is not configured.", code: "SUGGESTION_NOT_CONFIGURED" }, 503, {}, origin);
   }
 
-  const ip = request.headers.get("cf-connecting-ip") || "unknown";
-  const ipHash = await hashKey(ip);
-  const rateLimitKey = new Request(`https://cache.bbfraxy.local/coop-suggestion/${ipHash}`);
-  const existing = await caches.default.match(rateLimitKey);
-  if (existing) {
-    return json({ error: "Please wait a little before sending another suggestion.", code: "RATE_LIMITED" }, 429, { "retry-after": String(SUGGESTION_COOLDOWN_SECONDS) }, origin);
-  }
-
   let payload;
   try {
     payload = await request.json();
@@ -111,6 +104,34 @@ async function handleCoopSuggestion(request, env, ctx, origin) {
   }
   if (note.length > MAX_SUGGESTION_LENGTH) {
     return json({ error: `Additional details must be ${MAX_SUGGESTION_LENGTH} characters or fewer.` }, 400, {}, origin);
+  }
+
+  const ip = request.headers.get("cf-connecting-ip") || "unknown";
+  const ipHash = await hashKey(ip);
+  const rateLimitKey = new Request(`https://cache.bbfraxy.local/coop-suggestion/${ipHash}`);
+  const now = Math.floor(Date.now() / 1000);
+  const existing = await caches.default.match(rateLimitKey);
+
+  let timestamps = [];
+  if (existing) {
+    try {
+      const stored = await existing.json();
+      if (Array.isArray(stored?.timestamps)) {
+        timestamps = stored.timestamps.filter((timestamp) => Number.isFinite(timestamp) && now - timestamp < SUGGESTION_WINDOW_SECONDS);
+      }
+    } catch {
+      timestamps = [];
+    }
+  }
+
+  if (timestamps.length >= MAX_SUGGESTIONS_PER_WINDOW) {
+    const oldest = Math.min(...timestamps);
+    const retryAfter = Math.max(1, SUGGESTION_WINDOW_SECONDS - (now - oldest));
+    return json({
+      error: "Thanks for helping us improve Coop Finder! We allow a few suggestions per 20 minutes to keep the queue spam-free. Please try again a little later.",
+      code: "RATE_LIMITED",
+      retryAfter,
+    }, 429, { "retry-after": String(retryAfter) }, origin);
   }
 
   const issueBody = [
@@ -149,9 +170,13 @@ async function handleCoopSuggestion(request, env, ctx, origin) {
   }
 
   const issue = await response.json();
-  const rateResponse = new Response("1", {
+  const updatedTimestamps = [...timestamps, now].slice(-MAX_SUGGESTIONS_PER_WINDOW);
+  const rateResponse = new Response(JSON.stringify({ timestamps: updatedTimestamps }), {
     status: 200,
-    headers: { "cache-control": `public, max-age=${SUGGESTION_COOLDOWN_SECONDS}` },
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": `public, max-age=${SUGGESTION_WINDOW_SECONDS}`,
+    },
   });
   ctx.waitUntil(caches.default.put(rateLimitKey, rateResponse));
 
