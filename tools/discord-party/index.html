@@ -41,6 +41,34 @@
 
     .dp-pre { margin: 0; padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,.3); color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: .85rem; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; overflow-x: auto; }
 
+    .dp-vote-btn { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--accent); padding: 4px 8px; font-size: .75rem; font-weight: 700; cursor: pointer; transition: all 160ms ease; }
+    .dp-vote-btn:hover { background: var(--accent); color: #031014; }
+    .dp-vote-btn.active { background: var(--accent); color: #031014; }
+
+    /* Discord Preview */
+    .discord-preview { margin: 0; padding: 16px; border-radius: 8px; background: #313338; color: #dbdee1; font-family: "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 1rem; line-height: 1.375rem; display: flex; gap: 16px; white-space: normal; }
+    .discord-avatar { width: 40px; height: 40px; border-radius: 50%; background: #5865F2; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+    .discord-content { flex: 1; }
+    .discord-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+    .discord-name { color: #f2f3f5; font-weight: 500; font-size: 1rem; }
+    .discord-time { color: #949ba4; font-size: 0.75rem; }
+    .discord-text { color: #dbdee1; white-space: pre-wrap; word-wrap: break-word; }
+    .discord-text strong { color: #f2f3f5; font-weight: 700; }
+    .discord-text a { color: #00a8fc; text-decoration: none; }
+    .discord-text a:hover { text-decoration: underline; }
+
+    /* Modal */
+    .dp-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 200ms ease; }
+    .dp-modal-overlay.is-visible { display: flex; opacity: 1; }
+    .dp-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 24px 64px rgba(0,0,0,0.5); transform: translateY(20px); transition: transform 200ms ease; max-height: 90vh; overflow-y: auto; }
+    .dp-modal-overlay.is-visible .dp-modal { transform: translateY(0); }
+    .dp-modal-header { font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+    .dp-modal-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .dp-modal-option { display: flex; gap: 8px; align-items: center; }
+    .dp-modal-option-remove { background: #ff4a4a; color: white; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+    .dp-modal-add { display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; border: 1px dashed var(--border); border-radius: 8px; background: transparent; color: var(--text); font-weight: 600; cursor: pointer; margin-bottom: 24px; transition: border-color 160ms ease; }
+    .dp-modal-add:hover { border-color: var(--accent); color: var(--accent); }
+
     @media (max-width: 640px) {
       .dp-page { padding: 52px 0; }
       .dp-row { grid-template-columns: 1fr; gap: 20px; }
@@ -68,13 +96,25 @@
 
           <div class="dp-row">
             <div class="dp-field">
-              <label class="dp-label" for="dp-date" data-i18n="tools.discordParty.date">Datum</label>
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <label class="dp-label" for="dp-date" data-i18n="tools.discordParty.date">Datum</label>
+                <button type="button" class="dp-vote-btn" id="dp-vote-date-btn" data-i18n="tools.discordParty.voteBtn">Hlasovat</button>
+              </div>
               <input class="dp-input" type="date" id="dp-date" required>
+              <input type="hidden" id="dp-vote-data-hidden" value="">
             </div>
             <div class="dp-field">
-              <label class="dp-label" for="dp-time" data-i18n="tools.discordParty.time">Čas</label>
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <label class="dp-label" for="dp-time" data-i18n="tools.discordParty.time">Čas</label>
+                <button type="button" class="dp-vote-btn" id="dp-vote-time-btn" data-i18n="tools.discordParty.voteBtn">Hlasovat</button>
+              </div>
               <input class="dp-input" type="time" id="dp-time" value="20:00" required>
             </div>
+          </div>
+
+          <div class="dp-field">
+            <label class="dp-label" for="dp-place" data-i18n="tools.discordParty.place">Místo / Voice kanál (volitelné)</label>
+            <input class="dp-input" type="text" id="dp-place" placeholder="např. Hospůdka nebo https://discord.gg/..." data-i18n-attr="placeholder:tools.discordParty.placePlaceholder">
           </div>
 
           <div class="dp-field">
@@ -86,6 +126,11 @@
               <option value="Hospodský Kvíz">Hospodský Kvíz</option>
               <option value="Jackbox Games">Jackbox Games</option>
               <option value="Minecraft">Minecraft</option>
+              <option value="Codenames (Krycí jména)">Codenames (Krycí jména)</option>
+              <option value="GeoGuessr">GeoGuessr</option>
+              <option value="Kahoot">Kahoot</option>
+              <option value="Watchparty (Film / Seriál)">Watchparty (Film / Seriál)</option>
+              <option value="Watchparty (Sport)">Watchparty (Sport)</option>
             </select>
           </div>
 
@@ -103,12 +148,51 @@
       <section class="dp-output-section" id="dp-output-section" aria-live="polite">
         <div class="dp-output-heading">
           <h2 data-i18n="tools.discordParty.outputHeading">Vygenerovaná zpráva</h2>
-          <button class="dp-copy-btn" type="button" id="dp-copy-btn" data-i18n="tools.discordParty.copyBtn">Kopírovat do schránky</button>
+          <button class="dp-copy-btn" type="button" id="dp-copy-btn" data-i18n="tools.discordParty.copyBtn">Kopírovat kód pro Discord</button>
         </div>
-        <pre class="dp-pre" id="dp-output"></pre>
+
+        <div class="discord-preview" aria-hidden="true">
+          <div class="discord-avatar">BB</div>
+          <div class="discord-content">
+            <div class="discord-header">
+              <span class="discord-name" data-i18n="tools.discordParty.discordPreviewName">Ty</span>
+              <span class="discord-time">Dnes v 12:00</span>
+            </div>
+            <div class="discord-text" id="dp-preview-text"></div>
+          </div>
+        </div>
+
+        <pre class="dp-pre" id="dp-output" style="display: none;"></pre>
       </section>
     </main>
     <footer class="site-footer"><span>BBFRAXY</span></footer>
+  </div>
+
+  <!-- Modal -->
+  <div class="dp-modal-overlay" id="dp-vote-modal">
+    <div class="dp-modal">
+      <div class="dp-modal-header" data-i18n="tools.discordParty.modalTitle">Hlasování o termínu</div>
+
+      <div class="dp-field" style="margin-bottom: 20px;">
+        <label class="dp-label" data-i18n="tools.discordParty.modalTypeLabel">Typ hlasování</label>
+        <select class="dp-select" id="dp-modal-type">
+          <option value="dates" data-i18n="tools.discordParty.modalTypeDates">Jen dny</option>
+          <option value="times" data-i18n="tools.discordParty.modalTypeTimes">Jen časy</option>
+          <option value="combined" data-i18n="tools.discordParty.modalTypeCombined">Konkrétní termíny (Den + Čas)</option>
+        </select>
+      </div>
+
+      <div class="dp-modal-options" id="dp-modal-options">
+        <!-- JS will inject options here -->
+      </div>
+
+      <button type="button" class="dp-modal-add" id="dp-modal-add" data-i18n="tools.discordParty.modalAddBtn">+ Přidat možnost</button>
+
+      <div class="dp-actions" style="border-top: none; padding-top: 0;">
+        <button type="button" class="dp-copy-btn" id="dp-modal-cancel" data-i18n="tools.discordParty.modalCancelBtn">Zrušit</button>
+        <button type="button" class="dp-button" id="dp-modal-save" data-i18n="tools.discordParty.modalSaveBtn">Uložit hlasování</button>
+      </div>
+    </div>
   </div>
 
   <script src="../../assets/js/header.js" defer></script>
