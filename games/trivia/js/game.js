@@ -27,7 +27,8 @@ export function startGame({ state, gameBoard, timerElement, updateActiveSquare, 
 
     state.timer = setInterval(() => {
         state.timeElapsed += 1;
-        timerElement.textContent = `Čas: ${state.timeElapsed}s`;
+        const timePrefix = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("trivia.game.time") : "Čas:";
+        timerElement.textContent = `${timePrefix} ${state.timeElapsed}s`;
     }, 1000);
 
     state.currentIndex = 1;

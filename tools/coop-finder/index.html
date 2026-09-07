@@ -19,53 +19,54 @@
     <header class="site-header"></header>
     <main class="coop-page" id="main">
       <section class="coop-hero">
-        <h1>Coop Finder</h1>
-        <p>Tell us who is playing, how much time you have and what kind of experience you want. We’ll use that to find games that fit your group.</p>
+        <h1 data-i18n="tools.coopFinder.title">Coop Finder</h1>
+        <p data-i18n="tools.coopFinder.description">Tell us who is playing, how much time you have and what kind of experience you want. We’ll use that to find games that fit your group.</p>
       </section>
-      <section class="coop-card" aria-label="Coop Finder setup">
+      <section class="coop-card" aria-label="Coop Finder setup" data-i18n-attr="aria-label:tools.coopFinder.ariaSetup">
         <div class="coop-step">
-          <p class="coop-label">01 · Players</p>
+          <p class="coop-label" data-i18n="tools.coopFinder.step1">01 · Players</p>
           <div class="choice-grid" data-group="players">
             <button class="choice" type="button" data-value="1">1</button><button class="choice" type="button" data-value="2">2</button><button class="choice" type="button" data-value="3">3</button><button class="choice" type="button" data-value="4">4</button><button class="choice" type="button" data-value="5+">5+</button>
           </div>
         </div>
         <div class="coop-step">
-          <div class="time-value"><p class="coop-label" style="margin:0">02 · Time available</p><strong id="time-value-label">2 h</strong></div>
+          <div class="time-value"><p class="coop-label" style="margin:0" data-i18n="tools.coopFinder.step2">02 · Time available</p><strong id="time-value-label">2 h</strong></div>
           <div class="time-picker">
-            <input class="time-range" id="time-range" type="range" min="30" max="360" step="30" value="120" aria-label="Time available">
-            <div class="time-scale"><span>30 min</span><span>3 h</span><span>6 h</span></div>
+            <input class="time-range" id="time-range" type="range" min="30" max="360" step="30" value="120" aria-label="Time available" data-i18n-attr="aria-label:tools.coopFinder.ariaTime">
+            <div class="time-scale"><span data-i18n="tools.coopFinder.time30">30 min</span><span data-i18n="tools.coopFinder.time3">3 h</span><span data-i18n="tools.coopFinder.time6">6 h</span></div>
           </div>
         </div>
         <div class="coop-step">
-          <p class="coop-label">03 · What sounds fun?</p>
+          <p class="coop-label" data-i18n="tools.coopFinder.step3">03 · What sounds fun?</p>
           <div class="tag-grid" data-group="tags">
-            <button class="tag" type="button" data-value="puzzle">Puzzle</button><button class="tag" type="button" data-value="action">Action</button><button class="tag" type="button" data-value="adventure">Adventure</button><button class="tag" type="button" data-value="horror">Horror</button><button class="tag" type="button" data-value="survival">Survival</button><button class="tag" type="button" data-value="strategy">Strategy</button><button class="tag" type="button" data-value="story">Story</button><button class="tag" type="button" data-value="chaos">Funny / chaotic</button><button class="tag" type="button" data-value="exploration">Exploration</button><button class="tag" type="button" data-value="creativity">Creative</button><button class="tag" type="button" data-value="relaxing">Relaxing</button><button class="tag" type="button" data-value="competition">Competitive</button><button class="tag" type="button" data-value="party">Party</button><button class="tag" type="button" data-value="shooter">Shooter</button><button class="tag" type="button" data-value="simulation">Simulation</button><button class="tag" type="button" data-value="roguelike">Roguelike</button>
+            <button class="tag" type="button" data-value="puzzle" data-i18n="tools.coopFinder.tag.puzzle">Puzzle</button><button class="tag" type="button" data-value="action" data-i18n="tools.coopFinder.tag.action">Action</button><button class="tag" type="button" data-value="adventure" data-i18n="tools.coopFinder.tag.adventure">Adventure</button><button class="tag" type="button" data-value="horror" data-i18n="tools.coopFinder.tag.horror">Horror</button><button class="tag" type="button" data-value="survival" data-i18n="tools.coopFinder.tag.survival">Survival</button><button class="tag" type="button" data-value="strategy" data-i18n="tools.coopFinder.tag.strategy">Strategy</button><button class="tag" type="button" data-value="story" data-i18n="tools.coopFinder.tag.story">Story</button><button class="tag" type="button" data-value="chaos" data-i18n="tools.coopFinder.tag.chaos">Funny / chaotic</button><button class="tag" type="button" data-value="exploration" data-i18n="tools.coopFinder.tag.exploration">Exploration</button><button class="tag" type="button" data-value="creativity" data-i18n="tools.coopFinder.tag.creative">Creative</button><button class="tag" type="button" data-value="relaxing" data-i18n="tools.coopFinder.tag.relaxing">Relaxing</button><button class="tag" type="button" data-value="competition" data-i18n="tools.coopFinder.tag.competitive">Competitive</button><button class="tag" type="button" data-value="party" data-i18n="tools.coopFinder.tag.party">Party</button><button class="tag" type="button" data-value="shooter" data-i18n="tools.coopFinder.tag.shooter">Shooter</button><button class="tag" type="button" data-value="simulation" data-i18n="tools.coopFinder.tag.simulation">Simulation</button><button class="tag" type="button" data-value="roguelike" data-i18n="tools.coopFinder.tag.roguelike">Roguelike</button>
           </div>
         </div>
         <div class="coop-step">
-          <p class="coop-label">04 · Platform</p>
+          <p class="coop-label" data-i18n="tools.coopFinder.step4">04 · Platform</p>
           <div class="choice-grid" data-group="platform">
             <button class="choice" type="button" data-value="pc">PC</button><button class="choice" type="button" data-value="playstation">PlayStation</button><button class="choice" type="button" data-value="xbox">Xbox</button><button class="choice" type="button" data-value="switch">Switch</button><button class="choice" type="button" data-value="crossplay">Crossplay</button>
           </div>
         </div>
-        <div class="coop-actions"><button class="coop-button" type="button" id="find-games">Find games →</button></div>
-        <p class="coop-note">Choose as many preferences as you like. The more you select, the more specific the match becomes.</p>
+        <div class="coop-actions"><button class="coop-button" type="button" id="find-games" data-i18n="tools.coopFinder.findBtn">Find games →</button></div>
+        <p class="coop-note" data-i18n="tools.coopFinder.note">Choose as many preferences as you like. The more you select, the more specific the match becomes.</p>
       </section>
       <div id="missing-game-panel" class="missing-panel" aria-hidden="true">
-        <div class="missing-head"><div><h2>Missing a game?</h2><p>Tell us what should be added. We’ll review it and decide whether it belongs in the database.</p></div><button class="missing-close" type="button" id="missing-close" aria-label="Close">×</button></div>
+        <div class="missing-head"><div><h2 data-i18n="tools.coopFinder.missing.title">Missing a game?</h2><p data-i18n="tools.coopFinder.missing.desc">Tell us what should be added. We’ll review it and decide whether it belongs in the database.</p></div><button class="missing-close" type="button" id="missing-close" aria-label="Close" data-i18n-attr="aria-label:tools.coopFinder.missing.close">×</button></div>
         <form class="missing-form" id="missing-form">
-          <input id="missing-title" name="title" type="text" placeholder="Game title" maxlength="120" autocomplete="off" required>
-          <textarea id="missing-note" name="note" maxlength="1200" placeholder="Anything useful? e.g. why it belongs here, player count, platform..."></textarea>
+          <input id="missing-title" name="title" type="text" placeholder="Game title" maxlength="120" autocomplete="off" required data-i18n-attr="placeholder:tools.coopFinder.missing.placeholderTitle">
+          <textarea id="missing-note" name="note" maxlength="1200" placeholder="Anything useful? e.g. why it belongs here, player count, platform..." data-i18n-attr="placeholder:tools.coopFinder.missing.placeholderNote"></textarea>
           <input id="missing-website" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" class="honeypot">
-          <button class="missing-submit" type="submit">Send game suggestion →</button>
+          <button class="missing-submit" type="submit" data-i18n="tools.coopFinder.missing.submit">Send game suggestion →</button>
           <p class="missing-error" id="missing-status" aria-live="polite"></p>
-          <p class="missing-note">Your suggestion will be added to our review queue.</p>
+          <p class="missing-note" data-i18n="tools.coopFinder.missing.note">Your suggestion will be added to our review queue.</p>
         </form>
       </div>
     </main>
-    <button class="missing-trigger" type="button" id="missing-trigger">Missing a game?</button>
-    <footer class="site-footer"><span>BBFRAXY</span></footer>
+    <button class="missing-trigger" type="button" id="missing-trigger" data-i18n="tools.coopFinder.missing.triggerBtn">Missing a game?</button>
+    <footer class="site-footer"><span data-i18n="footer.text">BBFRAXY</span></footer>
   </div>
+  <script src="/assets/js/i18n.js" defer></script>
   <script src="../../assets/js/header.js" defer></script>
   <script src="../../assets/js/main.js" defer></script>
   <script type="module" src="./app.js"></script>

@@ -41,26 +41,27 @@
     <header class="site-header"></header>
     <main class="games-page" id="main">
       <header class="games-heading">
-        <h1>Mini games & experiments.</h1>
-        <p>Staré FraXy hry převedené z Wixu přímo na BBFRAXY, plus nové experimenty.</p>
+        <h1 data-i18n="games.title">Mini games & experiments.</h1>
+        <p data-i18n="games.description">Staré FraXy hry převedené z Wixu přímo na BBFRAXY, plus nové experimenty.</p>
       </header>
-      <section class="games-grid" aria-label="BBFRAXY games">
-        <a class="game-card" href="/games/trivia/" aria-label="Open FraXy's Trivia">
-          <div><div class="game-card-top"><div class="game-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h10"/><path d="m17 15 3 3-3 3"/></svg></div><span class="game-status">Local</span></div><h2>FraXy´s Trivia</h2><p>Deskový vědomostní kvíz s kategoriemi, náhodnými otázkami, časem a výsledkem.</p></div>
-          <div class="game-card-footer"><span class="game-meta">Quiz · BBFRAXY</span><span class="game-action">Play →</span></div>
+      <section class="games-grid" aria-label="BBFRAXY games" data-i18n-attr="aria-label:games.sectionLabel">
+        <a class="game-card" href="/games/trivia/" aria-label="Open FraXy's Trivia" data-i18n-attr="aria-label:games.trivia.aria">
+          <div><div class="game-card-top"><div class="game-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h10"/><path d="m17 15 3 3-3 3"/></svg></div><span class="game-status" data-i18n="games.status.local">Local</span></div><h2 data-i18n="games.trivia.title">FraXy´s Trivia</h2><p data-i18n="games.trivia.description">Deskový vědomostní kvíz s kategoriemi, náhodnými otázkami, časem a výsledkem.</p></div>
+          <div class="game-card-footer"><span class="game-meta" data-i18n="games.trivia.meta">Quiz · BBFRAXY</span><span class="game-action" data-i18n="games.playAction">Play →</span></div>
         </a>
-        <a class="game-card" href="/games/fraxy-soutez/" aria-label="Open FraXyho soutěž">
-          <div><div class="game-card-top"><div class="game-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6.2 6.2l11.6 11.6M17.8 6.2 6.2 17.8"/></svg></div><span class="game-status">Local</span></div><h2>FraXyho soutěž</h2><p>Evropská mapa a tipovací soutěž. Za každou odpověď získáš body podle přesnosti.</p></div>
-          <div class="game-card-footer"><span class="game-meta">Map · Competition</span><span class="game-action">Play →</span></div>
+        <a class="game-card" href="/games/fraxy-soutez/" aria-label="Open FraXyho soutěž" data-i18n-attr="aria-label:games.soutez.aria">
+          <div><div class="game-card-top"><div class="game-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6.2 6.2l11.6 11.6M17.8 6.2 6.2 17.8"/></svg></div><span class="game-status" data-i18n="games.status.local">Local</span></div><h2 data-i18n="games.soutez.title">FraXyho soutěž</h2><p data-i18n="games.soutez.description">Evropská mapa a tipovací soutěž. Za každou odpověď získáš body podle přesnosti.</p></div>
+          <div class="game-card-footer"><span class="game-meta" data-i18n="games.soutez.meta">Map · Competition</span><span class="game-action" data-i18n="games.playAction">Play →</span></div>
         </a>
-        <a class="game-card" href="/games/riskuj/" aria-label="Open Riskuj">
-          <div><div class="game-card-top"><div class="game-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v13H4z"/><path d="M8 9h8M8 12h5M8 15h7"/></svg></div><span class="game-status">Local</span></div><h2>Riskuj</h2><p>Jedna sjednocená verze Riskuj se dvěma režimy: rychlá klasika a rozšířená hra s vlastním importovaným kvízem.</p></div>
-          <div class="game-card-footer"><span class="game-meta">Multiplayer · Quiz</span><span class="game-action">Play →</span></div>
+        <a class="game-card" href="/games/riskuj/" aria-label="Open Riskuj" data-i18n-attr="aria-label:games.riskuj.aria">
+          <div><div class="game-card-top"><div class="game-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v13H4z"/><path d="M8 9h8M8 12h5M8 15h7"/></svg></div><span class="game-status" data-i18n="games.status.local">Local</span></div><h2 data-i18n="games.riskuj.title">Riskuj</h2><p data-i18n="games.riskuj.description">Jedna sjednocená verze Riskuj se dvěma režimy: rychlá klasika a rozšířená hra s vlastním importovaným kvízem.</p></div>
+          <div class="game-card-footer"><span class="game-meta" data-i18n="games.riskuj.meta">Multiplayer · Quiz</span><span class="game-action" data-i18n="games.playAction">Play →</span></div>
         </a>
       </section>
     </main>
-    <footer class="site-footer"><span>BBFRAXY</span></footer>
+    <footer class="site-footer"><span data-i18n="footer.text">BBFRAXY</span></footer>
   </div>
+  <script src="/assets/js/i18n.js" defer></script>
   <script src="/assets/js/header.js" defer></script>
   <script src="/assets/js/main.js" defer></script>
 </body>

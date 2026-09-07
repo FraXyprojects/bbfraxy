@@ -259,7 +259,7 @@ function submitAnswer() {
     const answer = Number.parseFloat(answerInput.value);
 
     if (!currentCountry || Number.isNaN(answer)) {
-        alert('Prosím zadej číselnou odpověď.');
+        alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.game.alertNumber") : 'Prosím zadej číselnou odpověď.');
         return;
     }
 
@@ -334,16 +334,24 @@ function renderQuestionHistory() {
         score.className = 'question-history-score';
 
         if (!history) {
+            const yourAnswer = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.yourAnswer") : "Tvoje odpověď";
+            const unanswered = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.unanswered") : "nezodpovězeno";
+            const correctAnswerTxt = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.correctAnswer") : "Správná odpověď";
+
             answer.textContent =
-                `Tvoje odpověď: nezodpovězeno · ` +
-                `Správná odpověď: ${formatNumber(data.answer)}`;
+                `${yourAnswer}: ${unanswered} · ` +
+                `${correctAnswerTxt}: ${formatNumber(data.answer)}`;
             score.classList.add('low');
             score.textContent = '0 b.';
         } else {
+            const yourAnswer = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.yourAnswer") : "Tvoje odpověď";
+            const correctAnswerTxt = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.correctAnswer") : "Správná odpověď";
+            const diffTxt = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.difference") : "Rozdíl";
+
             answer.textContent =
-                `Tvoje odpověď: ${formatNumber(history.answer)} · ` +
-                `Správná odpověď: ${formatNumber(history.correctAnswer)} · ` +
-                `Rozdíl: ${formatNumber(history.difference)}`;
+                `${yourAnswer}: ${formatNumber(history.answer)} · ` +
+                `${correctAnswerTxt}: ${formatNumber(history.correctAnswer)} · ` +
+                `${diffTxt}: ${formatNumber(history.difference)}`;
             score.classList.toggle('low', history.score < 50);
             score.textContent = `+${history.score.toFixed(2)} b.`;
         }
@@ -388,15 +396,17 @@ function finishCompetition(reason) {
 
     const duration = endTime.getTime() - startTime.getTime();
     totalScoreElement.textContent = totalScore.toFixed(2);
-    durationElement.textContent = `Trvání: ${formatDuration(duration)}`;
+    const durationTxt = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.duration") : "Trvání:";
+    durationElement.textContent = `${durationTxt} ${formatDuration(duration)}`;
 
     if (reason === 'complete') {
-        resultSummary.textContent =
-            `Odpověděl jsi na všech ${Object.keys(countries).length} otázek.`;
+        const completeTxt1 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.complete1") : "Odpověděl jsi na všech";
+        const completeTxt2 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.complete2") : "otázek.";
+        resultSummary.textContent = `${completeTxt1} ${Object.keys(countries).length} ${completeTxt2}`;
     } else {
         const unanswered = Object.keys(countries).length - answeredCountries.size;
-        resultSummary.textContent =
-            `Soutěž ukončena předčasně. Nezodpovězeno: ${unanswered}.`;
+        const earlyTxt1 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.early1") : "Soutěž ukončena předčasně. Nezodpovězeno:";
+        resultSummary.textContent = `${earlyTxt1} ${unanswered}.`;
     }
 
     renderQuestionHistory();
@@ -480,8 +490,12 @@ function finishEarly() {
         return;
     }
 
+    const confirmMsg1 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.game.confirmEarly1") : "Opravdu chceš soutěž ukončit předčasně?";
+    const confirmMsg2 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.game.confirmEarly2") : "Nezodpovězeno zůstane";
+    const confirmMsg3 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.game.confirmEarly3") : "otázek a ty získají 0 bodů.";
+
     const confirmed = window.confirm(
-        `Opravdu chceš soutěž ukončit předčasně?\n\nNezodpovězeno zůstane ${remaining} otázek a ty získají 0 bodů.`
+        `${confirmMsg1}\n\n${confirmMsg2} ${remaining} ${confirmMsg3}`
     );
 
     if (confirmed) {
@@ -491,13 +505,13 @@ function finishEarly() {
 
 async function downloadResult() {
     if (!window.html2canvas) {
-        alert('Nástroj pro stažení výsledku není dostupný.');
+        alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.game.html2canvasError") : 'Nástroj pro stažení výsledku není dostupný.');
         return;
     }
 
     const previousText = downloadResultButton.textContent;
     downloadResultButton.disabled = true;
-    downloadResultButton.textContent = 'Generuji…';
+    downloadResultButton.textContent = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.game.generating") : 'Generuji…';
     resultScreen.classList.add('exporting');
 
     try {
@@ -514,7 +528,7 @@ async function downloadResult() {
         link.href = canvas.toDataURL('image/png');
         link.click();
     } catch (error) {
-        alert('Nepodařilo se vytvořit obrázek výsledku.');
+        alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.game.imageGenError") : 'Nepodařilo se vytvořit obrázek výsledku.');
     } finally {
         resultScreen.classList.remove('exporting');
         downloadResultButton.disabled = false;

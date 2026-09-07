@@ -122,15 +122,16 @@ function loadQuiz(event) {
 
             const loadStatus = $('loadStatus');
             if (loadStatus) {
-                loadStatus.textContent =
-                    `Načteno: ${state.topics.length} témat. Kvíz je připraven.`;
+                const text1 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.loadedPrefix") : "Načteno:";
+                const text2 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.topicsLoaded") : "témat. Kvíz je připraven.";
+                loadStatus.textContent = `${text1} ${state.topics.length} ${text2}`;
             }
         } catch {
             state.loadedQuiz = false;
 
             const loadStatus = $('loadStatus');
             if (loadStatus) {
-                loadStatus.textContent = 'Soubor není platný Riskuj JSON.';
+                loadStatus.textContent = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.invalidJson") : 'Soubor není platný Riskuj JSON.';
             }
         }
     };
@@ -154,12 +155,12 @@ function startGame() {
     });
 
     if (state.runMode === 'build' && !readBuilt(setupEl)) {
-        alert('Zadej alespoň jedno téma.');
+        alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.alertOneTopic") : 'Zadej alespoň jedno téma.');
         return;
     }
 
     if (state.runMode === 'prepared' && !state.loadedQuiz) {
-        alert('Nejdřív vyber a načti quiz.json.');
+        alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.alertLoadQuiz") : 'Nejdřív vyber a načti quiz.json.');
         return;
     }
 
@@ -181,15 +182,17 @@ function startGame() {
 function updateScores() {
     $('scores').innerHTML = state.players
         .map(
-            (player, index) => `
+            (player, index) => {
+                const points = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.points") : "bodů";
+                return `
                 <div
                     class="score ${index === state.currentPlayer ? 'active' : ''}"
                     style="--player-color:${player.color}"
                 >
                     <strong>${esc(player.name)}</strong><br>
-                    ${player.score} bodů
+                    ${player.score} ${points}
                 </div>
-            `
+            `}
         )
         .join('');
 }
@@ -219,7 +222,7 @@ function startTimer() {
             state.timer = null;
 
             if (currentTimer) {
-                currentTimer.textContent = 'ČAS';
+                currentTimer.textContent = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.game.timeUp") : 'ČAS';
             }
         }
     }, 1000);

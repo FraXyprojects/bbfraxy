@@ -32,18 +32,19 @@
     <header class="site-header"></header>
     <main class="simplifier-page" id="main">
       <section class="simplifier-card" aria-labelledby="simplifier-title">
-        <h1 id="simplifier-title">GitHub Simplifier</h1>
+        <h1 id="simplifier-title" data-i18n="tools.githubSimplifier.title">GitHub Simplifier</h1>
         <form class="simplifier-form" novalidate>
-          <label class="sr-only" for="repository-url">GitHub repository URL</label>
-          <input class="simplifier-input" id="repository-url" name="repository-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://github.com/owner/repository" aria-label="GitHub repository URL">
-          <button class="simplifier-submit" type="submit">Analyze</button>
+          <label class="sr-only" for="repository-url" data-i18n="tools.githubSimplifier.labelUrl">GitHub repository URL</label>
+          <input class="simplifier-input" id="repository-url" name="repository-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://github.com/owner/repository" aria-label="GitHub repository URL" data-i18n-attr="placeholder:tools.githubSimplifier.placeholderUrl;aria-label:tools.githubSimplifier.labelUrl">
+          <button class="simplifier-submit" type="submit" data-i18n="tools.githubSimplifier.analyzeBtn">Analyze</button>
         </form>
-        <p class="simplifier-description"><strong>Paste a public GitHub repository URL.</strong> GitHub Simplifier turns the repository into a clearer overview of what the project is, how it is structured, which files matter and what they are likely used for.</p>
-        <p class="simplifier-note">You can also enter a GitHub user URL and choose one of their public repositories.</p>
+        <p class="simplifier-description"><strong data-i18n="tools.githubSimplifier.descStrong">Paste a public GitHub repository URL.</strong> <span data-i18n="tools.githubSimplifier.descRest">GitHub Simplifier turns the repository into a clearer overview of what the project is, how it is structured, which files matter and what they are likely used for.</span></p>
+        <p class="simplifier-note" data-i18n="tools.githubSimplifier.note">You can also enter a GitHub user URL and choose one of their public repositories.</p>
       </section>
     </main>
-    <footer class="site-footer"><span>BBFRAXY</span></footer>
+    <footer class="site-footer"><span data-i18n="footer.text">BBFRAXY</span></footer>
   </div>
+  <script src="/assets/js/i18n.js" defer></script>
   <script src="../../assets/js/header.js" defer></script>
   <script src="../../assets/js/main.js" defer></script>
   <script src="./proxy-fetch.js" defer></script>

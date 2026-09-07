@@ -10,6 +10,7 @@
     <title>BBFRAXY | Riskuj Quiz Builder</title>
 
     <link rel="stylesheet" href="/assets/css/styles.css">
+    <script src="/assets/js/i18n.js" defer></script>
 
     <style>
         main {
@@ -247,20 +248,19 @@
         <main>
             <section class="hero">
                 <div class="eyebrow">FRAXY // QUIZ BUILDER</div>
-                <h1>Vytvoř nebo uprav kvíz.</h1>
+                <h1 data-i18n="builder.title">Vytvoř nebo uprav kvíz.</h1>
                 <p>
-                    Připrav si vlastní témata, otázky, odpovědi a bodové hodnoty.
-                    Výsledek uložíš jako <strong>quiz.json</strong> a pak ho nahraješ do Riskuj.
+                    <span data-i18n="builder.desc1">Připrav si vlastní témata, otázky, odpovědi a bodové hodnoty. Výsledek uložíš jako </span><strong>quiz.json</strong><span data-i18n="builder.desc2"> a pak ho nahraješ do Riskuj.</span>
                 </p>
             </section>
 
             <section class="panel">
                 <div class="toolbar">
                     <div class="toolbar-main">
-                        <button class="btn" onclick="newQuiz()">＋ Nový kvíz</button>
+                        <button class="btn" onclick="newQuiz()" data-i18n="builder.btn.new">＋ Nový kvíz</button>
 
                         <label class="btn secondary">
-                            📂 Načíst JSON
+                            <span data-i18n="builder.btn.load">📂 Načíst JSON</span>
                             <input
                                 id="file"
                                 type="file"
@@ -269,12 +269,12 @@
                             >
                         </label>
 
-                        <button class="btn secondary" onclick="downloadQuiz()">
+                        <button class="btn secondary" onclick="downloadQuiz()" data-i18n="builder.btn.download">
                             ↓ Stáhnout quiz.json
                         </button>
                     </div>
 
-                    <a class="btn secondary toolbar-back" href="/games/riskuj/">
+                    <a class="btn secondary toolbar-back" href="/games/riskuj/" data-i18n="builder.btn.backToRiskuj">
                         ← Zpět do Riskuj
                     </a>
                 </div>
@@ -282,12 +282,12 @@
                 <div id="status" class="status"></div>
                 <div id="topics"></div>
 
-                <div id="empty" class="empty hidden">
+                <div id="empty" class="empty hidden" data-i18n="builder.empty">
                     Zatím nemáš žádné téma. Začni tlačítkem
                     <strong>＋ Přidat téma</strong>.
                 </div>
 
-                <button class="btn secondary" onclick="addTopic()">
+                <button class="btn secondary" onclick="addTopic()" data-i18n="builder.btn.addTopic">
                     ＋ Přidat téma
                 </button>
             </section>
@@ -325,7 +325,7 @@
                 ]
             });
 
-            setStatus('Nový prázdný kvíz.');
+            setStatus(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.status.newEmpty") : 'Nový prázdný kvíz.');
         }
 
         function addTopic(topic = { name: '', questions: [] }) {
@@ -360,6 +360,9 @@
         }
 
         function render() {
+            if (window.BBFRAXY_I18N && window.BBFRAXY_I18N.apply) {
+                window.BBFRAXY_I18N.apply();
+            }
             emptyEl.classList.toggle('hidden', data.topics.length > 0);
 
             topicsEl.innerHTML = data.topics
@@ -370,7 +373,7 @@
                                 <input
                                     class="input"
                                     value="${esc(topic.name)}"
-                                    placeholder="Název tématu"
+                                    placeholder="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.placeholder.topicName') : 'Název tématu'}"
                                     oninput="data.topics[${topicIndex}].name=this.value"
                                 >
 
@@ -378,7 +381,7 @@
                                     class="btn danger"
                                     onclick="removeTopic(${topicIndex})"
                                 >
-                                    Smazat téma
+                                    ${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.btn.deleteTopic') : 'Smazat téma'}
                                 </button>
                             </div>
 
@@ -390,14 +393,14 @@
                                                 <input
                                                     class="input"
                                                     value="${esc(question.question)}"
-                                                    placeholder="Otázka"
+                                                    placeholder="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.placeholder.question') : 'Otázka'}"
                                                     oninput="data.topics[${topicIndex}].questions[${questionIndex}].question=this.value"
                                                 >
 
                                                 <input
                                                     class="input"
                                                     value="${esc(question.answer)}"
-                                                    placeholder="Odpověď"
+                                                    placeholder="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.placeholder.answer') : 'Odpověď'}"
                                                     oninput="data.topics[${topicIndex}].questions[${questionIndex}].answer=this.value"
                                                 >
 
@@ -426,7 +429,7 @@
                                 class="btn secondary"
                                 onclick="addQuestion(${topicIndex})"
                             >
-                                ＋ Přidat otázku
+                                ＋ ${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.btn.addQuestion') : 'Přidat otázku'}
                             </button>
                         </article>
                     `;
@@ -436,7 +439,7 @@
 
         function downloadQuiz() {
             if (!data.topics.length) {
-                alert('Nejdřív přidej alespoň jedno téma.');
+                alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.alert.oneTopic") : 'Nejdřív přidej alespoň jedno téma.');
                 return;
             }
 
@@ -453,7 +456,7 @@
             anchor.click();
 
             URL.revokeObjectURL(url);
-            setStatus('quiz.json byl připraven ke stažení.');
+            setStatus(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.status.readyDownload") : 'quiz.json byl připraven ke stažení.');
         }
 
         function loadFile() {
@@ -485,9 +488,11 @@
                     };
 
                     render();
-                    setStatus(`Načteno ${data.topics.length} témat z ${file.name}.`);
+                    const txt1 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.status.loadedPrefix") : "Načteno";
+                    const txt2 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.status.topicsFrom") : "témat z";
+                    setStatus(`${txt1} ${data.topics.length} ${txt2} ${file.name}.`);
                 } catch {
-                    alert('Soubor nemá platný Riskuj JSON.');
+                    alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.alert.invalidJson") : 'Soubor nemá platný Riskuj JSON.');
                 }
             };
 
@@ -516,8 +521,23 @@
 
         const params = new URLSearchParams(location.search);
         if (params.get('edit') === '1') {
-            setStatus('Režim úprav: načti svůj existující quiz.json.');
+            setStatus(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.status.editMode") : 'Režim úprav: načti svůj existující quiz.json.');
         }
+
+        window.addEventListener("bbfraxy:locale-change", () => {
+            render();
+            // Re-run status setting logic based on current data state
+            if (data.topics.length > 0 && document.getElementById('file').files.length > 0) {
+                 const file = document.getElementById('file').files[0];
+                 const txt1 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.status.loadedPrefix") : "Načteno";
+                 const txt2 = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.status.topicsFrom") : "témat z";
+                 setStatus(`${txt1} ${data.topics.length} ${txt2} ${file.name}.`);
+            } else if (new URLSearchParams(location.search).get('edit') === '1') {
+                 setStatus(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.status.editMode") : 'Režim úprav: načti svůj existující quiz.json.');
+            } else {
+                 setStatus(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("builder.status.newEmpty") : 'Nový prázdný kvíz.');
+            }
+        });
     </script>
 </body>
 </html>

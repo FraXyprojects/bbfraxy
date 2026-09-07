@@ -76,12 +76,11 @@ function askQuestion(index) {
 }
 
 function showRetry() {
-    questionText.textContent =
-        'To se ti nepovedlo. Klikni na pokračovat nebo restart.';
+    questionText.textContent = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("trivia.game.failedRetry") : 'To se ti nepovedlo. Klikni na pokračovat nebo restart.';
     answerButtons.style.display = 'none';
 
     const continueButton = document.createElement('button');
-    continueButton.textContent = 'Pokračovat';
+    continueButton.textContent = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("trivia.game.continue") : 'Pokračovat';
     continueButton.classList.add('btn', 'btn-restart');
     continueButton.onclick = () => {
         questionContainer.style.display = 'block';
@@ -91,7 +90,7 @@ function showRetry() {
     };
 
     const restartButton = document.createElement('button');
-    restartButton.textContent = 'Restartovat';
+    restartButton.textContent = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("trivia.game.restart") : 'Restartovat';
     restartButton.classList.add('btn', 'btn-restart');
     restartButton.onclick = restartGame;
 

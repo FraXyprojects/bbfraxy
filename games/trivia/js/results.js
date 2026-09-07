@@ -16,7 +16,7 @@ export function showResult({
 
 export function downloadResult({ result }) {
     if (!window.html2canvas) {
-        alert('Chyba: html2canvas není dostupné.');
+        alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("trivia.game.html2canvasError") : 'Chyba: html2canvas není dostupné.');
         return;
     }
 
@@ -30,7 +30,7 @@ export function downloadResult({ result }) {
             link.click();
         })
         .catch(() => {
-            alert('Chyba při generování obrázku výsledku.');
+            alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("trivia.game.imageGenError") : 'Chyba při generování obrázku výsledku.');
         });
 }
 

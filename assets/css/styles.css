@@ -247,6 +247,17 @@ button {
   transform: translateY(-1px);
 }
 
+.lang-flag svg {
+  border-radius: 2px;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: block;
+}
+
+[data-theme="light"] .lang-flag svg {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
 .theme-icon {
   width: 18px;
   height: 18px;
