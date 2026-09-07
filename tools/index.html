@@ -29,6 +29,17 @@
     @media (max-width: 760px) { .section-page { padding: 52px 0 52px; } .tools-grid { grid-template-columns: 1fr; } }
     @media (max-width: 420px) { .tool-card { padding: 20px; } .tool-card-footer { align-items: flex-start; flex-direction: column; } .tool-action { width: 100%; } }
   </style>
+
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('bbfraxy-locale') === 'cs') {
+          document.documentElement.setAttribute('data-i18n-loading', '');
+          document.write('<style>[data-i18n-loading] [data-i18n], [data-i18n-loading] [data-i18n-attr] { opacity: 0 !important; visibility: hidden !important; }</style>');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <canvas class="ambient-canvas" id="ambient-canvas" aria-hidden="true"></canvas>
