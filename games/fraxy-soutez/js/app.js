@@ -514,7 +514,6 @@ async function downloadResult() {
         link.href = canvas.toDataURL('image/png');
         link.click();
     } catch (error) {
-        console.error(error);
         alert('Nepodařilo se vytvořit obrázek výsledku.');
     } finally {
         resultScreen.classList.remove('exporting');
