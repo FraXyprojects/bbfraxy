@@ -33,7 +33,7 @@
         </div>
         <div class="nav-actions">
           <button class="icon-button lang-toggle" type="button" aria-label="Switch language" data-i18n-attr="aria-label:nav.switchLanguage">
-            <span class="lang-text" aria-hidden="true"></span>
+            <span class="lang-flag" aria-hidden="true">🇨🇿</span>
           </button>
           <button class="icon-button theme-toggle" type="button" aria-label="Switch theme" aria-pressed="false" data-i18n-attr="aria-label:nav.switchTheme">
             <span class="theme-icon" aria-hidden="true"></span>
@@ -44,22 +44,53 @@
   `;
 
   const langToggle = header.querySelector(".lang-toggle");
-  const langText = langToggle?.querySelector(".lang-text");
+  const langFlag = langToggle?.querySelector(".lang-flag");
 
-  const syncLangToggle = () => {
-    if (langText && window.BBFRAXY_I18N) {
-      langText.textContent = window.BBFRAXY_I18N.getLocale().toUpperCase();
+  const getLocaleFromStorage = () => {
+    try {
+      return localStorage.getItem("bbfraxy-locale") === "en" ? "en" : "cs";
+    } catch {
+      return "cs";
     }
   };
 
-  if (langToggle) {
-    syncLangToggle();
-    langToggle.addEventListener("click", () => {
-      if (window.BBFRAXY_I18N) {
-        const current = window.BBFRAXY_I18N.getLocale();
-        const next = current === "cs" ? "en" : "cs";
-        window.BBFRAXY_I18N.setLocale(next);
+  const syncLangToggle = () => {
+    const locale = window.BBFRAXY_I18N?.getLocale?.() || getLocaleFromStorage();
+    if (langFlag) langFlag.textContent = locale === "en" ? "🇺🇸" : "🇨🇿";
+  };
+
+  const ensureI18n = () => {
+    if (window.BBFRAXY_I18N?.ready) return window.BBFRAXY_I18N.ready;
+
+    return new Promise((resolve) => {
+      const onReady = () => resolve(window.BBFRAXY_I18N);
+      window.addEventListener("bbfraxy:i18n-ready", onReady, { once: true });
+
+      const existing = Array.from(document.scripts).find((script) => {
+        const src = script.getAttribute("src") || "";
+        return src.endsWith("/assets/js/i18n.js") || src.endsWith("assets/js/i18n.js");
+      });
+
+      if (!existing) {
+        const script = document.createElement("script");
+        script.src = "/assets/js/i18n.js";
+        script.defer = true;
+        document.head.appendChild(script);
       }
+    });
+  };
+
+  syncLangToggle();
+  ensureI18n().then(syncLangToggle);
+
+  if (langToggle) {
+    langToggle.addEventListener("click", async () => {
+      const i18n = await ensureI18n();
+      if (!i18n) return;
+
+      const current = i18n.getLocale();
+      const next = current === "cs" ? "en" : "cs";
+      await i18n.setLocale(next);
     });
 
     window.addEventListener("bbfraxy:locale-change", syncLangToggle);
