@@ -1,6 +1,0 @@
-127.0.0.1 - - [07/Sep/2026 12:56:15] "GET /tools/index.html HTTP/1.1" 200 -
-127.0.0.1 - - [07/Sep/2026 12:56:15] "GET /assets/css/styles.css HTTP/1.1" 200 -
-127.0.0.1 - - [07/Sep/2026 12:56:15] "GET /assets/js/header.js HTTP/1.1" 200 -
-127.0.0.1 - - [07/Sep/2026 12:56:15] "GET /assets/js/main.js HTTP/1.1" 200 -
-127.0.0.1 - - [07/Sep/2026 12:56:17] "GET /tools/discord-party/ HTTP/1.1" 200 -
-127.0.0.1 - - [07/Sep/2026 12:56:17] "GET /tools/discord-party/main.js HTTP/1.1" 200 -
