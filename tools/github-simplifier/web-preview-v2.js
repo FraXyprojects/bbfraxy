@@ -163,15 +163,23 @@ const RAW_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
 
     while (queue.length) {
       const current = queue.shift();
+      const promises = [];
       for (const ref of extractReferences(current.text, current.path)) {
         const actual = available.get(normalize(ref).toLowerCase());
         if (!actual || used.has(actual)) continue;
         used.add(actual);
         if (isTextDependency(actual) && used.size < 120) {
-          try {
-            const payload = await fetchFile(actual);
-            queue.push({ path: actual, text: payload.text || "" });
-          } catch {}
+          promises.push(
+            fetchFile(actual)
+              .then((payload) => ({ path: actual, text: payload.text || "" }))
+              .catch(() => null)
+          );
+        }
+      }
+      if (promises.length > 0) {
+        const results = await Promise.all(promises);
+        for (const res of results) {
+          if (res) queue.push(res);
         }
       }
     }
