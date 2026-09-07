@@ -294,6 +294,9 @@ async function cacheTreeResponse(owner, repo, branch, response, ctx, cacheKey, o
 }
 
 async function githubFetch(url, env) {
+  if (!url.startsWith(`${GITHUB_API}/`)) {
+    throw new Error("Security exception: githubFetch requires a GitHub API URL.");
+  }
   const headers = { accept: "application/vnd.github+json", "user-agent": "BBFRAXY-API/1.0" };
   if (env.GITHUB_READ_TOKEN) headers.authorization = `Bearer ${env.GITHUB_READ_TOKEN}`;
   return fetch(url, { headers });
