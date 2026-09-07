@@ -247,60 +247,66 @@ const RAW_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
   async function assemblePage(html, entryPath, enabledPaths) {
     const doc = new DOMParser().parseFromString(html, "text/html");
 
-    for (const link of [...doc.querySelectorAll("link[href]")]) {
-      const href = link.getAttribute("href") || "";
-      if (!isLocalRef(href)) continue;
-      const path = findTreePath(resolveRelative(entryPath, href));
-      if (!path || !enabledPaths.has(path)) continue;
-      if (/stylesheet/i.test(link.getAttribute("rel") || "")) {
-        const payload = await fetchFile(path);
-        const style = doc.createElement("style");
-        style.dataset.previewFile = path;
-        style.textContent = rewriteCss(payload.text || "", path);
-        link.replaceWith(style);
-      } else if (/icon/i.test(link.getAttribute("rel") || "")) {
-        link.setAttribute("href", rawUrl(path));
+    const fetches = [];
+    const elements = doc.querySelectorAll("link[href], script[src], img[src], source[src], video[src], audio[src], a[href], form");
+
+    for (const el of elements) {
+      const tagName = el.tagName.toLowerCase();
+      if (tagName === "link") {
+        const href = el.getAttribute("href") || "";
+        if (!isLocalRef(href)) continue;
+        const path = findTreePath(resolveRelative(entryPath, href));
+        if (!path || !enabledPaths.has(path)) continue;
+        if (/stylesheet/i.test(el.getAttribute("rel") || "")) {
+          fetches.push(
+            fetchFile(path).then(payload => {
+              const style = doc.createElement("style");
+              style.dataset.previewFile = path;
+              style.textContent = rewriteCss(payload.text || "", path);
+              el.replaceWith(style);
+            })
+          );
+        } else if (/icon/i.test(el.getAttribute("rel") || "")) {
+          el.setAttribute("href", rawUrl(path));
+        }
+      } else if (tagName === "script") {
+        const src = el.getAttribute("src") || "";
+        if (!isLocalRef(src)) continue;
+        const path = findTreePath(resolveRelative(entryPath, src));
+        if (path && enabledPaths.has(path)) el.setAttribute("src", rawUrl(path));
+      } else if (tagName === "img" || tagName === "source" || tagName === "video" || tagName === "audio") {
+        const src = el.getAttribute("src") || "";
+        if (!isLocalRef(src)) continue;
+        const path = findTreePath(resolveRelative(entryPath, src));
+        if (path && enabledPaths.has(path)) el.setAttribute("src", rawUrl(path));
+      } else if (tagName === "a") {
+        const href = el.getAttribute("href") || "";
+        if (!href || /^(https?:|mailto:|javascript:|#|\/\/)/i.test(href)) continue;
+        const route = href.startsWith("/") ? href : routeFromRelativeLink(entryPath, href);
+        if (!route) continue;
+        el.setAttribute("href", "#");
+        el.addEventListener("click", (event) => {
+          event.preventDefault();
+          window.parent.postMessage({ type: "bbfraxy-preview-navigate", route: normalizeRoute(route) }, "*");
+        });
+      } else if (tagName === "form") {
+        el.addEventListener("submit", (event) => event.preventDefault());
       }
     }
-
-    for (const script of [...doc.querySelectorAll("script[src]")]) {
-      const src = script.getAttribute("src") || "";
-      if (!isLocalRef(src)) continue;
-      const path = findTreePath(resolveRelative(entryPath, src));
-      if (path && enabledPaths.has(path)) script.setAttribute("src", rawUrl(path));
-    }
-
-    for (const element of [...doc.querySelectorAll("img[src],source[src],video[src],audio[src]")]) {
-      const src = element.getAttribute("src") || "";
-      if (!isLocalRef(src)) continue;
-      const path = findTreePath(resolveRelative(entryPath, src));
-      if (path && enabledPaths.has(path)) element.setAttribute("src", rawUrl(path));
-    }
-
-    for (const link of [...doc.querySelectorAll("a[href]")]) {
-      const href = link.getAttribute("href") || "";
-      if (!href || /^(https?:|mailto:|javascript:|#|\/\/)/i.test(href)) continue;
-      const route = href.startsWith("/") ? href : routeFromRelativeLink(entryPath, href);
-      if (!route) continue;
-      link.setAttribute("href", "#");
-      link.addEventListener("click", (event) => {
-        event.preventDefault();
-        window.parent.postMessage({ type: "bbfraxy-preview-navigate", route: normalizeRoute(route) }, "*");
-      });
-    }
-
-    doc.querySelectorAll("form").forEach((formElement) => formElement.addEventListener("submit", (event) => event.preventDefault()));
 
     for (const path of enabledPaths) {
       if (path === entryPath || !isInjectable(path)) continue;
       const state = readState()[path];
       if (!state?.enabled) continue;
       if (/\.css$/i.test(path)) {
-        const payload = await fetchFile(path);
-        const style = doc.createElement("style");
-        style.dataset.previewInjected = path;
-        style.textContent = rewriteCss(payload.text || "", path);
-        doc.head.append(style);
+        fetches.push(
+          fetchFile(path).then(payload => {
+            const style = doc.createElement("style");
+            style.dataset.previewInjected = path;
+            style.textContent = rewriteCss(payload.text || "", path);
+            doc.head.append(style);
+          })
+        );
       } else {
         const script = doc.createElement("script");
         script.src = rawUrl(path);
@@ -308,6 +314,8 @@ const RAW_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
         doc.body.append(script);
       }
     }
+
+    await Promise.all(fetches);
 
     return `<!doctype html>${doc.documentElement.outerHTML}`;
   }
