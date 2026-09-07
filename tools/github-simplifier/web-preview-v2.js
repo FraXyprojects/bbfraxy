@@ -258,6 +258,9 @@ const RAW_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
     const fetches = [];
     const elements = doc.querySelectorAll("link[href], script[src], img[src], source[src], video[src], audio[src], a[href], form");
 
+    const stylesheetLinks = [];
+    const stylesheetPromises = [];
+
     for (const el of elements) {
       const tagName = el.tagName.toLowerCase();
       if (tagName === "link") {
@@ -266,14 +269,8 @@ const RAW_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
         const path = findTreePath(resolveRelative(entryPath, href));
         if (!path || !enabledPaths.has(path)) continue;
         if (/stylesheet/i.test(el.getAttribute("rel") || "")) {
-          fetches.push(
-            fetchFile(path).then(payload => {
-              const style = doc.createElement("style");
-              style.dataset.previewFile = path;
-              style.textContent = rewriteCss(payload.text || "", path);
-              el.replaceWith(style);
-            })
-          );
+          stylesheetLinks.push({ el, path });
+          stylesheetPromises.push(fetchFile(path));
         } else if (/icon/i.test(el.getAttribute("rel") || "")) {
           el.setAttribute("href", rawUrl(path));
         }
@@ -302,24 +299,45 @@ const RAW_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
       }
     }
 
+    if (stylesheetPromises.length > 0) {
+      const payloads = await Promise.all(stylesheetPromises);
+      for (let i = 0; i < stylesheetLinks.length; i++) {
+        const { el, path } = stylesheetLinks[i];
+        const payload = payloads[i];
+        const style = doc.createElement("style");
+        style.dataset.previewFile = path;
+        style.textContent = rewriteCss(payload.text || "", path);
+        el.replaceWith(style);
+      }
+    }
+
+    const injectedPaths = [];
+    const injectedPromises = [];
+
     for (const path of enabledPaths) {
       if (path === entryPath || !isInjectable(path)) continue;
       const state = readState()[path];
       if (!state?.enabled) continue;
       if (/\.css$/i.test(path)) {
-        fetches.push(
-          fetchFile(path).then(payload => {
-            const style = doc.createElement("style");
-            style.dataset.previewInjected = path;
-            style.textContent = rewriteCss(payload.text || "", path);
-            doc.head.append(style);
-          })
-        );
+        injectedPaths.push(path);
+        injectedPromises.push(fetchFile(path));
       } else {
         const script = doc.createElement("script");
         script.src = rawUrl(path);
         script.dataset.previewInjected = path;
         doc.body.append(script);
+      }
+    }
+
+    if (injectedPromises.length > 0) {
+      const payloads = await Promise.all(injectedPromises);
+      for (let i = 0; i < injectedPaths.length; i++) {
+        const path = injectedPaths[i];
+        const payload = payloads[i];
+        const style = doc.createElement("style");
+        style.dataset.previewInjected = path;
+        style.textContent = rewriteCss(payload.text || "", path);
+        doc.head.append(style);
       }
     }
 
