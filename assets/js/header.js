@@ -32,13 +32,38 @@
           ${navItems.map((item) => `<a href="${item.href}" data-i18n="nav.${item.key}"${item.key === activeKey ? ' aria-current="page"' : ""}>${item.label}</a>`).join("")}
         </div>
         <div class="nav-actions">
-          <button class="icon-button theme-toggle" type="button" aria-label="Switch theme" aria-pressed="false">
+          <button class="icon-button lang-toggle" type="button" aria-label="Switch language" data-i18n-attr="aria-label:nav.switchLanguage">
+            <span class="lang-text" aria-hidden="true"></span>
+          </button>
+          <button class="icon-button theme-toggle" type="button" aria-label="Switch theme" aria-pressed="false" data-i18n-attr="aria-label:nav.switchTheme">
             <span class="theme-icon" aria-hidden="true"></span>
           </button>
         </div>
       </div>
     </nav>
   `;
+
+  const langToggle = header.querySelector(".lang-toggle");
+  const langText = langToggle?.querySelector(".lang-text");
+
+  const syncLangToggle = () => {
+    if (langText && window.BBFRAXY_I18N) {
+      langText.textContent = window.BBFRAXY_I18N.getLocale().toUpperCase();
+    }
+  };
+
+  if (langToggle) {
+    syncLangToggle();
+    langToggle.addEventListener("click", () => {
+      if (window.BBFRAXY_I18N) {
+        const current = window.BBFRAXY_I18N.getLocale();
+        const next = current === "cs" ? "en" : "cs";
+        window.BBFRAXY_I18N.setLocale(next);
+      }
+    });
+
+    window.addEventListener("bbfraxy:locale-change", syncLangToggle);
+  }
 
   if (currentPath.startsWith("/games/")) {
     document.querySelectorAll(".eyebrow, .trivia-eyebrow").forEach((element) => element.remove());
