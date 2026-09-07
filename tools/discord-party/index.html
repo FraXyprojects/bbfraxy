@@ -58,7 +58,7 @@
     .discord-text a:hover { text-decoration: underline; }
 
     /* Modal */
-    .dp-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 200ms ease; }
+    .dp-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 200ms ease; }
     .dp-modal-overlay.is-visible { display: flex; opacity: 1; }
     .dp-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 24px 64px rgba(0,0,0,0.5); transform: translateY(20px); transition: transform 200ms ease; max-height: 90vh; overflow-y: auto; }
     .dp-modal-overlay.is-visible .dp-modal { transform: translateY(0); }
