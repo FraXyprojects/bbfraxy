@@ -593,3 +593,10 @@ function restoreCachedAnalysis() {
     // Ignore malformed or unavailable cache.
   }
 }
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    formatNumber,
+    formatBytes,
+  };
+}
