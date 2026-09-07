@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BBFRAXY tools — Discord Party Planner">
+  <meta name="theme-color" content="#050607">
+  <title data-i18n="tools.discordParty.title">Discord Party Planner | BBFRAXY</title>
+  <link rel="canonical" href="https://bbfraxy.com/tools/discord-party/">
+  <link rel="stylesheet" href="../../assets/css/styles.css">
+  <style>
+    .dp-page { width: min(100%, 720px); margin: 0 auto; padding: 72px 0 52px; }
+    .dp-hero { margin-bottom: 28px; animation: card-enter 520ms ease both; }
+    .dp-hero h1 { margin: 0; color: var(--text); font-size: clamp(2.3rem, 5vw, 3.4rem); line-height: 1; font-weight: 820; letter-spacing: -.035em; }
+    .dp-hero p { max-width: 580px; margin: 12px 0 0; color: var(--muted); font-size: 1.05rem; line-height: 1.65; }
+
+    .dp-card { padding: 28px; border: 1px solid var(--border); border-radius: var(--radius); background: linear-gradient(180deg, rgba(255,255,255,.04), transparent 48%), var(--surface); box-shadow: 0 18px 54px var(--shadow), 0 0 34px rgba(95,231,255,.03); animation: card-enter 520ms ease 90ms both; backdrop-filter: blur(18px); }
+
+    .dp-form { display: grid; gap: 20px; }
+    .dp-field { display: flex; flex-direction: column; gap: 8px; }
+    .dp-label { color: var(--muted); font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+
+    .dp-input, .dp-select, .dp-textarea { box-sizing: border-box; width: 100%; border: 1px solid var(--border); border-radius: 10px; background: rgba(255,255,255,.035); color: var(--text); padding: 12px 14px; font: inherit; font-size: .95rem; outline: none; transition: border-color 160ms ease, box-shadow 160ms ease; }
+    .dp-input:focus, .dp-select:focus, .dp-textarea:focus { border-color: var(--border-strong); box-shadow: 0 0 0 3px rgba(95,231,255,.08); }
+    .dp-textarea { min-height: 100px; resize: vertical; }
+
+    .dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    .dp-actions { display: flex; align-items: center; justify-content: flex-end; gap: 14px; margin-top: 10px; padding-top: 20px; border-top: 1px solid var(--border); }
+    .dp-button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 0 20px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--accent); color: #031014; font: inherit; font-size: .9rem; font-weight: 800; cursor: pointer; transition: opacity 160ms ease; }
+    .dp-button:hover { opacity: .9; }
+
+    .dp-output-section { margin-top: 32px; padding: 24px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-strong); display: none; }
+    .dp-output-section.is-visible { display: block; animation: card-enter 300ms ease both; }
+    .dp-output-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .dp-output-heading h2 { margin: 0; color: var(--text); font-size: 1.1rem; font-weight: 700; }
+
+    .dp-copy-btn { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); padding: 6px 12px; font-size: .8rem; font-weight: 600; cursor: pointer; transition: all 160ms ease; }
+    .dp-copy-btn:hover { color: var(--text); border-color: var(--border-strong); }
+    .dp-copy-btn.copied { background: var(--accent); color: #031014; border-color: var(--accent); }
+
+    .dp-pre { margin: 0; padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,.3); color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: .85rem; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; overflow-x: auto; }
+
+    @media (max-width: 640px) {
+      .dp-page { padding: 52px 0; }
+      .dp-row { grid-template-columns: 1fr; gap: 20px; }
+      .dp-actions { flex-direction: column; }
+      .dp-button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <canvas class="ambient-canvas" id="ambient-canvas" aria-hidden="true"></canvas>
+  <div class="site-shell">
+    <header class="site-header"></header>
+    <main class="dp-page" id="main">
+      <section class="dp-hero">
+        <h1 data-i18n="tools.discordParty.heading">Discord Party Planner</h1>
+        <p data-i18n="tools.discordParty.description">Naplánuj další party na Discordu. Vyber si hru, čas a vygeneruj zprávu, kterou jen zkopíruješ.</p>
+      </section>
+
+      <section class="dp-card" aria-label="Discord Party form">
+        <form class="dp-form" id="dp-form">
+          <div class="dp-field">
+            <label class="dp-label" for="dp-title" data-i18n="tools.discordParty.eventName">Název události (volitelné)</label>
+            <input class="dp-input" type="text" id="dp-title" placeholder="např. Páteční chlastačka" data-i18n-attr="placeholder:tools.discordParty.eventNamePlaceholder">
+          </div>
+
+          <div class="dp-row">
+            <div class="dp-field">
+              <label class="dp-label" for="dp-date" data-i18n="tools.discordParty.date">Datum</label>
+              <input class="dp-input" type="date" id="dp-date" required>
+            </div>
+            <div class="dp-field">
+              <label class="dp-label" for="dp-time" data-i18n="tools.discordParty.time">Čas</label>
+              <input class="dp-input" type="time" id="dp-time" value="20:00" required>
+            </div>
+          </div>
+
+          <div class="dp-field">
+            <label class="dp-label" for="dp-game" data-i18n="tools.discordParty.game">Hra / Aktivita</label>
+            <select class="dp-select" id="dp-game" required>
+              <option value="" disabled selected data-i18n="tools.discordParty.gamePlaceholder">-- Vyber hru --</option>
+              <option value="Gartic Phone">Gartic Phone</option>
+              <option value="Riskuj (vlastní kvíz)">Riskuj (vlastní kvíz)</option>
+              <option value="Hospodský Kvíz">Hospodský Kvíz</option>
+              <option value="Jackbox Games">Jackbox Games</option>
+              <option value="Minecraft">Minecraft</option>
+            </select>
+          </div>
+
+          <div class="dp-field">
+            <label class="dp-label" for="dp-notes" data-i18n="tools.discordParty.notes">Poznámka (volitelné)</label>
+            <textarea class="dp-textarea" id="dp-notes" placeholder="Připravte se na zapeklité otázky!" data-i18n-attr="placeholder:tools.discordParty.notesPlaceholder"></textarea>
+          </div>
+
+          <div class="dp-actions">
+            <button class="dp-button" type="submit" id="dp-generate" data-i18n="tools.discordParty.generateBtn">Vygenerovat pro Discord →</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="dp-output-section" id="dp-output-section" aria-live="polite">
+        <div class="dp-output-heading">
+          <h2 data-i18n="tools.discordParty.outputHeading">Vygenerovaná zpráva</h2>
+          <button class="dp-copy-btn" type="button" id="dp-copy-btn" data-i18n="tools.discordParty.copyBtn">Kopírovat do schránky</button>
+        </div>
+        <pre class="dp-pre" id="dp-output"></pre>
+      </section>
+    </main>
+    <footer class="site-footer"><span>BBFRAXY</span></footer>
+  </div>
+
+  <script src="../../assets/js/header.js" defer></script>
+  <script src="../../assets/js/main.js" defer></script>
+  <script src="main.js" defer></script>
+</body>
+</html>
