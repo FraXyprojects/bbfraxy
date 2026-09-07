@@ -104,7 +104,6 @@ document.querySelector("#find-games")?.addEventListener("click", async () => {
     summary.textContent = `${matches.length} matching games in the current database.`;
     resultGrid.innerHTML = matches.slice(0, 8).map(renderMatch).join("");
   } catch (error) {
-    console.error(error);
     summary.textContent = "The database could not be loaded.";
     resultGrid.innerHTML = `<div class="coop-empty">Something went wrong while loading the game database. Try again in a moment.</div>`;
   }
@@ -176,7 +175,6 @@ missingForm?.addEventListener("submit", async (event) => {
       </div>
     `;
   } catch (error) {
-    console.error(error);
     if (missingStatus) {
       missingStatus.textContent = error.message || "Could not send the suggestion. Please try again later.";
     }
