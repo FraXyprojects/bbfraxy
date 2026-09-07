@@ -58,15 +58,18 @@
     .discord-text a:hover { text-decoration: underline; }
 
     /* Modal */
-    .dp-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 200ms ease; }
+    .dp-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 200ms ease; }
     .dp-modal-overlay.is-visible { display: flex; opacity: 1; }
     .dp-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 24px 64px rgba(0,0,0,0.5); transform: translateY(20px); transition: transform 200ms ease; max-height: 90vh; overflow-y: auto; }
     .dp-modal-overlay.is-visible .dp-modal { transform: translateY(0); }
     .dp-modal-header { font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; color: var(--text); }
-    .dp-modal-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-    .dp-modal-option { display: flex; gap: 8px; align-items: center; }
-    .dp-modal-option-remove { background: #ff4a4a; color: white; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
-    .dp-modal-add { display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; border: 1px dashed var(--border); border-radius: 8px; background: transparent; color: var(--text); font-weight: 600; cursor: pointer; margin-bottom: 24px; transition: border-color 160ms ease; }
+    .dp-modal-options { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+    .dp-modal-option { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .dp-modal-option-inputs { display: flex; gap: 12px; flex: 1; min-width: 0; flex-wrap: wrap; }
+    .dp-modal-option-inputs > * { flex: 1; min-width: 120px; }
+    .dp-modal-option-remove { background: #ff4a4a; color: white; border: none; border-radius: 6px; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 1.2rem; transition: background 160ms ease; }
+    .dp-modal-option-remove:hover { background: #ff2a2a; }
+    .dp-modal-add { display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; border: 1px dashed var(--border); border-radius: 8px; background: transparent; color: var(--text); font-weight: 600; cursor: pointer; margin-bottom: 24px; transition: border-color 160ms ease; width: 100%; }
     .dp-modal-add:hover { border-color: var(--accent); color: var(--accent); }
 
     @media (max-width: 640px) {
@@ -188,7 +191,7 @@
 
       <button type="button" class="dp-modal-add" id="dp-modal-add" data-i18n="tools.discordParty.modalAddBtn">+ Přidat možnost</button>
 
-      <div class="dp-actions" style="border-top: none; padding-top: 0;">
+      <div class="dp-actions" style="border-top: none; padding-top: 0; justify-content: flex-end; width: 100%;">
         <button type="button" class="dp-copy-btn" id="dp-modal-cancel" data-i18n="tools.discordParty.modalCancelBtn">Zrušit</button>
         <button type="button" class="dp-button" id="dp-modal-save" data-i18n="tools.discordParty.modalSaveBtn">Uložit hlasování</button>
       </div>

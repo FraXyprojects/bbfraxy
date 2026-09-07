@@ -110,18 +110,24 @@
 
     if (type === 'dates') {
       row.innerHTML = `
-        <input class="dp-input" type="date" value="${values.date || ''}" required>
+        <div class="dp-modal-option-inputs">
+          <input class="dp-input" type="date" value="${values.date || ''}" required>
+        </div>
         <button type="button" class="dp-modal-option-remove" aria-label="Remove">×</button>
       `;
     } else if (type === 'times') {
       row.innerHTML = `
-        <input class="dp-input" type="time" value="${values.time || '20:00'}" required>
+        <div class="dp-modal-option-inputs">
+          <input class="dp-input" type="time" value="${values.time || '20:00'}" required>
+        </div>
         <button type="button" class="dp-modal-option-remove" aria-label="Remove">×</button>
       `;
     } else if (type === 'combined') {
       row.innerHTML = `
-        <input class="dp-input" type="date" value="${values.date || ''}" required>
-        <input class="dp-input" type="time" value="${values.time || '20:00'}" required>
+        <div class="dp-modal-option-inputs">
+          <input class="dp-input" type="date" value="${values.date || ''}" required>
+          <input class="dp-input" type="time" value="${values.time || '20:00'}" required>
+        </div>
         <button type="button" class="dp-modal-option-remove" aria-label="Remove">×</button>
       `;
     }
