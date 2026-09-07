@@ -2,6 +2,11 @@ const WEB_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/github";
 const RAW_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
 
 (() => {
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = { resolveRelative, normalize, isLocalRef };
+    if (typeof document === "undefined") return;
+  }
+
   const form = document.querySelector(".simplifier-form");
   if (!form) return;
 
