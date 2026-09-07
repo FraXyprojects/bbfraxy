@@ -1,0 +1,24 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "Osobní web FraXyho — místo pro hry, nástroje, projekty, experimenty a další věci.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FraXyprojects/bbfraxy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/FraXyprojects/bbfraxy/issues"
+  },
+  "homepage": "https://github.com/FraXyprojects/bbfraxy#readme",
+  "devDependencies": {
+    "jest": "^30.5.1"
+  }
+}
