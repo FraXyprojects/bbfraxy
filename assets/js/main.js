@@ -225,6 +225,7 @@ function setupAmbientCanvas() {
   let pixelRatio = 1;
   let particles = [];
   let animationFrame = 0;
+  let currentPalette = { dot: "", line: "" };
 
   const createParticles = () => {
     const density = Math.round((width * height) / 28000);
@@ -252,28 +253,29 @@ function setupAmbientCanvas() {
     draw();
   };
 
-  const getPalette = () => {
+  const updatePalette = () => {
     const light = root.dataset.theme === "light";
-
-    return {
+    currentPalette = {
       dot: light ? "rgba(0, 125, 152, 0.2)" : "rgba(95, 231, 255, 0.22)",
       line: light ? "rgba(0, 125, 152, 0.07)" : "rgba(95, 231, 255, 0.075)",
     };
   };
 
   const draw = () => {
-    const palette = getPalette();
-
     context.clearRect(0, 0, width, height);
 
+    context.beginPath();
     for (let index = 0; index < particles.length; index += 1) {
       const particle = particles[index];
-
-      context.beginPath();
+      context.moveTo(particle.x + particle.radius, particle.y);
       context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-      context.fillStyle = palette.dot;
-      context.fill();
+    }
+    context.fillStyle = currentPalette.dot;
+    context.fill();
 
+    context.beginPath();
+    for (let index = 0; index < particles.length; index += 1) {
+      const particle = particles[index];
       for (let next = index + 1; next < particles.length; next += 1) {
         const other = particles[next];
         const dx = particle.x - other.x;
@@ -284,15 +286,14 @@ function setupAmbientCanvas() {
         }
 
         if (dx * dx + dy * dy < 13924) {
-          context.beginPath();
           context.moveTo(particle.x, particle.y);
           context.lineTo(other.x, other.y);
-          context.strokeStyle = palette.line;
-          context.lineWidth = 1;
-          context.stroke();
         }
       }
     }
+    context.strokeStyle = currentPalette.line;
+    context.lineWidth = 1;
+    context.stroke();
   };
 
   const tick = () => {
@@ -312,6 +313,14 @@ function setupAmbientCanvas() {
     animationFrame = window.requestAnimationFrame(tick);
   };
 
+  const onVisibilityChange = () => {
+    if (document.hidden) {
+      window.cancelAnimationFrame(animationFrame);
+    } else {
+      restart();
+    }
+  };
+
   const restart = () => {
     window.cancelAnimationFrame(animationFrame);
 
@@ -323,8 +332,22 @@ function setupAmbientCanvas() {
     animationFrame = window.requestAnimationFrame(tick);
   };
 
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === "data-theme") {
+        updatePalette();
+        if (prefersReducedMotion.matches) draw();
+      }
+    });
+  });
+
+  observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
   window.addEventListener("resize", resize);
   prefersReducedMotion.addEventListener("change", restart);
+  document.addEventListener("visibilitychange", onVisibilityChange);
+
+  updatePalette();
   resize();
   restart();
 }
