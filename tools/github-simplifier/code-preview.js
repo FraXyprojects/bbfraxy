@@ -12,10 +12,12 @@
   let mountedKey = null;
   let active = null;
   let generation = 0;
-  const observer = new MutationObserver(() => sync());
 
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-  sync();
+  if (typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
+    const observer = new MutationObserver(() => sync());
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    sync();
+  }
 
   function getAnalysis() {
     return document.querySelector('.analysis-result:not(.repository-picker-result)');
@@ -257,5 +259,12 @@
       @media(max-width:860px){.code-workspace{grid-template-columns:1fr}.code-sidebar{max-height:260px;border-right:0;border-bottom:1px solid rgba(255,255,255,.07)}}@media(max-width:640px){.code-workspace-head{flex-direction:column}.code-workspace-actions{width:100%}.code-action{flex:1}}
     `;
     document.head.append(style);
+  }
+
+  // Export pure functions for testing in Node.js environment
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      formatBytes,
+    };
   }
 })();
