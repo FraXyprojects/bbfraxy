@@ -10,6 +10,17 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%23050607'/%3E%3Cpath d='M18 46V18h18a9 9 0 0 1 0 18H26v10h-8Zm8-18h10a2 2 0 0 0 0-4H26v4Z' fill='%235fe7ff'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="/assets/css/styles.css">
   <script src="/assets/js/i18n.js" defer></script>
+
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('bbfraxy-locale') === 'cs') {
+          document.documentElement.setAttribute('data-i18n-loading', '');
+          document.write('<style>[data-i18n-loading] [data-i18n], [data-i18n-loading] [data-i18n-attr] { opacity: 0 !important; visibility: hidden !important; }</style>');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <canvas class="ambient-canvas" id="ambient-canvas" aria-hidden="true"></canvas>

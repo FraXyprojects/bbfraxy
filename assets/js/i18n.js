@@ -40,9 +40,7 @@
     const safeLocale = SUPPORTED_LOCALES.includes(locale) ? locale : DEFAULT_LOCALE;
     if (dictionaryCache[safeLocale]) return dictionaryCache[safeLocale];
 
-    const response = await fetch(`${DICTIONARY_BASE}/${safeLocale}.json`, {
-      cache: "no-store",
-    });
+    const response = await fetch(`${DICTIONARY_BASE}/${safeLocale}.json`);
 
     if (!response.ok) {
       throw new Error(`Failed to load translation dictionary: ${safeLocale}`);
@@ -84,6 +82,8 @@
     window.dispatchEvent(new CustomEvent("bbfraxy:locale-change", {
       detail: { locale: safeLocale },
     }));
+
+    document.documentElement.removeAttribute('data-i18n-loading');
 
     return safeLocale;
   };

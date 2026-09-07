@@ -318,7 +318,7 @@
     "note": "Note",
     "storage": {
       "title": "Local Storage",
-      "desc": "We only use essential local storage."
+      "desc": "The website may save your appearance settings (dark/light mode) and chosen language with translations to your browser's local storage. This is solely used to remember your preferences and speed up loading times, and is not used for any analytical or marketing tracking."
     },
     "external": {
       "title": "External Services",

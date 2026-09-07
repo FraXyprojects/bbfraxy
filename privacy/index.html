@@ -7,13 +7,24 @@
     <title>BBFRAXY | Soukromí</title>
     <link rel="stylesheet" href="/assets/css/styles.css">
     <link rel="stylesheet" href="./privacy.css">
+
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('bbfraxy-locale') === 'cs') {
+          document.documentElement.setAttribute('data-i18n-loading', '');
+          document.write('<style>[data-i18n-loading] [data-i18n], [data-i18n-loading] [data-i18n-attr] { opacity: 0 !important; visibility: hidden !important; }</style>');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
     <div class="site-shell">
         <header class="site-header"></header>
         <main>
             <section class="privacy-page"><div class="privacy-card"><div class="privacy-eyebrow">FRAXY // PRIVACY</div><h1 data-i18n="privacy.title">Soukromí</h1><p class="privacy-intro" data-i18n="privacy.intro">BBFRAXY se snaží používat jen minimum technologií, které ukládají nebo sledují informace o návštěvnících.</p>
-            <div class="privacy-section"><h2 data-i18n="privacy.storage.title">Lokální úložiště</h2><p data-i18n="privacy.storage.desc">Web si může uložit vaše nastavení vzhledu (dark/light mode) do místního úložiště prohlížeče. Slouží pouze k zapamatování vaší volby motivu a není používáno k analytickému ani marketingovému sledování.</p></div>
+            <div class="privacy-section"><h2 data-i18n="privacy.storage.title">Lokální úložiště</h2><p data-i18n="privacy.storage.desc">Web si může uložit vaše nastavení vzhledu (dark/light mode) a zvolený jazyk včetně překladů do místního úložiště prohlížeče. Slouží pouze k zapamatování vašich předvoleb a zrychlení načítání, a není používáno k analytickému ani marketingovému sledování.</p></div>
             <div class="privacy-section"><h2 data-i18n="privacy.cookies.title">Cookies</h2><p data-i18n="privacy.cookies.desc">BBFRAXY v současné době nepoužívá vlastní analytické ani marketingové cookies. Web proto nemá klasickou cookie lištu pro marketingové nebo analytické souhlasy.</p></div>
             <div class="privacy-section"><h2 data-i18n="privacy.external.title">Externí služby</h2><p data-i18n="privacy.external.desc">Některé hry používají externí služby. Například FraXyho soutěž načítá mapové podklady prostřednictvím OpenStreetMap a knihovny Leaflet. Při používání těchto funkcí může prohlížeč navazovat síťová spojení s příslušnými externími servery.</p></div>
             <div class="privacy-section"><h2 data-i18n="privacy.data.title">Co BBFRAXY nyní nesbírá</h2><p data-i18n="privacy.data.desc">Vlastní webový kód aktuálně neobsahuje nástroj pro analytické měření, marketingové profilování ani vlastní systém sledování návštěvníků.</p></div>

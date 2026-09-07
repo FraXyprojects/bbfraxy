@@ -318,7 +318,7 @@
     "note": "Poznámka",
     "storage": {
       "title": "Lokální úložiště",
-      "desc": "Využíváme pouze nezbytné lokální úložiště."
+      "desc": "Web si může uložit vaše nastavení vzhledu (dark/light mode) a zvolený jazyk včetně překladů do místního úložiště prohlížeče. Slouží pouze k zapamatování vašich předvoleb a zrychlení načítání, a není používáno k analytickému ani marketingovému sledování."
     },
     "external": {
       "title": "Externí služby",
