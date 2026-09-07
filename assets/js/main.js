@@ -113,6 +113,23 @@ themeToggle?.addEventListener("click", () => {
   syncThemeToggle();
 });
 
+window.addEventListener("storage", (event) => {
+  if (event.key === "bbfraxy-theme" && event.newValue) {
+    const nextTheme = event.newValue;
+    if (root.dataset.theme !== nextTheme) {
+      root.dataset.theme = nextTheme;
+      syncThemeToggle();
+    }
+  }
+
+  if (event.key === "bbfraxy-locale" && event.newValue) {
+    const nextLocale = event.newValue;
+    if (window.BBFRAXY_I18N && window.BBFRAXY_I18N.getLocale() !== nextLocale) {
+      window.BBFRAXY_I18N.apply(nextLocale);
+    }
+  }
+});
+
 function renderSocialLinks() {
   if (!socialContainer) {
     return;

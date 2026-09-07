@@ -34,6 +34,10 @@
         github: "GitHub",
         privacy: "Soukromí",
       },
+      home: {
+        tagline: "Hry, nástroje, projekty & další věci.",
+        seoIntro: "BBFRAXY je FraXyho osobní centrum pro hry, nástroje, projekty a experimenty.",
+      },
       tools: {
         title: "Nástroje",
         githubSimplifier: "GitHub Simplifier",
@@ -71,6 +75,10 @@
         home: "Home",
         github: "GitHub",
         privacy: "Privacy",
+      },
+      home: {
+        tagline: "Games, tools, projects & random stuff.",
+        seoIntro: "BBFRAXY is FraXy's personal hub for games, tools, projects and experiments.",
       },
       tools: {
         title: "Tools",
