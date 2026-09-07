@@ -62,8 +62,17 @@ export default {
       return handleRepoFile(owner, repo, path, url.searchParams.get("branch") || "main", env, ctx, origin);
     }
 
-    const rawMatch = url.pathname.match(/^\/v1\/raw\/(.+)$/);
-    if (rawMatch) return handleRawContent(rawMatch[1], ctx);
+    const rawMatch = url.pathname.match(/^\/v1\/raw\/([^/]+)\/([^/]+)\/(.+)$/);
+    if (rawMatch) {
+      let owner, repo;
+      try {
+        owner = decodeURIComponent(rawMatch[1]);
+        repo = decodeURIComponent(rawMatch[2]);
+      } catch {
+        return json({ error: "Invalid GitHub path encoding." }, 400, {}, origin);
+      }
+      return handleRawContent(owner, repo, rawMatch[3], ctx);
+    }
 
     return json({
       error: "Not found.",
@@ -258,8 +267,12 @@ async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
   return result;
 }
 
-async function handleRawContent(rawPath, ctx) {
-  if (!rawPath || rawPath.length > 2000 || rawPath.includes("..")) return new Response(JSON.stringify({ error: "Invalid raw content path." }), { status: 400, headers: { ...JSON_HEADERS, ...corsHeaders("*") } });
+async function handleRawContent(owner, repo, path, ctx) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 2000 || path.includes("..")) {
+    return new Response(JSON.stringify({ error: "Invalid raw content path." }), { status: 400, headers: { ...JSON_HEADERS, ...corsHeaders("*") } });
+  }
+
+  const rawPath = `${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${path}`;
 
   const cacheKey = new Request(`https://cache.bbfraxy.local/raw/${rawPath}`);
   const cached = await caches.default.match(cacheKey);
