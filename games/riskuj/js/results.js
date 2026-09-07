@@ -38,15 +38,8 @@ export function renderFinalResults({
     );
 }
 
-function renderScoreboard(
-    players,
-    state,
-    questionEl,
-    restart,
-    tiedTop,
-    onOpenTiebreak
-) {
-    const headline = tiedTop?.length > 1
+function getHeadlineHTML(players, tiedTop) {
+    return tiedTop?.length > 1
         ? `
             Vítězství je zatím nerozhodné mezi
             <strong>
@@ -69,20 +62,44 @@ function renderScoreboard(
                 </strong>.
             `
             : '';
+}
 
-    const note = tiedTop?.length > 1
+function getNoteHTML(tiedTop) {
+    return tiedTop?.length > 1
         ? '<div class="decision-hint">O pořadí rozhodne Kolo rozhodnutí.</div>'
         : '';
+}
 
-    const tiebreakButton = tiedTop?.length > 1
+function getTiebreakButtonHTML(tiedTop) {
+    return tiedTop?.length > 1
         ? `
             <button class="btn" id="open-tiebreak">
                 🎡 Kolo rozhodnutí
             </button>
         `
         : '';
+}
 
-    questionEl.innerHTML = `
+function getScorebarHTML(players) {
+    return players
+        .map(
+            (player, index) => `
+                <div
+                    class="score"
+                    style="--player-color:${player.color}"
+                >
+                    <strong>
+                        #${index + 1} ${esc(player.name)}
+                    </strong><br>
+                    ${player.score} bodů
+                </div>
+            `
+        )
+        .join('');
+}
+
+function getWinnerHTML(headline, note, tiebreakButton, scorebar) {
+    return `
         <div class="winner">
             <div class="eyebrow">FRAXY // RESULTS</div>
             <h2>Hra skončila.</h2>
@@ -92,21 +109,7 @@ function renderScoreboard(
             ${tiebreakButton}
 
             <div class="scorebar">
-                ${players
-                    .map(
-                        (player, index) => `
-                            <div
-                                class="score"
-                                style="--player-color:${player.color}"
-                            >
-                                <strong>
-                                    #${index + 1} ${esc(player.name)}
-                                </strong><br>
-                                ${player.score} bodů
-                            </div>
-                        `
-                    )
-                    .join('')}
+                ${scorebar}
             </div>
 
             <div class="results-actions">
@@ -126,6 +129,22 @@ function renderScoreboard(
             aria-hidden="true"
         ></div>
     `;
+}
+
+function renderScoreboard(
+    players,
+    state,
+    questionEl,
+    restart,
+    tiedTop,
+    onOpenTiebreak
+) {
+    const headline = getHeadlineHTML(players, tiedTop);
+    const note = getNoteHTML(tiedTop);
+    const tiebreakButton = getTiebreakButtonHTML(tiedTop);
+    const scorebar = getScorebarHTML(players);
+
+    questionEl.innerHTML = getWinnerHTML(headline, note, tiebreakButton, scorebar);
 
     questionEl.querySelector('#restart').onclick = restart;
     questionEl.querySelector('#show-questions').onclick = () => {
