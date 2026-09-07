@@ -1,134 +1,22 @@
-/* BBFRAXY i18n foundation.
+/* BBFRAXY i18n loader.
  *
- * This module is intentionally passive for now: it does not change the visible
- * language until a language switcher is connected to it.
+ * Translation dictionaries live in:
+ *   /assets/i18n/cs.json
+ *   /assets/i18n/en.json
  *
- * Future usage:
- *   BBFRAXY_I18N.setLocale("en");
- *   BBFRAXY_I18N.setLocale("cs");
- *
- * Mark translatable elements with:
+ * Elements can opt into translation with:
  *   data-i18n="nav.games"
  * or attributes with:
- *   data-i18n-attr="aria-label:nav.openMenu"
+ *   data-i18n-attr="aria-label:nav.openMenu;placeholder:some.key"
  */
 (() => {
   const STORAGE_KEY = "bbfraxy-locale";
   const SUPPORTED_LOCALES = ["cs", "en"];
   const DEFAULT_LOCALE = "cs";
+  const DICTIONARY_BASE = "/assets/i18n";
 
-  const translations = {
-    cs: {
-      nav: {
-        games: "Hry",
-        tools: "Nástroje",
-        projects: "Projekty",
-        downloads: "Ke stažení",
-        switchTheme: "Přepnout motiv",
-        switchLanguage: "Změnit jazyk",
-        openMenu: "Otevřít navigaci",
-        closeMenu: "Zavřít navigaci",
-      },
-      common: {
-        home: "Domů",
-        github: "GitHub",
-        privacy: "Soukromí",
-      },
-      home: {
-        tagline: "Hry, nástroje, projekty & další věci.",
-        seoIntro: "BBFRAXY je FraXyho osobní centrum pro hry, nástroje, projekty a experimenty.",
-      },
-      tools: {
-        title: "Nástroje",
-        githubSimplifier: "GitHub Simplifier",
-        discordParty: {
-          title: "Discord Party Planner | BBFRAXY",
-          heading: "Discord Party Planner",
-          description: "Naplánuj párty na Discordu. Vyber si hru, čas a vygeneruj zprávu, kterou jen zkopíruješ.",
-          eventName: "Název události (volitelné)",
-          eventNamePlaceholder: "např. Středeční Gartic",
-          date: "Datum",
-          time: "Čas",
-          voteBtn: "Hlasovat",
-          place: "Místo / Voice kanál (volitelné)",
-          placePlaceholder: "např. Kobereček nebo https://discord.gg/...",
-          game: "Hra / Aktivita",
-          gamePlaceholder: "-- Vyber hru --",
-          notes: "Poznámka (volitelné)",
-          notesPlaceholder: "Připravte své dad jokes a mozkové závity!",
-          generateBtn: "Vygenerovat pro Discord →",
-          outputHeading: "Vygenerovaná zpráva",
-          copyBtn: "Kopírovat zprávu pro Discord",
-          copiedBtn: "Zkopírováno!",
-          modalTitle: "Hlasování o termínu",
-          modalTypeLabel: "Typ hlasování",
-          modalTypeDates: "Jen dny",
-          modalTypeTimes: "Jen časy",
-          modalTypeBoth: "Dny i časy (odděleně)",
-          modalTypeCombined: "Konkrétní termíny (Den + Čas)",
-          modalAddBtn: "Přidat možnost",
-          modalSaveBtn: "Uložit hlasování",
-          modalCancelBtn: "Zrušit",
-          discordPreviewName: "Ty"
-        },
-      },
-    },
-    en: {
-      nav: {
-        games: "Games",
-        tools: "Tools",
-        projects: "Projects",
-        downloads: "Downloads",
-        switchTheme: "Switch theme",
-        switchLanguage: "Change language",
-        openMenu: "Open navigation",
-        closeMenu: "Close navigation",
-      },
-      common: {
-        home: "Home",
-        github: "GitHub",
-        privacy: "Privacy",
-      },
-      home: {
-        tagline: "Games, tools, projects & random stuff.",
-        seoIntro: "BBFRAXY is FraXy's personal hub for games, tools, projects and experiments.",
-      },
-      tools: {
-        title: "Tools",
-        githubSimplifier: "GitHub Simplifier",
-        discordParty: {
-          title: "Discord Party Planner | BBFRAXY",
-          heading: "Discord Party Planner",
-          description: "Plan next Discord party. Pick a game, time and generate a message you can easily copy.",
-          eventName: "Event Name (optional)",
-          eventNamePlaceholder: "e.g. Friday Night Gaming",
-          date: "Date",
-          time: "Time",
-          voteBtn: "Vote",
-          place: "Place / Voice Channel (optional)",
-          placePlaceholder: "e.g. Pub or https://discord.gg/...",
-          game: "Game / Activity",
-          gamePlaceholder: "-- Select a game --",
-          notes: "Notes (optional)",
-          notesPlaceholder: "Get ready for tricky questions!",
-          generateBtn: "Generate for Discord →",
-          outputHeading: "Generated Message",
-          copyBtn: "Copy Discord code",
-          copiedBtn: "Copied!",
-          modalTitle: "Term Voting",
-          modalTypeLabel: "Voting type",
-          modalTypeDates: "Days only",
-          modalTypeTimes: "Times only",
-          modalTypeBoth: "Days and times (separate)",
-          modalTypeCombined: "Specific slots (Day + Time)",
-          modalAddBtn: "Add option",
-          modalSaveBtn: "Save voting",
-          modalCancelBtn: "Cancel",
-          discordPreviewName: "You"
-        },
-      },
-    },
-  };
+  let dictionaryCache = {};
+  let loadPromise = null;
 
   const getStoredLocale = () => {
     try {
@@ -148,13 +36,32 @@
     }, object);
   };
 
+  const loadDictionary = async (locale) => {
+    const safeLocale = SUPPORTED_LOCALES.includes(locale) ? locale : DEFAULT_LOCALE;
+    if (dictionaryCache[safeLocale]) return dictionaryCache[safeLocale];
+
+    const response = await fetch(`${DICTIONARY_BASE}/${safeLocale}.json`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to load translation dictionary: ${safeLocale}`);
+    }
+
+    const dictionary = await response.json();
+    dictionaryCache[safeLocale] = dictionary;
+    return dictionary;
+  };
+
   const translate = (key, locale = getLocale()) => {
-    return resolve(translations[locale] || translations[DEFAULT_LOCALE], key) ?? key;
+    const dictionary = dictionaryCache[locale] || dictionaryCache[DEFAULT_LOCALE];
+    return resolve(dictionary, key) ?? key;
   };
 
   const apply = (locale = getLocale()) => {
     const safeLocale = SUPPORTED_LOCALES.includes(locale) ? locale : DEFAULT_LOCALE;
-    const dictionary = translations[safeLocale];
+    const dictionary = dictionaryCache[safeLocale];
+    if (!dictionary) return safeLocale;
 
     document.documentElement.dataset.locale = safeLocale;
     document.documentElement.lang = safeLocale;
@@ -181,7 +88,13 @@
     return safeLocale;
   };
 
-  const setLocale = (locale) => {
+  const loadAndApply = async (locale = getLocale()) => {
+    const safeLocale = SUPPORTED_LOCALES.includes(locale) ? locale : DEFAULT_LOCALE;
+    await loadDictionary(safeLocale);
+    return apply(safeLocale);
+  };
+
+  const setLocale = async (locale) => {
     if (!SUPPORTED_LOCALES.includes(locale)) return getLocale();
 
     try {
@@ -190,7 +103,7 @@
       // Local storage can be unavailable in privacy-restricted contexts.
     }
 
-    return apply(locale);
+    return loadAndApply(locale);
   };
 
   window.BBFRAXY_I18N = {
@@ -200,9 +113,18 @@
     translate,
     apply,
     setLocale,
+    loadDictionary,
+    loadAndApply,
   };
 
-  // Passive initialization only. Existing pages keep their current wording
-  // until translatable elements and the language switcher are introduced.
-  apply(getLocale());
+  loadPromise = loadAndApply(getLocale())
+    .catch((error) => {
+      console.error("BBFRAXY i18n initialization failed:", error);
+      return DEFAULT_LOCALE;
+    })
+    .finally(() => {
+      window.dispatchEvent(new CustomEvent("bbfraxy:i18n-ready"));
+    });
+
+  window.BBFRAXY_I18N.ready = loadPromise;
 })();
