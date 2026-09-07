@@ -37,6 +37,23 @@
       tools: {
         title: "Nástroje",
         githubSimplifier: "GitHub Simplifier",
+        discordParty: {
+          title: "Discord Party Planner | BBFRAXY",
+          heading: "Discord Party Planner",
+          description: "Naplánuj další party na Discordu. Vyber si hru, čas a vygeneruj zprávu, kterou jen zkopíruješ.",
+          eventName: "Název události (volitelné)",
+          eventNamePlaceholder: "např. Páteční chlastačka",
+          date: "Datum",
+          time: "Čas",
+          game: "Hra / Aktivita",
+          gamePlaceholder: "-- Vyber hru --",
+          notes: "Poznámka (volitelné)",
+          notesPlaceholder: "Připravte se na zapeklité otázky!",
+          generateBtn: "Vygenerovat pro Discord →",
+          outputHeading: "Vygenerovaná zpráva",
+          copyBtn: "Kopírovat do schránky",
+          copiedBtn: "Zkopírováno!"
+        },
       },
     },
     en: {
@@ -58,6 +75,23 @@
       tools: {
         title: "Tools",
         githubSimplifier: "GitHub Simplifier",
+        discordParty: {
+          title: "Discord Party Planner | BBFRAXY",
+          heading: "Discord Party Planner",
+          description: "Plan your next Discord party. Pick a game, time and generate a message you can easily copy.",
+          eventName: "Event Name (optional)",
+          eventNamePlaceholder: "e.g. Friday Night Gaming",
+          date: "Date",
+          time: "Time",
+          game: "Game / Activity",
+          gamePlaceholder: "-- Select a game --",
+          notes: "Notes (optional)",
+          notesPlaceholder: "Get ready for tricky questions!",
+          generateBtn: "Generate for Discord →",
+          outputHeading: "Generated Message",
+          copyBtn: "Copy to clipboard",
+          copiedBtn: "Copied!"
+        },
       },
     },
   };
