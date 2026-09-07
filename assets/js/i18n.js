@@ -36,9 +36,35 @@
     }, object);
   };
 
+  const getCachedDictionary = (locale) => {
+    try {
+      const stored = localStorage.getItem(`bbfraxy-i18n-dict-${locale}`);
+      if (stored) return JSON.parse(stored);
+    } catch {
+      return null;
+    }
+    return null;
+  };
+
   const loadDictionary = async (locale) => {
     const safeLocale = SUPPORTED_LOCALES.includes(locale) ? locale : DEFAULT_LOCALE;
     if (dictionaryCache[safeLocale]) return dictionaryCache[safeLocale];
+
+    // Try to load from localStorage first
+    const cached = getCachedDictionary(safeLocale);
+    if (cached) {
+      dictionaryCache[safeLocale] = cached;
+      // Start background fetch to update cache silently
+      fetch(`${DICTIONARY_BASE}/${safeLocale}.json`, { cache: "no-store" })
+        .then(res => res.ok ? res.json() : null)
+        .then(dict => {
+          if (dict) {
+            dictionaryCache[safeLocale] = dict;
+            try { localStorage.setItem(`bbfraxy-i18n-dict-${safeLocale}`, JSON.stringify(dict)); } catch {}
+          }
+        }).catch(() => {});
+      return cached;
+    }
 
     const response = await fetch(`${DICTIONARY_BASE}/${safeLocale}.json`, {
       cache: "no-store",
@@ -50,6 +76,7 @@
 
     const dictionary = await response.json();
     dictionaryCache[safeLocale] = dictionary;
+    try { localStorage.setItem(`bbfraxy-i18n-dict-${safeLocale}`, JSON.stringify(dictionary)); } catch {}
     return dictionary;
   };
 
@@ -117,7 +144,15 @@
     loadAndApply,
   };
 
-  loadPromise = loadAndApply(getLocale())
+  // Attempt immediate synchronous load from cache for instant translation
+  const initialLocale = getLocale();
+  const initialCache = getCachedDictionary(initialLocale);
+  if (initialCache) {
+    dictionaryCache[initialLocale] = initialCache;
+    apply(initialLocale); // Apply instantly before initial render paint if possible
+  }
+
+  loadPromise = loadAndApply(initialLocale)
     .catch((error) => {
       console.error("BBFRAXY i18n initialization failed:", error);
       return DEFAULT_LOCALE;
