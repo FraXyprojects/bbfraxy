@@ -26,7 +26,9 @@ export const esc = (value) => {
 export function renderPlayers({ players, container, onAdd, onRemove }) {
     container.innerHTML = players
         .map(
-            (player, index) => `
+            (player, index) => {
+                const placeholder = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.playerPlaceholder") + ` ${index + 1}` : `Hráč / tým ${index + 1}`;
+                return `
                 <div class="player-row">
                     <span
                         class="player-color"
@@ -34,14 +36,14 @@ export function renderPlayers({ players, container, onAdd, onRemove }) {
                     ></span>
                     <input
                         value="${esc(player.name)}"
-                        placeholder="Hráč / tým ${index + 1}"
+                        placeholder="${placeholder}"
                     >
                     <button
                         class="player-remove"
                         ${players.length <= 2 ? 'disabled' : ''}
                     >×</button>
                 </div>
-            `
+            `}
         )
         .join('');
 
@@ -62,27 +64,30 @@ export function renderPlayers({ players, container, onAdd, onRemove }) {
 
 export function renderQuestionEditor({ topicCount, questionCount, container }) {
     container.innerHTML = Array.from({ length: topicCount }, (_, topicIndex) => {
+        const topicPlaceholder = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.topicPlaceholder") + ` ${topicIndex + 1}` : `Téma ${topicIndex + 1}`;
         return `
             <div class="topic-block">
                 <div class="topic-title">
                     <input
                         data-topic="${topicIndex}"
-                        placeholder="Téma ${topicIndex + 1}"
+                        placeholder="${topicPlaceholder}"
                     >
                 </div>
 
                 ${Array.from({ length: questionCount }, (_, questionIndex) => {
                     const value = (questionIndex + 1) * 100;
+                    const questionPlaceholder = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.questionPlaceholder") + ` ${value}` : `Otázka za ${value}`;
+                    const answerPlaceholder = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.answerPlaceholder") : `Odpověď`;
 
                     return `
                         <div class="q-row">
                             <input
                                 data-q="${topicIndex}-${questionIndex}"
-                                placeholder="Otázka za ${value}"
+                                placeholder="${questionPlaceholder}"
                             >
                             <input
                                 data-a="${topicIndex}-${questionIndex}"
-                                placeholder="Odpověď"
+                                placeholder="${answerPlaceholder}"
                             >
                             <input value="${value}" disabled>
                         </div>

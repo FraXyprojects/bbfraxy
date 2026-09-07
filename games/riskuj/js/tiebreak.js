@@ -132,9 +132,9 @@ function renderWheel(state, mount, renderFinal) {
     mount.innerHTML = `
         <div class="tiebreak-card">
             <div class="eyebrow">FRAXY // DECISION ROUND</div>
-            <h3 id="decision-modal-title">Kolo rozhodnutí</h3>
+            <h3 id="decision-modal-title" data-i18n="riskuj.tiebreak.title">Kolo rozhodnutí</h3>
             <p>
-                Skóre mezi
+                <span data-i18n="riskuj.tiebreak.scoreBetween">Skóre mezi</span>
                 <strong>
                     ${group
                         .map(
@@ -143,7 +143,7 @@ function renderWheel(state, mount, renderFinal) {
                         )
                         .join(', ')}
                 </strong>
-                je nerozhodné. O vítězi rozhodne náhoda.
+                <span data-i18n="riskuj.tiebreak.isTied">je nerozhodné. O vítězi rozhodne náhoda.</span>
             </p>
 
             <div class="wheel-stage">
@@ -161,11 +161,13 @@ function renderWheel(state, mount, renderFinal) {
 
             <div id="wheel-result" class="wheel-result" aria-live="polite"></div>
 
-            <button class="btn" id="spin-wheel">
+            <button class="btn" id="spin-wheel" data-i18n="riskuj.tiebreak.spinButton">
                 🎡 Zatočit kolem
             </button>
         </div>
     `;
+
+    if (window.BBFRAXY_I18N) window.BBFRAXY_I18N.apply();
 
     mount.closest('.decision-modal-dialog')
         ?.classList.remove('spinning');
@@ -213,12 +215,15 @@ function spin(state, mount, renderFinal) {
 
         state.placed.push(winner);
 
+        const winsText = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.tiebreak.winsRound") : "vyhrává toto kolo a získává";
+        const placeText = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.tiebreak.place") : "místo";
+
         result.innerHTML = `
             <strong style="color:${winner.color}">
                 ${esc(winner.name)}
             </strong>
-            vyhrává toto kolo a získává
-            <strong>${place}. místo</strong>.
+            ${winsText}
+            <strong>${place}. ${placeText}</strong>.
         `;
 
         state.currentGroup = group.filter(

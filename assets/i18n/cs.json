@@ -1,4 +1,13 @@
 {
+  "404": {
+    "signal": "ROUTE NEPŘIPOJENA",
+    "title": "Stránka nenalezena",
+    "description": "Tato část ještě není online. Domovská stránka je stále nejlepší místo, kde začít.",
+    "availableLinks": "Dostupné odkazy",
+    "backHome": "ZPĚT NA HLAVNÍ STRÁNKU",
+    "note": "Spousta věcí je naplánovaná na později.",
+    "footerFallback": "404 fallback."
+  },
   "_meta": {
     "locale": "cs",
     "name": "Čeština",
@@ -17,7 +26,7 @@
     "primaryNavigation": "Hlavní navigace",
     "siteSections": "Sekce webu",
     "socialLinks": "Odkazy na sociální sítě",
-    "explore": "Prozkoumat BBFRAXY"
+    "explore": "Prozkoumej BBFRAXY"
   },
   "common": {
     "home": "Domů",
@@ -69,16 +78,16 @@
     "avatarAlt": "FraXyho avatar"
   },
   "games": {
-    "title": "BBFRAXY Hry | Kvízy, hry & experimenty",
-    "description": "Prohlížečové hry, kvízy, soutěže a experimenty od BBFRAXY.",
+    "title": "Mini hry & experimenty.",
+    "description": "Staré FraXy hry převedené z Wixu přímo na BBFRAXY, plus nové experimenty.",
     "heading": "Mini hry & experimenty.",
     "intro": "Staré FraXy hry převedené z Wixu přímo na BBFRAXY, plus nové experimenty.",
     "ariaLabel": "BBFRAXY hry",
     "trivia": {
-      "name": "FraXy´s Trivia",
+      "aria": "Otevřít FraXy's Trivia",
+      "title": "FraXy´s Trivia",
       "description": "Deskový vědomostní kvíz s kategoriemi, náhodnými otázkami, časem a výsledkem.",
-      "meta": "Kvíz · BBFRAXY",
-      "ariaOpen": "Otevřít FraXy´s Trivia"
+      "meta": "Kvíz · BBFRAXY"
     },
     "competition": {
       "name": "FraXyho soutěž",
@@ -87,15 +96,26 @@
       "ariaOpen": "Otevřít FraXyho soutěž"
     },
     "riskuj": {
-      "name": "Riskuj",
+      "aria": "Otevřít Riskuj",
+      "title": "Riskuj",
       "description": "Jedna sjednocená verze Riskuj se dvěma režimy: rychlá klasika a rozšířená hra s vlastním importovaným kvízem.",
-      "meta": "Multiplayer · Kvíz",
-      "ariaOpen": "Otevřít Riskuj"
+      "meta": "Multiplayer · Kvíz"
+    },
+    "sectionLabel": "BBFRAXY hry",
+    "playAction": "Hrát →",
+    "status": {
+      "local": "Lokální"
+    },
+    "soutez": {
+      "aria": "Otevřít FraXyho soutěž",
+      "title": "FraXyho soutěž",
+      "description": "Evropská mapa a tipovací soutěž. Za každou odpověď získáš body podle přesnosti.",
+      "meta": "Mapa · Soutěž"
     }
   },
   "tools": {
-    "title": "Nástroje | BBFRAXY",
-    "description": "Malé utility a experimenty vytvořené tak, aby byly věci jednodušší, rychlejší nebo užitečnější.",
+    "title": "Nástroje",
+    "description": "Drobné utility a experimenty vytvořené, aby věci byly jednodušší, rychlejší nebo užitečnější.",
     "ariaLabel": "BBFRAXY nástroje",
     "githubSimplifier": {
       "name": "GitHub Simplifier",
@@ -103,15 +123,63 @@
       "meta": "Analyzátor repozitáře · Náhled plánován",
       "action": "Otevřít nástroj →",
       "status": "Ve vývoji",
-      "ariaOpen": "Otevřít GitHub Simplifier"
+      "ariaOpen": "Otevřít GitHub Simplifier",
+      "title": "GitHub Simplifier",
+      "labelUrl": "GitHub repository URL",
+      "placeholderUrl": "https://github.com/owner/repository",
+      "analyzeBtn": "Analyze",
+      "descStrong": "Vlož URL veřejného repozitáře.",
+      "descRest": "GitHub Simplifier promění repozitář na přehlednější souhrn – co projekt dělá, jak je strukturovaný a na jaké soubory se zaměřit.",
+      "note": "Můžeš zadat i URL uživatele a vybrat z jeho veřejných repozitářů.",
+      "placeholderUrl;aria-label": "https://github.com/owner/repository"
     },
     "coopFinder": {
       "name": "Coop Finder",
-      "description": "Řekni nám, kolik vás hraje, kolik máte času a na co máte chuť — a najdi co-op hry, které vám sednou.",
+      "description": "Řekni nám, kdo hraje, kolik máte času a co by vás bavilo. Podle toho vám najdeme ty nejlepší hry na míru.",
       "meta": "Herní matcher · Doporučení plánována",
       "action": "Otevřít nástroj →",
       "status": "Ve vývoji",
-      "ariaOpen": "Otevřít Coop Finder"
+      "ariaOpen": "Otevřít Coop Finder",
+      "title": "Coop Finder",
+      "ariaSetup": "Nastavení Coop Finderu",
+      "step1": "01 · Hráči",
+      "step2": "02 · Čas",
+      "ariaTime": "Dostupný čas",
+      "time30": "30 min",
+      "time3": "3 h",
+      "time6": "6 h",
+      "step3": "03 · Na co máte chuť?",
+      "tag": {
+        "puzzle": "Puzzle",
+        "action": "Akce",
+        "adventure": "Dobrodružství",
+        "horror": "Horor",
+        "survival": "Survival",
+        "strategy": "Strategie",
+        "story": "Příběh",
+        "chaos": "Chaotické",
+        "exploration": "Objevování",
+        "creative": "Kreativní",
+        "relaxing": "Relax",
+        "competitive": "Kompetitivní",
+        "party": "Party",
+        "shooter": "Střílečka",
+        "simulation": "Simulace",
+        "roguelike": "Roguelike"
+      },
+      "step4": "04 · Platforma",
+      "findBtn": "Najít hry →",
+      "note": "Vyber, kolik preferencí chceš. Čím víc jich zadáš, tím přesnější bude výsledek.",
+      "missing": {
+        "title": "Chybí tu hra?",
+        "desc": "Řekni nám, co bychom měli přidat. Zvážíme, jestli se hodí do databáze.",
+        "close": "Zavřít",
+        "placeholderTitle": "Název hry",
+        "placeholderNote": "Něco užitečného k tomu? Např. proč by tu hra měla být, počet hráčů, platforma...",
+        "submit": "Odeslat návrh hry →",
+        "note": "Tvůj návrh půjde k posouzení.",
+        "triggerBtn": "Chybí tu hra?"
+      }
     },
     "discordParty": {
       "title": "Discord Party Planner | BBFRAXY",
@@ -128,7 +196,7 @@
       "gamePlaceholder": "-- Vyber hru --",
       "notes": "Poznámka (volitelné)",
       "notesPlaceholder": "Připravte se na zapeklité otázky!",
-      "generateBtn": "Vygenerovat pro Discord →",
+      "generateBtn": "Vygenerovat zprávu",
       "outputHeading": "Vygenerovaná zpráva",
       "copyBtn": "Kopírovat kód pro Discord",
       "copiedBtn": "Zkopírováno!",
@@ -138,7 +206,7 @@
       "modalTypeTimes": "Jen časy",
       "modalTypeBoth": "Dny i časy (odděleně)",
       "modalTypeCombined": "Konkrétní termíny (Den + Čas)",
-      "modalAddBtn": "Přidat možnost",
+      "modalAddBtn": "+ Přidat možnost",
       "modalSaveBtn": "Uložit hlasování",
       "modalCancelBtn": "Zrušit",
       "discordPreviewName": "Ty",
@@ -155,7 +223,53 @@
         "kahoot": "Kahoot",
         "watchpartyFilm": "Watchparty (Film / Seriál)",
         "watchpartySport": "Watchparty (Sport)"
-      }
+      },
+      "pageTitle": "Discord Party Planner",
+      "pageDesc": "Naplánuj další hraní. Zadej detaily a vygeneruj zprávu v Markdownu, která na Discordu vypadá skvěle a jasně.",
+      "labelTitle": "Nadpis / Hra",
+      "placeholderTitle": "např. Páteční Valorant",
+      "labelDate": "Datum",
+      "labelTime": "Čas",
+      "labelDesc": "Dodatečné info (volitelné)",
+      "placeholderDesc": "např. Hrajeme rankedy, potřebujeme 5. hráče.",
+      "labelPoll": "Přidat hlasování na termín (Discord anketa)",
+      "md": {
+        "whichDay": "Který den se to hodí nejvíc?",
+        "time": "Čas:",
+        "date": "Datum:",
+        "whatTime": "V kolik hodin to odpálíme?",
+        "when": "Kdy to odpálíme?",
+        "voteDesc": "Hlasujte pomocí reakcí pod zprávou",
+        "game": "Hra:",
+        "where": "Kde:",
+        "clickToJoin": "Klikni pro připojení",
+        "info": "Info:"
+      },
+      "alertFillAll": "Vyplňte prosím všechna políčka v hlasování."
+    },
+    "sectionLabel": "BBFRAXY nástroje",
+    "openAction": "Otevřít nástroj →",
+    "status": {
+      "new": "Nový",
+      "dev": "Ve vývoji"
+    },
+    "discord": {
+      "aria": "Otevřít Discord Party Planner",
+      "title": "Discord Party Planner",
+      "description": "Naplánuj další party na Discordu. Vyber si hru, čas a vygeneruj zprávu pro jednoduché pozvání kamarádů.",
+      "meta": "Plánovač událostí · Markdown"
+    },
+    "github": {
+      "aria": "Otevřít GitHub Simplifier",
+      "title": "GitHub Simplifier",
+      "description": "Proměň GitHub repozitář na přehledný souhrn — k čemu slouží, jak je strukturován a co se dá upravit.",
+      "meta": "Analyzátor repozitářů · Plánován náhled"
+    },
+    "coop": {
+      "aria": "Otevřít Coop Finder",
+      "title": "Coop Finder",
+      "description": "Řekni nám počet hráčů, kolik máte času a na co máte chuť — najdeme co-op hry přesně na míru.",
+      "meta": "Vyhledávač her · Plánováno doporučování"
     }
   },
   "downloads": {
@@ -171,27 +285,45 @@
       "version": "v1.0.0",
       "status": "Vývoj",
       "technology": "BepInEx"
+    },
+    "valheim": {
+      "iconAlt": "Ikona Valheim Session Chronicle",
+      "title": "Valheim Session Chronicle",
+      "description": "Client-side kronika sezení ve Valheimu a tracker aktivity s českými TXT reporty a exportem do JSON.",
+      "version": "v1.0.0",
+      "type": "BepInEx"
+    },
+    "viewGithub": "Zobrazit na GitHubu ↗",
+    "status": {
+      "dev": "Ve vývoji"
     }
-  },
-  "errors": {
-    "page404Title": "404 | BBFRAXY",
-    "pageNotFound": "Stránka nenalezena",
-    "pageNotFoundDescription": "Tahle část ještě není online. Domovská stránka je stále nejlepší místo, kde začít.",
-    "routeNotConnected": "ROUTE NEPŘIPOJENA",
-    "availableLinks": "Dostupné odkazy",
-    "fallbackNote": "404 fallback.",
-    "plannedNote": "Spousta věcí je naplánovaná na později."
   },
   "privacy": {
     "title": "Soukromí | BBFRAXY",
     "metaDescription": "BBFRAXY — informace o soukromí, cookies a lokálním úložišti.",
     "heading": "Soukromí",
-    "cookies": "Cookies",
+    "cookies": {
+      "title": "Soubory cookie",
+      "desc": "Nepoužíváme cookies pro sledování."
+    },
     "localStorage": "Lokální úložiště",
     "analytics": "Analytika",
-    "data": "Data",
+    "data": {
+      "title": "Sběr dat",
+      "desc": "Neukládáme žádná data."
+    },
     "lastUpdated": "Naposledy aktualizováno",
-    "backHome": "Zpět na domovskou stránku"
+    "backHome": "Zpět na domovskou stránku",
+    "intro": "Soukromí",
+    "note": "Poznámka",
+    "storage": {
+      "title": "Lokální úložiště",
+      "desc": "Využíváme pouze nezbytné lokální úložiště."
+    },
+    "external": {
+      "title": "Externí služby",
+      "desc": "Některé služby využívají externí poskytovatele."
+    }
   },
   "coopFinder": {
     "title": "Coop Finder | BBFRAXY",
@@ -302,7 +434,42 @@
     "downloadResult": "Stáhnout výsledek",
     "restart": "Restartovat",
     "retryPrompt": "To se ti nepovedlo. Klikni na pokračovat nebo restart.",
-    "continue": "Pokračovat"
+    "continue": "Pokračovat",
+    "game": {
+      "failedRetry": "To se ti nepovedlo. Klikni na pokračovat nebo restart.",
+      "continue": "Pokračovat",
+      "restart": "Restartovat",
+      "time": "Čas:",
+      "html2canvasError": "Chyba: html2canvas není dostupné.",
+      "imageGenError": "Chyba při generování obrázku výsledku."
+    },
+    "rules": {
+      "item1": "Správná odpověď tě posune vpřed.",
+      "item2": "Špatná odpověď tě může vrátit zpět.",
+      "item3": "Cíl je jednoduchý: dojít až na konec."
+    },
+    "board": {
+      "title": "HERNÍ DESKA",
+      "start": "Start",
+      "goal": "Cíl",
+      "status": "START → CÍL"
+    },
+    "status": {
+      "timer": "Čas: {seconds}s",
+      "note": "Klikni na START a začni svou cestu."
+    },
+    "question": {
+      "placeholder": "Pro spuštění hry klikni na políčko START"
+    },
+    "result": {
+      "success": "Vyhrál jsi!",
+      "details1": "Dokončil jsi kvíz s",
+      "details2": "špatnými odpověďmi.",
+      "details3": "Trvalo ti to",
+      "details4": "sekund.",
+      "downloadBtn": "Stáhnout výsledek",
+      "restartBtn": "Restartovat"
+    }
   },
   "riskuj": {
     "title": "BBFRAXY | Riskuj",
@@ -326,7 +493,78 @@
     "preparedQuiz": "Mám připravený kvíz",
     "preparedQuizDescription": "Nahraj svůj {file} a nastav hráče, barvy a časovač.",
     "prepareBeforeStart": "Připravit před spuštěním",
-    "prepareBeforeStartDescription": "Vyber počet témat i otázek v každém tématu a vytvoř hru přímo teď."
+    "prepareBeforeStartDescription": "Vyber počet témat i otázek v každém tématu a vytvoř hru přímo teď.",
+    "board": {
+      "title": "Herní deska",
+      "newGame": "Nová hra"
+    },
+    "points": "BODŮ",
+    "game": {
+      "showAnswer": "Ukázat odpověď",
+      "correct": "✓ Správně",
+      "wrong": "✕ Špatně",
+      "turnEvaluated": "Tah vyhodnocen. Pokračuje další hráč.",
+      "timeUp": "ČAS"
+    },
+    "results": {
+      "tieHeadline": "Vítězství je zatím nerozhodné mezi",
+      "winnerHeadline": "Vítězem se stává",
+      "decisionHint": "O pořadí rozhodne Kolo rozhodnutí.",
+      "tiebreakButton": "🎡 Kolo rozhodnutí",
+      "gameOver": "Hra skončila.",
+      "playAgain": "Hrát znovu",
+      "showQuestions": "Zobrazit otázky",
+      "allQuestionsTitle": "Všechny otázky",
+      "successRate": "Úspěšnost",
+      "answerPrefix": "Odpověď:"
+    },
+    "setup": {
+      "playerPlaceholder": "Hráč / tým",
+      "topicPlaceholder": "Téma",
+      "questionPlaceholder": "Otázka za",
+      "answerPlaceholder": "Odpověď",
+      "loadedPrefix": "Načteno:",
+      "topicsLoaded": "témat. Kvíz je připraven.",
+      "invalidJson": "Soubor není platný Riskuj JSON.",
+      "alertOneTopic": "Zadej alespoň jedno téma.",
+      "alertLoadQuiz": "Nejdřív vyber a načti quiz.json."
+    },
+    "tiebreak": {
+      "title": "Kolo rozhodnutí",
+      "scoreBetween": "Skóre mezi",
+      "isTied": "je nerozhodné. O vítězi rozhodne náhoda.",
+      "spinButton": "🎡 Zatočit kolem",
+      "winsRound": "vyhrává toto kolo a získává",
+      "place": "místo"
+    },
+    "launch": {
+      "title": "Jak chceš připravit hru?",
+      "backBtn": "Zpět",
+      "mode1": {
+        "title": "Mám připravený kvíz",
+        "desc": "Nahraj svůj {file} a nastav hráče, barvy a časovač."
+      },
+      "mode2": {
+        "title": "Připravit před spuštěním",
+        "desc": "Vyber počet témat i otázek v každém tématu a vytvoř hru přímo teď."
+      }
+    },
+    "how": {
+      "title": "Jak se Riskuj hraje?",
+      "desc": "Herní deska má několik témat a u každého otázky s různou bodovou hodnotou. Hráč nebo tým si vybere políčko, moderátor přečte otázku a hráč odpoví.",
+      "item1": "Správná odpověď přičte hodnotu otázky.",
+      "item2": "Špatná odpověď může body odečíst, jako v klasickém Riskuj.",
+      "item3": "Po vyhodnocení pokračuje další hráč nebo tým.",
+      "item4": "Vyhrává nejvyšší skóre po vyčerpání desky."
+    },
+    "discord": {
+      "title": "Ideální na Discord",
+      "desc": "Jeden člověk může dělat moderátora a sdílet obrazovku s ostatními. Hra běží lokálně v prohlížeči, bez registrace a serveru.",
+      "note": "Pravidla si můžete upravit podle party — například kdo smí odpovídat po chybě, zda se používá časový limit nebo jak řešit remízu."
+    },
+    "startBtn": "Spustit hru →",
+    "createBtn": "Vytvořit kvíz",
+    "editBtn": "Upravit kvíz"
   },
   "competition": {
     "title": "BBFRAXY | FraXyho soutěž",
@@ -377,6 +615,110 @@
   },
   "footer": {
     "site": "BBFRAXY",
-    "fallback404": "404 fallback."
+    "fallback404": "404 fallback.",
+    "text": "BBFRAXY",
+    "privacy": "Ochrana soukromí"
+  },
+  "builder": {
+    "title": "Vytvoř nebo uprav kvíz.",
+    "desc1": "Připrav si vlastní témata, otázky, odpovědi a bodové hodnoty. Výsledek uložíš jako ",
+    "desc2": " a pak ho nahraješ do Riskuj.",
+    "btn": {
+      "new": "＋ Nový kvíz",
+      "load": "📂 Načíst JSON",
+      "download": "↓ Stáhnout quiz.json",
+      "back": "Zpět do hry →",
+      "backToRiskuj": "← Zpět do Riskuj",
+      "addTopic": "＋ Přidat téma",
+      "deleteTopic": "Smazat téma",
+      "addQuestion": "Přidat otázku"
+    },
+    "status": {
+      "ready": "Kvíz vytvořen. Začni přidávat témata.",
+      "newEmpty": "Nový prázdný kvíz.",
+      "readyDownload": "quiz.json byl připraven ke stažení.",
+      "loadedPrefix": "Načteno",
+      "topicsFrom": "témat z",
+      "editMode": "Režim úprav: načti svůj existující quiz.json."
+    },
+    "placeholder": {
+      "topicName": "Název tématu",
+      "question": "Otázka",
+      "answer": "Odpověď"
+    },
+    "alert": {
+      "oneTopic": "Nejdřív přidej alespoň jedno téma.",
+      "invalidJson": "Soubor nemá platný Riskuj JSON."
+    },
+    "empty": "Prázdný"
+  },
+  "soutez": {
+    "game": {
+      "alertNumber": "Prosím zadej číselnou odpověď.",
+      "confirmEarly1": "Opravdu chceš soutěž ukončit předčasně?",
+      "confirmEarly2": "Nezodpovězeno zůstane",
+      "confirmEarly3": "otázek a ty získají 0 bodů.",
+      "html2canvasError": "Nástroj pro stažení výsledku není dostupný.",
+      "generating": "Generuji…",
+      "imageGenError": "Nepodařilo se vytvořit obrázek výsledku."
+    },
+    "results": {
+      "yourAnswer": "Tvoje odpověď",
+      "unanswered": "nezodpovězeno",
+      "correctAnswer": "Správná odpověď",
+      "difference": "Rozdíl",
+      "duration": "Trvání:",
+      "complete1": "Odpověděl jsi na všech",
+      "complete2": "otázek.",
+      "early1": "Soutěž ukončena předčasně. Nezodpovězeno:",
+      "scoreDownloadError": "Nepodařilo se stáhnout výsledek.",
+      "answerDownloadError": "Nepodařilo se stáhnout přehled odpovědí."
+    },
+    "welcome": {
+      "title": "Vítej ve FraXyho soutěži.",
+      "description": "Tipovací soutěž po mapě Evropy. Klikni na zemi, odhadni správné číslo a získej co nejvyšší skóre.",
+      "startAction": "Začít soutěž →",
+      "how": {
+        "title": "Jak to funguje?",
+        "description": "Na mapě Evropy dostaneš otázky typu „Tipni si“. Čím blíž se trefíš ke skutečné hodnotě, tím vyšší skóre získáš."
+      },
+      "rules": {
+        "title": "Hra na jeden průchod",
+        "description": "Každou zemi lze zodpovědět jednou. Po zodpovězení všech otázek se zobrazí výsledné skóre."
+      }
+    },
+    "rules": {
+      "title": "Vítej ve FraXyho soutěži.",
+      "intro": "Dostaneš sérii otázek „Tipni si“ ke každé evropské zemi. Tvým úkolem je přiblížit se co nejvíce skutečnosti.",
+      "item1": "Vyber zemi na mapě.",
+      "item2": "Zadej číselný odhad.",
+      "item3": "Za každou zemi získáš až 100 bodů podle přesnosti.",
+      "item4": "Po zodpovězení všech zemí uvidíš svůj celkový výsledek.",
+      "openMap": "Otevřít mapu →",
+      "backToGames": "Zpět na Hry"
+    },
+    "map": {
+      "title": "Tipni si.",
+      "description": "Klikni na bod na mapě a zkus co nejpřesněji odhadnout odpověď."
+    },
+    "sidebar": {
+      "remaining": "Zbývá zodpovědět",
+      "back": "← Zpět",
+      "finish": "Ukončit a vyhodnotit"
+    },
+    "result": {
+      "title": "Soutěž dokončena.",
+      "scoreNote": "bodů ze všech zodpovězených otázek",
+      "downloadScore": "Stáhnout výsledek",
+      "restart": "Hrát znovu",
+      "historyTitle": "Přehled otázek",
+      "historyIntro": "Tvoje odpověď, správná odpověď, rozdíl a počet získaných bodů.",
+      "downloadAnswers": "Stáhnout mé odpovědi"
+    },
+    "modal": {
+      "close": "Zavřít",
+      "placeholder": "Zadej odpověď",
+      "submit": "Odeslat →"
+    }
   }
 }

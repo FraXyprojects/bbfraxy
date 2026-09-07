@@ -15,53 +15,54 @@
         <main class="trivia-page">
             <section class="trivia-hero">
                 <div class="trivia-eyebrow">FRAXY // TRIVIA</div>
-                <h1>FraXy´s Trivia</h1>
-                <p>Projdi herní pole, odpovídej na otázky a dostaň se až do cíle. Každá chyba tě může vrátit o krok zpět.</p>
+                <h1 data-i18n="trivia.title">FraXy´s Trivia</h1>
+                <p data-i18n="trivia.description">Projdi herní pole, odpovídej na otázky a dostaň se až do cíle. Každá chyba tě může vrátit o krok zpět.</p>
             </section>
 
             <section class="trivia-layout">
                 <aside class="trivia-sidebar">
                     <div class="trivia-panel">
                         <div class="panel-label">GAME STATUS</div>
-                        <div id="timer" class="timer">Čas: 0s</div>
-                        <p class="panel-note">Klikni na START a začni svou cestu.</p>
+                        <div id="timer" class="timer" data-i18n="trivia.status.timer">Čas: 0s</div>
+                        <p class="panel-note" data-i18n="trivia.status.note">Klikni na START a začni svou cestu.</p>
                     </div>
                     <div class="trivia-panel trivia-rules">
                         <div class="panel-label">HOW IT WORKS</div>
-                        <p>Správná odpověď tě posune vpřed.</p>
-                        <p>Špatná odpověď tě může vrátit zpět.</p>
-                        <p>Cíl je jednoduchý: dojít až na konec.</p>
+                        <p data-i18n="trivia.rules.item1">Správná odpověď tě posune vpřed.</p>
+                        <p data-i18n="trivia.rules.item2">Špatná odpověď tě může vrátit zpět.</p>
+                        <p data-i18n="trivia.rules.item3">Cíl je jednoduchý: dojít až na konec.</p>
                     </div>
                 </aside>
 
                 <section class="trivia-main-panel">
                     <div id="question-container" class="question-container">
                         <div class="panel-label">CURRENT QUESTION</div>
-                        <p id="question-text">Pro spuštění hry klikni na políčko START</p>
+                        <p id="question-text" data-i18n="trivia.question.placeholder">Pro spuštění hry klikni na políčko START</p>
                         <div id="answer-buttons" class="answer-buttons" style="display: none;"></div>
                     </div>
                     <div class="board-shell">
                         <div class="board-header">
-                            <div><div class="panel-label">GAME BOARD</div><h2>Tvá cesta</h2></div>
-                            <div class="board-status">START → CÍL</div>
+                            <div><div class="panel-label">GAME BOARD</div><h2 data-i18n="trivia.board.title">Tvá cesta</h2></div>
+                            <div class="board-status" data-i18n="trivia.board.status">START → CÍL</div>
                         </div>
                         <div id="game-board">
-                            <div class="square start">START</div>
+                            <div class="square start" data-i18n="trivia.board.start">START</div>
                             <div class="square" data-theme="math">1</div><div class="square" data-theme="math">2</div><div class="square" data-theme="math">3</div><div class="square" data-theme="math">4</div><div class="square" data-theme="math">5</div><div class="square" data-theme="math">6</div><div class="square" data-theme="math">7</div><div class="square" data-theme="math">8</div><div class="square" data-theme="math">9</div><div class="square" data-theme="math">10</div><div class="square" data-theme="math">11</div><div class="square" data-theme="math">12</div>
-                            <div class="square goal">CÍL</div>
+                            <div class="square goal" data-i18n="trivia.board.goal">CÍL</div>
                         </div>
                     </div>
                     <div id="result" class="result-card">
                         <div class="panel-label">FRAXY // RESULTS</div>
-                        <p class="success">Vyhrál jsi!</p>
-                        <p class="details">Dokončil jsi kvíz s <span class="highlight" id="wrong-answers">0</span> špatnými odpověďmi.<br>Trvalo ti to <span class="highlight" id="completion-time">0</span> sekund.</p>
-                        <div id="result-buttons"><button class="btn btn-download">Stáhnout výsledek</button><button class="btn btn-restart">Restartovat</button></div>
+                        <p class="success" data-i18n="trivia.result.success">Vyhrál jsi!</p>
+                        <p class="details"><span data-i18n="trivia.result.details1">Dokončil jsi kvíz s </span><span class="highlight" id="wrong-answers">0</span><span data-i18n="trivia.result.details2"> špatnými odpověďmi.</span><br><span data-i18n="trivia.result.details3">Trvalo ti to </span><span class="highlight" id="completion-time">0</span><span data-i18n="trivia.result.details4"> sekund.</span></p>
+                        <div id="result-buttons"><button class="btn btn-download" data-i18n="trivia.result.downloadBtn">Stáhnout výsledek</button><button class="btn btn-restart" data-i18n="trivia.result.restartBtn">Restartovat</button></div>
                     </div>
                 </section>
             </section>
         </main>
-        <footer class="site-footer"><span>BBFRAXY</span></footer>
+        <footer class="site-footer"><span data-i18n="footer.text">BBFRAXY</span></footer>
     </div>
+    <script src="/assets/js/i18n.js" defer></script>
     <script src="/assets/js/header.js" defer></script>
     <script src="/assets/js/main.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>

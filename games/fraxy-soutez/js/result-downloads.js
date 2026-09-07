@@ -32,7 +32,7 @@ function setupResultDownloads() {
     scoreDownloadButton?.addEventListener('click', async () => {
         const previousText = scoreDownloadButton.textContent;
         scoreDownloadButton.disabled = true;
-        scoreDownloadButton.textContent = 'Generuji…';
+        scoreDownloadButton.textContent = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.game.generating") : 'Generuji…';
 
         try {
             await exportElementAsPng(
@@ -41,7 +41,7 @@ function setupResultDownloads() {
             );
         } catch (error) {
             console.error(error);
-            alert('Nepodařilo se stáhnout výsledek.');
+            alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.scoreDownloadError") : 'Nepodařilo se stáhnout výsledek.');
         } finally {
             scoreDownloadButton.disabled = false;
             scoreDownloadButton.textContent = previousText;
@@ -57,7 +57,7 @@ function setupResultDownloads() {
 
             const previousText = answerDownloadButton.textContent;
             answerDownloadButton.disabled = true;
-            answerDownloadButton.textContent = 'Generuji…';
+            answerDownloadButton.textContent = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.game.generating") : 'Generuji…';
             document.getElementById('result-screen')?.classList.add('exporting');
 
             try {
@@ -67,7 +67,7 @@ function setupResultDownloads() {
                 );
             } catch (error) {
                 console.error(error);
-                alert('Nepodařilo se stáhnout přehled odpovědí.');
+                alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("soutez.results.answerDownloadError") : 'Nepodařilo se stáhnout přehled odpovědí.');
             } finally {
                 document.getElementById('result-screen')?.classList.remove('exporting');
                 answerDownloadButton.disabled = false;

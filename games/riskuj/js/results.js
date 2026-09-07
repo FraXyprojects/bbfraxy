@@ -41,7 +41,7 @@ export function renderFinalResults({
 function getHeadlineHTML(players, tiedTop) {
     return tiedTop?.length > 1
         ? `
-            Vítězství je zatím nerozhodné mezi
+            <span data-i18n="riskuj.results.tieHeadline">Vítězství je zatím nerozhodné mezi</span>
             <strong>
                 ${tiedTop
                     .map(
@@ -56,7 +56,7 @@ function getHeadlineHTML(players, tiedTop) {
         `
         : players.length
             ? `
-                Vítězem se stává
+                <span data-i18n="riskuj.results.winnerHeadline">Vítězem se stává</span>
                 <strong style="color:${players[0].color}">
                     ${esc(players[0].name)}
                 </strong>.
@@ -66,14 +66,14 @@ function getHeadlineHTML(players, tiedTop) {
 
 function getNoteHTML(tiedTop) {
     return tiedTop?.length > 1
-        ? '<div class="decision-hint">O pořadí rozhodne Kolo rozhodnutí.</div>'
+        ? '<div class="decision-hint" data-i18n="riskuj.results.decisionHint">O pořadí rozhodne Kolo rozhodnutí.</div>'
         : '';
 }
 
 function getTiebreakButtonHTML(tiedTop) {
     return tiedTop?.length > 1
         ? `
-            <button class="btn" id="open-tiebreak">
+            <button class="btn" id="open-tiebreak" data-i18n="riskuj.results.tiebreakButton">
                 🎡 Kolo rozhodnutí
             </button>
         `
@@ -91,7 +91,7 @@ function getScorebarHTML(players) {
                     <strong>
                         #${index + 1} ${esc(player.name)}
                     </strong><br>
-                    ${player.score} bodů
+                    ${player.score} <span data-i18n="riskuj.points">bodů</span>
                 </div>
             `
         )
@@ -102,7 +102,7 @@ function getWinnerHTML(headline, note, tiebreakButton, scorebar) {
     return `
         <div class="winner">
             <div class="eyebrow">FRAXY // RESULTS</div>
-            <h2>Hra skončila.</h2>
+            <h2 data-i18n="riskuj.results.gameOver">Hra skončila.</h2>
             <p>${headline}</p>
             ${note}
 
@@ -113,11 +113,11 @@ function getWinnerHTML(headline, note, tiebreakButton, scorebar) {
             </div>
 
             <div class="results-actions">
-                <button class="btn" id="restart">
+                <button class="btn" id="restart" data-i18n="riskuj.results.playAgain">
                     Hrát znovu
                 </button>
 
-                <button class="btn secondary" id="show-questions">
+                <button class="btn secondary" id="show-questions" data-i18n="riskuj.results.showQuestions">
                     Zobrazit otázky
                 </button>
             </div>
@@ -145,6 +145,7 @@ function renderScoreboard(
     const scorebar = getScorebarHTML(players);
 
     questionEl.innerHTML = getWinnerHTML(headline, note, tiebreakButton, scorebar);
+    if (window.BBFRAXY_I18N) window.BBFRAXY_I18N.apply();
 
     questionEl.querySelector('#restart').onclick = restart;
     questionEl.querySelector('#show-questions').onclick = () => {
@@ -192,7 +193,7 @@ function openQuestionHistory({ state, questionEl }) {
             <div class="question-history-header">
                 <div>
                     <div class="eyebrow">FRAXY // QUESTION REVIEW</div>
-                    <h2 id="question-history-title">Všechny otázky</h2>
+                    <h2 id="question-history-title" data-i18n="riskuj.results.allQuestionsTitle">Všechny otázky</h2>
                 </div>
 
                 <button
@@ -212,6 +213,7 @@ function openQuestionHistory({ state, questionEl }) {
         </div>
     `;
 
+    if (window.BBFRAXY_I18N) window.BBFRAXY_I18N.apply();
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
 
@@ -246,7 +248,7 @@ function renderTopicHistory({ state, topic }) {
         <section class="question-history-topic">
             <div class="question-history-topic-header">
                 <h3>${esc(topic)}</h3>
-                <span>Úspěšnost ${success}%</span>
+                <span><span data-i18n="riskuj.results.successRate">Úspěšnost</span> ${success}%</span>
             </div>
 
             <div class="question-history-list">
@@ -258,7 +260,7 @@ function renderTopicHistory({ state, topic }) {
                             <article class="question-history-item">
                                 <div class="question-history-meta">
                                     <span class="question-history-points">
-                                        ${question.value} bodů
+                                        ${question.value} <span data-i18n="riskuj.points">bodů</span>
                                     </span>
 
                                     <span
@@ -274,7 +276,7 @@ function renderTopicHistory({ state, topic }) {
                                 </div>
 
                                 <div class="question-history-answer">
-                                    Odpověď: ${esc(question.answer)}
+                                    <span data-i18n="riskuj.results.answerPrefix">Odpověď:</span> ${esc(question.answer)}
                                 </div>
                             </article>
                         `;

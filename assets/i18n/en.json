@@ -1,4 +1,13 @@
 {
+  "404": {
+    "signal": "ROUTE NOT CONNECTED",
+    "title": "Page not found",
+    "description": "This part is not online yet. The homepage is still the best place to start.",
+    "availableLinks": "Available links",
+    "backHome": "BACK HOME",
+    "note": "A lot planned for later.",
+    "footerFallback": "404 fallback."
+  },
   "_meta": {
     "locale": "en",
     "name": "English",
@@ -69,16 +78,16 @@
     "avatarAlt": "FraXy avatar"
   },
   "games": {
-    "title": "BBFRAXY Games | Quizzes, Games & Experiments",
-    "description": "Browser games, quizzes, competitions and experiments from BBFRAXY.",
+    "title": "Mini games & experiments.",
+    "description": "Old FraXy games transferred from Wix directly to BBFRAXY, plus new experiments.",
     "heading": "Mini games & experiments.",
     "intro": "Old FraXy games moved from Wix directly to BBFRAXY, plus new experiments.",
     "ariaLabel": "BBFRAXY games",
     "trivia": {
-      "name": "FraXy´s Trivia",
-      "description": "A board-style trivia quiz with categories, random questions, a timer and results.",
-      "meta": "Quiz · BBFRAXY",
-      "ariaOpen": "Open FraXy's Trivia"
+      "aria": "Open FraXy's Trivia",
+      "title": "FraXy´s Trivia",
+      "description": "A board trivia quiz with categories, random questions, time and a result.",
+      "meta": "Quiz · BBFRAXY"
     },
     "competition": {
       "name": "FraXy's Competition",
@@ -87,14 +96,25 @@
       "ariaOpen": "Open FraXy's Competition"
     },
     "riskuj": {
-      "name": "Riskuj",
-      "description": "One unified Riskuj version with two modes: a quick classic mode and an extended game with your own imported quiz.",
-      "meta": "Multiplayer · Quiz",
-      "ariaOpen": "Open Riskuj"
+      "aria": "Open Riskuj",
+      "title": "Riskuj",
+      "description": "One unified version of Riskuj with two modes: fast classic and extended game with custom imported quiz.",
+      "meta": "Multiplayer · Quiz"
+    },
+    "sectionLabel": "BBFRAXY games",
+    "playAction": "Play →",
+    "status": {
+      "local": "Local"
+    },
+    "soutez": {
+      "aria": "Open FraXyho soutěž",
+      "title": "FraXy's Competition",
+      "description": "A European map and guessing competition. Get points for each answer based on accuracy.",
+      "meta": "Map · Competition"
     }
   },
   "tools": {
-    "title": "Tools | BBFRAXY",
+    "title": "Tools",
     "description": "Small utilities and experiments built to make things simpler, faster or more useful.",
     "ariaLabel": "BBFRAXY tools",
     "githubSimplifier": {
@@ -103,15 +123,63 @@
       "meta": "Repository analyzer · Preview planned",
       "action": "Open tool →",
       "status": "In development",
-      "ariaOpen": "Open GitHub Simplifier"
+      "ariaOpen": "Open GitHub Simplifier",
+      "title": "GitHub Simplifier",
+      "labelUrl": "GitHub repository URL",
+      "placeholderUrl": "https://github.com/owner/repository",
+      "analyzeBtn": "Analyze",
+      "descStrong": "Paste a public GitHub repository URL.",
+      "descRest": "GitHub Simplifier turns the repository into a clearer overview of what the project is, how it is structured, which files matter and what they are likely used for.",
+      "note": "You can also enter a GitHub user URL and choose one of their public repositories.",
+      "placeholderUrl;aria-label": "https://github.com/owner/repository"
     },
     "coopFinder": {
       "name": "Coop Finder",
-      "description": "Tell us how many players you have, how much time you have and what you feel like playing — then find the co-op games that fit.",
+      "description": "Tell us who is playing, how much time you have and what kind of experience you want. We’ll use that to find games that fit your group.",
       "meta": "Game matcher · Recommendations planned",
       "action": "Open tool →",
       "status": "In development",
-      "ariaOpen": "Open Coop Finder"
+      "ariaOpen": "Open Coop Finder",
+      "title": "Coop Finder",
+      "ariaSetup": "Coop Finder setup",
+      "step1": "01 · Players",
+      "step2": "02 · Time available",
+      "ariaTime": "Time available",
+      "time30": "30 min",
+      "time3": "3 h",
+      "time6": "6 h",
+      "step3": "03 · What sounds fun?",
+      "tag": {
+        "puzzle": "Puzzle",
+        "action": "Action",
+        "adventure": "Adventure",
+        "horror": "Horror",
+        "survival": "Survival",
+        "strategy": "Strategy",
+        "story": "Story",
+        "chaos": "Funny / chaotic",
+        "exploration": "Exploration",
+        "creative": "Creative",
+        "relaxing": "Relaxing",
+        "competitive": "Competitive",
+        "party": "Party",
+        "shooter": "Shooter",
+        "simulation": "Simulation",
+        "roguelike": "Roguelike"
+      },
+      "step4": "04 · Platform",
+      "findBtn": "Find games →",
+      "note": "Choose as many preferences as you like. The more you select, the more specific the match becomes.",
+      "missing": {
+        "title": "Missing a game?",
+        "desc": "Tell us what should be added. We’ll review it and decide whether it belongs in the database.",
+        "close": "Close",
+        "placeholderTitle": "Game title",
+        "placeholderNote": "Anything useful? e.g. why it belongs here, player count, platform...",
+        "submit": "Send game suggestion →",
+        "note": "Your suggestion will be added to our review queue.",
+        "triggerBtn": "Missing a game?"
+      }
     },
     "discordParty": {
       "title": "Discord Party Planner | BBFRAXY",
@@ -128,18 +196,18 @@
       "gamePlaceholder": "-- Select a game --",
       "notes": "Notes (optional)",
       "notesPlaceholder": "Get ready for tricky questions!",
-      "generateBtn": "Generate for Discord →",
+      "generateBtn": "Generate message",
       "outputHeading": "Generated message",
-      "copyBtn": "Copy Discord code",
+      "copyBtn": "Copy code for Discord",
       "copiedBtn": "Copied!",
-      "modalTitle": "Date & time voting",
-      "modalTypeLabel": "Voting type",
+      "modalTitle": "Vote for a date/time",
+      "modalTypeLabel": "Poll type",
       "modalTypeDates": "Days only",
       "modalTypeTimes": "Times only",
       "modalTypeBoth": "Days and times (separate)",
-      "modalTypeCombined": "Specific slots (Day + Time)",
-      "modalAddBtn": "Add option",
-      "modalSaveBtn": "Save voting",
+      "modalTypeCombined": "Specific times (Day + Time)",
+      "modalAddBtn": "+ Add option",
+      "modalSaveBtn": "Save poll",
       "modalCancelBtn": "Cancel",
       "discordPreviewName": "You",
       "discordPreviewTime": "Today at 12:00",
@@ -155,7 +223,53 @@
         "kahoot": "Kahoot",
         "watchpartyFilm": "Watchparty (Movie / Series)",
         "watchpartySport": "Watchparty (Sports)"
-      }
+      },
+      "pageTitle": "Discord Party Planner",
+      "pageDesc": "Plan the next gaming session. Enter details and generate a Markdown message that looks great and clear on Discord.",
+      "labelTitle": "Title / Game",
+      "placeholderTitle": "e.g. Friday Valorant",
+      "labelDate": "Date",
+      "labelTime": "Time",
+      "labelDesc": "Additional info (optional)",
+      "placeholderDesc": "e.g. We play rankeds, need a 5th player.",
+      "labelPoll": "Add poll for date/time (Discord poll)",
+      "md": {
+        "whichDay": "Which day works best?",
+        "time": "Time:",
+        "date": "Date:",
+        "whatTime": "What time are we launching?",
+        "when": "When are we launching?",
+        "voteDesc": "Vote using reactions below the message",
+        "game": "Game:",
+        "where": "Where:",
+        "clickToJoin": "Click to join",
+        "info": "Info:"
+      },
+      "alertFillAll": "Please fill all fields in the voting."
+    },
+    "sectionLabel": "BBFRAXY tools",
+    "openAction": "Open tool →",
+    "status": {
+      "new": "New",
+      "dev": "In development"
+    },
+    "discord": {
+      "aria": "Open Discord Party Planner",
+      "title": "Discord Party Planner",
+      "description": "Plan the next party on Discord. Pick a game, time and generate a message for easy invites.",
+      "meta": "Event planner · Markdown"
+    },
+    "github": {
+      "aria": "Open GitHub Simplifier",
+      "title": "GitHub Simplifier",
+      "description": "Turn a GitHub repository into a clear, human-friendly overview — what it does, how it is structured, which files matter and what can be safely edited.",
+      "meta": "Repository analyzer · Preview planned"
+    },
+    "coop": {
+      "aria": "Open Coop Finder",
+      "title": "Coop Finder",
+      "description": "Tell us how many players you have, how much time you have and what you feel like playing — then find the coop games that fit.",
+      "meta": "Game matcher · Recommendations planned"
     }
   },
   "downloads": {
@@ -171,27 +285,45 @@
       "version": "v1.0.0",
       "status": "Development",
       "technology": "BepInEx"
+    },
+    "valheim": {
+      "iconAlt": "Valheim Session Chronicle icon",
+      "title": "Valheim Session Chronicle",
+      "description": "Client-side Valheim session chronicle and activity tracker with Czech TXT reports and JSON export.",
+      "version": "v1.0.0",
+      "type": "BepInEx"
+    },
+    "viewGithub": "View on GitHub ↗",
+    "status": {
+      "dev": "In Development"
     }
-  },
-  "errors": {
-    "page404Title": "404 | BBFRAXY",
-    "pageNotFound": "Page not found",
-    "pageNotFoundDescription": "This part is not online yet. The homepage is still the best place to start.",
-    "routeNotConnected": "ROUTE NOT CONNECTED",
-    "availableLinks": "Available links",
-    "fallbackNote": "404 fallback.",
-    "plannedNote": "A lot planned for later."
   },
   "privacy": {
     "title": "Privacy | BBFRAXY",
     "metaDescription": "BBFRAXY — information about privacy, cookies and local storage.",
     "heading": "Privacy",
-    "cookies": "Cookies",
+    "cookies": {
+      "title": "Cookies",
+      "desc": "We do not use tracking cookies."
+    },
     "localStorage": "Local storage",
     "analytics": "Analytics",
-    "data": "Data",
+    "data": {
+      "title": "Data Collection",
+      "desc": "We do not store any data."
+    },
     "lastUpdated": "Last updated",
-    "backHome": "Back to homepage"
+    "backHome": "Back to homepage",
+    "intro": "Privacy",
+    "note": "Note",
+    "storage": {
+      "title": "Local Storage",
+      "desc": "We only use essential local storage."
+    },
+    "external": {
+      "title": "External Services",
+      "desc": "Some services use external providers."
+    }
   },
   "coopFinder": {
     "title": "Coop Finder | BBFRAXY",
@@ -302,7 +434,42 @@
     "downloadResult": "Download result",
     "restart": "Restart",
     "retryPrompt": "That didn't work. Click continue or restart.",
-    "continue": "Continue"
+    "continue": "Continue",
+    "game": {
+      "failedRetry": "You failed. Click continue or restart.",
+      "continue": "Continue",
+      "restart": "Restart",
+      "time": "Time:",
+      "html2canvasError": "Error: html2canvas is not available.",
+      "imageGenError": "Error generating result image."
+    },
+    "rules": {
+      "item1": "A correct answer moves you forward.",
+      "item2": "A wrong answer can send you back.",
+      "item3": "The goal is simple: reach the end."
+    },
+    "board": {
+      "title": "GAME BOARD",
+      "start": "Start",
+      "goal": "Goal",
+      "status": "START → GOAL"
+    },
+    "status": {
+      "timer": "Time: {seconds}s",
+      "note": "Click START to begin your journey."
+    },
+    "question": {
+      "placeholder": "Click the START square to begin the game"
+    },
+    "result": {
+      "success": "You won!",
+      "details1": "You finished quiz with",
+      "details2": "wrong answers.",
+      "details3": "It took you",
+      "details4": "seconds.",
+      "downloadBtn": "Download result",
+      "restartBtn": "Restart"
+    }
   },
   "riskuj": {
     "title": "BBFRAXY | Riskuj",
@@ -326,7 +493,78 @@
     "preparedQuiz": "I have a prepared quiz",
     "preparedQuizDescription": "Upload your {file} and set players, colors and the timer.",
     "prepareBeforeStart": "Prepare before starting",
-    "prepareBeforeStartDescription": "Choose the number of topics and questions in each topic and create the game right now."
+    "prepareBeforeStartDescription": "Choose the number of topics and questions in each topic and create the game right now.",
+    "board": {
+      "title": "Game Board",
+      "newGame": "New Game"
+    },
+    "points": "POINTS",
+    "game": {
+      "showAnswer": "Show Answer",
+      "correct": "✓ Correct",
+      "wrong": "✕ Wrong",
+      "turnEvaluated": "Turn evaluated. Next player.",
+      "timeUp": "TIME"
+    },
+    "results": {
+      "tieHeadline": "Victory is currently tied between",
+      "winnerHeadline": "The winner is",
+      "decisionHint": "The Decision Wheel will decide the order.",
+      "tiebreakButton": "🎡 Decision Wheel",
+      "gameOver": "Game over.",
+      "playAgain": "Play again",
+      "showQuestions": "Show questions",
+      "allQuestionsTitle": "All questions",
+      "successRate": "Success rate",
+      "answerPrefix": "Answer:"
+    },
+    "setup": {
+      "playerPlaceholder": "Player / team",
+      "topicPlaceholder": "Topic",
+      "questionPlaceholder": "Question for",
+      "answerPlaceholder": "Answer",
+      "loadedPrefix": "Loaded:",
+      "topicsLoaded": "topics. Quiz is ready.",
+      "invalidJson": "File is not a valid Riskuj JSON.",
+      "alertOneTopic": "Enter at least one topic.",
+      "alertLoadQuiz": "First select and load quiz.json."
+    },
+    "tiebreak": {
+      "title": "Decision Wheel",
+      "scoreBetween": "Score between",
+      "isTied": "is tied. Chance will decide the winner.",
+      "spinButton": "🎡 Spin the wheel",
+      "winsRound": "wins this round and gets",
+      "place": "place"
+    },
+    "launch": {
+      "title": "How do you want to prepare the game?",
+      "backBtn": "Back",
+      "mode1": {
+        "title": "I have a prepared quiz",
+        "desc": "Upload your {file} and set players, colors and the timer."
+      },
+      "mode2": {
+        "title": "Prepare before starting",
+        "desc": "Choose the number of topics and questions in each topic and create the game right now."
+      }
+    },
+    "how": {
+      "title": "How do you play Riskuj?",
+      "desc": "The game board has several topics, each with questions worth different point values. A player or team chooses a square, the moderator reads the question and the player answers.",
+      "item1": "A correct answer adds the question's value.",
+      "item2": "A wrong answer can subtract points, like in classic Riskuj.",
+      "item3": "After evaluation, the next player or team continues.",
+      "item4": "The highest score wins after the board is cleared."
+    },
+    "discord": {
+      "title": "Perfect for Discord",
+      "desc": "One person can be the moderator and share their screen with everyone else. The game runs locally in the browser, with no registration or server.",
+      "note": "Adjust the rules to your group — for example who can answer after a mistake, whether to use a time limit or how to handle a tie."
+    },
+    "startBtn": "Start game →",
+    "createBtn": "Create quiz",
+    "editBtn": "Edit quiz"
   },
   "competition": {
     "title": "BBFRAXY | FraXy's Competition",
@@ -377,6 +615,110 @@
   },
   "footer": {
     "site": "BBFRAXY",
-    "fallback404": "404 fallback."
+    "fallback404": "404 fallback.",
+    "text": "BBFRAXY",
+    "privacy": "Privacy Policy"
+  },
+  "builder": {
+    "title": "Create or edit a quiz.",
+    "desc1": "Prepare your own topics, questions, answers and point values. Save the result as ",
+    "desc2": " and then upload it to Riskuj.",
+    "btn": {
+      "new": "＋ New quiz",
+      "load": "📂 Load JSON",
+      "download": "↓ Download quiz.json",
+      "back": "Back to game →",
+      "backToRiskuj": "← Back to Riskuj",
+      "addTopic": "＋ Add topic",
+      "deleteTopic": "Delete topic",
+      "addQuestion": "Add question"
+    },
+    "status": {
+      "ready": "Quiz created. Start adding topics.",
+      "newEmpty": "New empty quiz.",
+      "readyDownload": "quiz.json is ready for download.",
+      "loadedPrefix": "Loaded",
+      "topicsFrom": "topics from",
+      "editMode": "Edit mode: load your existing quiz.json."
+    },
+    "placeholder": {
+      "topicName": "Topic name",
+      "question": "Question",
+      "answer": "Answer"
+    },
+    "alert": {
+      "oneTopic": "Add at least one topic first.",
+      "invalidJson": "The file is not a valid Riskuj JSON."
+    },
+    "empty": "Empty"
+  },
+  "soutez": {
+    "game": {
+      "alertNumber": "Please enter a numeric answer.",
+      "confirmEarly1": "Do you really want to end the competition early?",
+      "confirmEarly2": "There will be",
+      "confirmEarly3": "unanswered questions and they will get 0 points.",
+      "html2canvasError": "Tool for downloading results is not available.",
+      "generating": "Generating…",
+      "imageGenError": "Failed to create result image."
+    },
+    "results": {
+      "yourAnswer": "Your answer",
+      "unanswered": "unanswered",
+      "correctAnswer": "Correct answer",
+      "difference": "Difference",
+      "duration": "Duration:",
+      "complete1": "You answered all",
+      "complete2": "questions.",
+      "early1": "Competition ended early. Unanswered:",
+      "scoreDownloadError": "Failed to download result.",
+      "answerDownloadError": "Failed to download answers overview."
+    },
+    "welcome": {
+      "title": "Welcome to FraXy's Competition.",
+      "description": "A guessing competition across a map of Europe. Click a country, estimate the correct number and get the highest score possible.",
+      "startAction": "Start competition →",
+      "how": {
+        "title": "How does it work?",
+        "description": "You'll get “guess the number” questions on a map of Europe. The closer you are to the real value, the higher your score."
+      },
+      "rules": {
+        "title": "One-pass game",
+        "description": "Each country can be answered once. After all questions are answered, the final score is shown."
+      }
+    },
+    "rules": {
+      "title": "Welcome to FraXy's Competition.",
+      "intro": "You'll get a series of “guess the number” questions for each European country. Your goal is to get as close to reality as possible.",
+      "item1": "Pick a country on the map.",
+      "item2": "Enter a numeric estimate.",
+      "item3": "You can earn up to 100 points per country based on accuracy.",
+      "item4": "After answering all countries, you'll see your total result.",
+      "openMap": "Open map →",
+      "backToGames": "Back to Games"
+    },
+    "map": {
+      "title": "Take a guess.",
+      "description": "Click a point on the map and try to estimate the answer as accurately as possible."
+    },
+    "sidebar": {
+      "remaining": "Remaining",
+      "back": "← Back",
+      "finish": "Finish and evaluate"
+    },
+    "result": {
+      "title": "Competition complete.",
+      "scoreNote": "points from all answered questions",
+      "downloadScore": "Download score",
+      "restart": "Play again",
+      "historyTitle": "Question overview",
+      "historyIntro": "Your answer, the correct answer, the difference and the points earned.",
+      "downloadAnswers": "Download my answers"
+    },
+    "modal": {
+      "close": "Close",
+      "placeholder": "Enter your answer",
+      "submit": "Submit →"
+    }
   }
 }

@@ -50,51 +50,52 @@
   };
 
   const generateMarkdown = (data) => {
+    const t = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate : (k) => k.split('.').pop();
     const title = data.title ? `🎉 **${data.title}** 🎉` : `🎉 **Discord Party: ${data.game}** 🎉`;
     let markdown = `${title}\n\n`;
 
     // Voting or Fixed Date/Time
     if (data.voteData) {
       if (data.voteData.type === 'dates') {
-        markdown += `📅 **Který den se to hodí nejvíc?**\n`;
+        markdown += `📅 **${t("tools.discordParty.md.whichDay") || "Který den se to hodí nejvíc?"}**\n`;
         data.voteData.options.forEach((opt, idx) => {
           const emoji = EMOJI_NUMBERS[idx % EMOJI_NUMBERS.length];
           markdown += `${emoji} ${formatDate(opt)}\n`;
         });
-        markdown += `\n⏰ **Čas:** ${data.time}\n`;
+        markdown += `\n⏰ **${t("tools.discordParty.md.time") || "Čas:"}** ${data.time}\n`;
       } else if (data.voteData.type === 'times') {
-        markdown += `📅 **Datum:** ${formatDate(data.date)}\n`;
-        markdown += `⏰ **V kolik hodin to odpálíme?**\n`;
+        markdown += `📅 **${t("tools.discordParty.md.date") || "Datum:"}** ${formatDate(data.date)}\n`;
+        markdown += `⏰ **${t("tools.discordParty.md.whatTime") || "V kolik hodin to odpálíme?"}**\n`;
         data.voteData.options.forEach((opt, idx) => {
           const emoji = EMOJI_LETTERS[idx % EMOJI_LETTERS.length];
           markdown += `${emoji} ${opt}\n`;
         });
       } else if (data.voteData.type === 'combined') {
-        markdown += `📅 **Kdy to odpálíme?**\n`;
+        markdown += `📅 **${t("tools.discordParty.md.when") || "Kdy to odpálíme?"}**\n`;
         data.voteData.options.forEach((opt, idx) => {
           const emoji = EMOJI_NUMBERS[idx % EMOJI_NUMBERS.length];
           markdown += `${emoji} ${formatDate(opt.date)} v ${opt.time}\n`;
         });
       }
-      markdown += `*(Hlasujte pomocí reakcí pod zprávou)*\n`;
+      markdown += `*(${t("tools.discordParty.md.voteDesc") || "Hlasujte pomocí reakcí pod zprávou"})*\n`;
     } else {
-      markdown += `📅 **Datum:** ${formatDate(data.date)}\n`;
-      markdown += `⏰ **Čas:** ${data.time}\n`;
+      markdown += `📅 **${t("tools.discordParty.md.date") || "Datum:"}** ${formatDate(data.date)}\n`;
+      markdown += `⏰ **${t("tools.discordParty.md.time") || "Čas:"}** ${data.time}\n`;
     }
 
-    markdown += `\n🎲 **Hra:** ${data.game}\n`;
+    markdown += `\n🎲 **${t("tools.discordParty.md.game") || "Hra:"}** ${data.game}\n`;
 
     if (data.place) {
       const isUrl = data.place.startsWith('http://') || data.place.startsWith('https://');
       if (isUrl) {
-        markdown += `📍 **Kde:** [Klikni pro připojení](${data.place})\n`;
+        markdown += `📍 **${t("tools.discordParty.md.where") || "Kde:"}** [${t("tools.discordParty.md.clickToJoin") || "Klikni pro připojení"}](${data.place})\n`;
       } else {
-        markdown += `📍 **Kde:** ${data.place}\n`;
+        markdown += `📍 **${t("tools.discordParty.md.where") || "Kde:"}** ${data.place}\n`;
       }
     }
 
     if (data.notes) {
-      markdown += `ℹ️ **Info:** ${data.notes}\n`;
+      markdown += `ℹ️ **${t("tools.discordParty.md.info") || "Info:"}** ${data.notes}\n`;
     }
 
     markdown += `\n@based`;
@@ -224,7 +225,7 @@
     });
 
     if (!isValid || options.length === 0) {
-      alert("Vyplňte prosím všechna políčka v hlasování.");
+      alert(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("tools.discordParty.alertFillAll") : "Vyplňte prosím všechna políčka v hlasování.");
       return;
     }
 

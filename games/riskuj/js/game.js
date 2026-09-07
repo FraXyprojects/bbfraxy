@@ -45,10 +45,10 @@ export function renderGame({
         <div class="topline">
             <div>
                 <div class="eyebrow">FRAXY // RISKUJ</div>
-                <h2>Herní deska</h2>
+                <h2 data-i18n="riskuj.board.title">Herní deska</h2>
             </div>
 
-            <button class="btn secondary" id="new-game">
+            <button class="btn secondary" id="new-game" data-i18n="riskuj.board.newGame">
                 Nová hra
             </button>
         </div>
@@ -69,6 +69,8 @@ export function renderGame({
         <div id="question" class="question-card"></div>
         <div id="question-preview" class="question-preview hidden"></div>
     `;
+
+    if (window.BBFRAXY_I18N) window.BBFRAXY_I18N.apply();
 
     gameEl.querySelector('#new-game').onclick = onNewGame;
     updateScores();
@@ -110,7 +112,7 @@ export function openQuestion({
 
     questionEl.innerHTML = `
         <div class="question-value">
-            ${question.value} BODŮ
+            ${question.value} <span data-i18n="riskuj.points">BODŮ</span>
         </div>
 
         <div class="question-text">
@@ -126,19 +128,21 @@ export function openQuestion({
         </div>
 
         <div class="actions">
-            <button class="btn secondary" id="show-answer">
+            <button class="btn secondary" id="show-answer" data-i18n="riskuj.game.showAnswer">
                 Ukázat odpověď
             </button>
 
-            <button class="btn success" id="score-right">
+            <button class="btn success" id="score-right" data-i18n="riskuj.game.correct">
                 ✓ Správně
             </button>
 
-            <button class="btn danger" id="score-wrong">
+            <button class="btn danger" id="score-wrong" data-i18n="riskuj.game.wrong">
                 ✕ Špatně
             </button>
         </div>
     `;
+
+    if (window.BBFRAXY_I18N) window.BBFRAXY_I18N.apply();
 
     questionEl.querySelector('#show-answer').onclick = () => {
         if (state.timer) {
@@ -228,10 +232,12 @@ export function scoreQuestion({
     updateScores();
 
     questionEl.innerHTML = `
-        <div class="note">
+        <div class="note" data-i18n="riskuj.game.turnEvaluated">
             Tah vyhodnocen. Pokračuje další hráč.
         </div>
     `;
+
+    if (window.BBFRAXY_I18N) window.BBFRAXY_I18N.apply();
 
     const answeredCells = document.querySelectorAll(
         '.cell-btn.answered'
@@ -292,7 +298,7 @@ function renderQuestionPreview({ state, cell, preview }) {
         </button>
 
         <div class="question-preview-value">
-            ${question.value} BODŮ
+            ${question.value} <span data-i18n="riskuj.points">BODŮ</span>
         </div>
 
         <div class="question-preview-text">
@@ -304,6 +310,7 @@ function renderQuestionPreview({ state, cell, preview }) {
         </div>
     `;
 
+    if (window.BBFRAXY_I18N) window.BBFRAXY_I18N.apply();
     preview.classList.remove('hidden');
 
     preview.querySelector('.question-preview-close').onclick = () => {
