@@ -247,20 +247,31 @@ const RAW_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
   async function assemblePage(html, entryPath, enabledPaths) {
     const doc = new DOMParser().parseFromString(html, "text/html");
 
+    const stylesheetLinks = [];
+    const stylesheetPromises = [];
+
     for (const link of [...doc.querySelectorAll("link[href]")]) {
       const href = link.getAttribute("href") || "";
       if (!isLocalRef(href)) continue;
       const path = findTreePath(resolveRelative(entryPath, href));
       if (!path || !enabledPaths.has(path)) continue;
       if (/stylesheet/i.test(link.getAttribute("rel") || "")) {
-        const payload = await fetchFile(path);
-        const style = doc.createElement("style");
-        style.dataset.previewFile = path;
-        style.textContent = rewriteCss(payload.text || "", path);
-        link.replaceWith(style);
+        stylesheetLinks.push({ link, path });
+        stylesheetPromises.push(fetchFile(path));
       } else if (/icon/i.test(link.getAttribute("rel") || "")) {
         link.setAttribute("href", rawUrl(path));
       }
+    }
+
+    const payloads = await Promise.all(stylesheetPromises);
+
+    for (let i = 0; i < stylesheetLinks.length; i++) {
+      const { link, path } = stylesheetLinks[i];
+      const payload = payloads[i];
+      const style = doc.createElement("style");
+      style.dataset.previewFile = path;
+      style.textContent = rewriteCss(payload.text || "", path);
+      link.replaceWith(style);
     }
 
     for (const script of [...doc.querySelectorAll("script[src]")]) {
@@ -291,21 +302,33 @@ const RAW_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
 
     doc.querySelectorAll("form").forEach((formElement) => formElement.addEventListener("submit", (event) => event.preventDefault()));
 
+    const injectedPaths = [];
+    const injectedPromises = [];
+
     for (const path of enabledPaths) {
       if (path === entryPath || !isInjectable(path)) continue;
       const state = readState()[path];
       if (!state?.enabled) continue;
       if (/\.css$/i.test(path)) {
-        const payload = await fetchFile(path);
-        const style = doc.createElement("style");
-        style.dataset.previewInjected = path;
-        style.textContent = rewriteCss(payload.text || "", path);
-        doc.head.append(style);
+        injectedPaths.push(path);
+        injectedPromises.push(fetchFile(path));
       } else {
         const script = doc.createElement("script");
         script.src = rawUrl(path);
         script.dataset.previewInjected = path;
         doc.body.append(script);
+      }
+    }
+
+    if (injectedPromises.length > 0) {
+      const injectedPayloads = await Promise.all(injectedPromises);
+      for (let i = 0; i < injectedPaths.length; i++) {
+        const path = injectedPaths[i];
+        const payload = injectedPayloads[i];
+        const style = doc.createElement("style");
+        style.dataset.previewInjected = path;
+        style.textContent = rewriteCss(payload.text || "", path);
+        doc.head.append(style);
       }
     }
 
