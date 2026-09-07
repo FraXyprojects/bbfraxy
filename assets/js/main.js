@@ -276,9 +276,14 @@ function setupAmbientCanvas() {
 
       for (let next = index + 1; next < particles.length; next += 1) {
         const other = particles[next];
-        const distance = Math.hypot(particle.x - other.x, particle.y - other.y);
+        const dx = particle.x - other.x;
+        const dy = particle.y - other.y;
 
-        if (distance < 118) {
+        if (dx > 118 || dx < -118 || dy > 118 || dy < -118) {
+          continue;
+        }
+
+        if (dx * dx + dy * dy < 13924) {
           context.beginPath();
           context.moveTo(particle.x, particle.y);
           context.lineTo(other.x, other.y);
