@@ -223,14 +223,25 @@
     return text.replace(/\r\n?/g,'\n').split('\n').map((line,index) => `<div class="code-line"><span class="code-ln">${index+1}</span><span class="code-src">${highlightLine(line,language) || ' '}</span></div>`).join('') + '<div class="code-copybar"><button type="button" class="code-copy">Copy file</button></div>';
   }
 
+  // Performance optimization: Pre-compile regex rules outside the render loop
+  // to prevent recreating RegExp instances for every single line of code.
+  const SYNTAX_RULES = {
+    json: [/(\"(?:[^\"\\]|\\.)*\")(?=\s*:)/g,'string',/(\"(?:[^\"\\]|\\.)*\")/g,'string',/\b(?:true|false|null)\b/g,'keyword',/-?\b\d+(?:\.\d+)?\b/g,'number'],
+    html: [/&lt;\/?[A-Za-z][^&]*?&gt;/g,'tag',/&lt;!--.*?--&gt;/g,'comment'],
+    css: [/\/\/.*$/g,'comment',/#[0-9a-fA-F]{3,8}\b/g,'number',/\b(?:margin|padding|display|position|color|background|font-size|width|height)\b/g,'property'],
+    markdown: [/^\s{0,3}#{1,6}.*$/g,'heading',/\*\*[^*]+\*\*|__[^_]+__/g,'strong',/`[^`]+`/g,'string'],
+    ini: [/^\s*[#;].*$/g,'comment',/^\s*\[[^\]]+\]/g,'section',/^\s*[A-Za-z0-9_.-]+(?=\s*=)/g,'property'],
+    default: [/\/\/.*$/g,'comment',/#.*$/g,'comment',/\/\*.*?\*\//g,'comment',/\b(?:const|let|var|function|return|if|else|for|while|class|public|private|protected|using|namespace|new|this|async|await|import|from|export|extends|static|void|int|float|string|bool|true|false|null|undefined|def|try|catch|throw|switch|case|break|continue)\b/g,'keyword',/\b\d+(?:\.\d+)?\b/g,'number',/'(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"|`(?:[^`\\]|\\.)*`/g,'string']
+  };
+
   function highlightLine(line, language) {
     const escaped = escapeHtml(line);
-    if (language === 'json') return colorize(escaped, [/(\"(?:[^\"\\]|\\.)*\")(?=\s*:)/g,'string',/(\"(?:[^\"\\]|\\.)*\")/g,'string',/\b(?:true|false|null)\b/g,'keyword',/-?\b\d+(?:\.\d+)?\b/g,'number']);
-    if (language === 'html' || language === 'xml') return colorize(escaped,[/&lt;\/?[A-Za-z][^&]*?&gt;/g,'tag',/&lt;!--.*?--&gt;/g,'comment']);
-    if (language === 'css') return colorize(escaped,[/\/\/.*$/g,'comment',/#[0-9a-fA-F]{3,8}\b/g,'number',/\b(?:margin|padding|display|position|color|background|font-size|width|height)\b/g,'property']);
-    if (language === 'markdown') return colorize(escaped,[/^\s{0,3}#{1,6}.*$/g,'heading',/\*\*[^*]+\*\*|__[^_]+__/g,'strong',/`[^`]+`/g,'string']);
-    if (language === 'ini') return colorize(escaped,[/^\s*[#;].*$/g,'comment',/^\s*\[[^\]]+\]/g,'section',/^\s*[A-Za-z0-9_.-]+(?=\s*=)/g,'property']);
-    return colorize(escaped,[/\/\/.*$/g,'comment',/#.*$/g,'comment',/\/\*.*?\*\//g,'comment',/\b(?:const|let|var|function|return|if|else|for|while|class|public|private|protected|using|namespace|new|this|async|await|import|from|export|extends|static|void|int|float|string|bool|true|false|null|undefined|def|try|catch|throw|switch|case|break|continue)\b/g,'keyword',/\b\d+(?:\.\d+)?\b/g,'number',/'(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"|`(?:[^`\\]|\\.)*`/g,'string']);
+    if (language === 'json') return colorize(escaped, SYNTAX_RULES.json);
+    if (language === 'html' || language === 'xml') return colorize(escaped, SYNTAX_RULES.html);
+    if (language === 'css') return colorize(escaped, SYNTAX_RULES.css);
+    if (language === 'markdown') return colorize(escaped, SYNTAX_RULES.markdown);
+    if (language === 'ini') return colorize(escaped, SYNTAX_RULES.ini);
+    return colorize(escaped, SYNTAX_RULES.default);
   }
 
   function colorize(text, rules) {
