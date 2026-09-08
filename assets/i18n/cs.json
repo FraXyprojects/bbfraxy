@@ -631,7 +631,8 @@
       "backToRiskuj": "← Zpět do Riskuj",
       "addTopic": "＋ Přidat téma",
       "deleteTopic": "Smazat téma",
-      "addQuestion": "Přidat otázku"
+      "addQuestion": "Přidat otázku",
+      "deleteQuestion": "Smazat otázku"
     },
     "status": {
       "ready": "Kvíz vytvořen. Začni přidávat témata.",
@@ -644,11 +645,13 @@
     "placeholder": {
       "topicName": "Název tématu",
       "question": "Otázka",
-      "answer": "Odpověď"
+      "answer": "Odpověď",
+      "value": "Hodnota"
     },
     "alert": {
       "oneTopic": "Nejdřív přidej alespoň jedno téma.",
-      "invalidJson": "Soubor nemá platný Riskuj JSON."
+      "invalidJson": "Soubor nemá platný Riskuj JSON.",
+      "confirmDeleteTopic": "Opravdu chceš smazat toto téma a všechny jeho otázky?"
     },
     "empty": "Prázdný"
   },

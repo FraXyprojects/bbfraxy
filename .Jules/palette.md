@@ -1,0 +1,3 @@
+## 2024-05-18 - Riskuj Builder Accessibility and Destructive Actions
+**Learning:** Destructive actions that delete parent structures (like a topic that holds multiple questions) must have confirmation dialogs to prevent catastrophic data loss from misclicks, and dynamic inputs in builder UIs need localized ARIA labels because placeholders are insufficient for screen readers.
+**Action:** When implementing or reviewing builder UIs, always check if 'delete' actions affect child elements and require confirmation, and ensure all dynamic inputs have both placeholders and ARIA labels linked to the localization system.
