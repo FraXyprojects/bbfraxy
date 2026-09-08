@@ -38,9 +38,16 @@
 
   const parseToDiscordHTML = (markdown) => {
     let html = markdown
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") // escape
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") // escape
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>') // links
+      .replace(/\[(.*?)\]\((.*?)\)/g, (match, text, url) => {
+        const cleanUrl = url.trim();
+        // Allow only safe protocols
+        if (/^https?:|^mailto:/i.test(cleanUrl) || cleanUrl.startsWith('/')) {
+          return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        }
+        return `[${text}](${url})`; // fallback to text for unsafe URLs
+      }) // links
       .replace(/\n/g, "<br>"); // new lines
 
     // Replace @based with a styled mention lookalike
