@@ -361,8 +361,10 @@
         }
 
         function removeTopic(topicIndex) {
-            data.topics.splice(topicIndex, 1);
-            render();
+            if (confirm(window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.alert.confirmDeleteTopic') || "Opravdu smazat toto téma?" : "Opravdu smazat toto téma?")) {
+                data.topics.splice(topicIndex, 1);
+                render();
+            }
         }
 
         function removeQuestion(topicIndex, questionIndex) {
@@ -385,6 +387,7 @@
                                     class="input"
                                     value="${esc(topic.name)}"
                                     placeholder="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.placeholder.topicName') : 'Název tématu'}"
+                                    aria-label="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.placeholder.topicName') : 'Název tématu'}"
                                     oninput="data.topics[${topicIndex}].name=this.value"
                                 >
 
@@ -405,6 +408,7 @@
                                                     class="input"
                                                     value="${esc(question.question)}"
                                                     placeholder="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.placeholder.question') : 'Otázka'}"
+                                                    aria-label="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.placeholder.question') : 'Otázka'}"
                                                     oninput="data.topics[${topicIndex}].questions[${questionIndex}].question=this.value"
                                                 >
 
@@ -412,6 +416,7 @@
                                                     class="input"
                                                     value="${esc(question.answer)}"
                                                     placeholder="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.placeholder.answer') : 'Odpověď'}"
+                                                    aria-label="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.placeholder.answer') : 'Odpověď'}"
                                                     oninput="data.topics[${topicIndex}].questions[${questionIndex}].answer=this.value"
                                                 >
 
@@ -421,12 +426,15 @@
                                                     min="0"
                                                     step="100"
                                                     value="${Number(question.value) || 0}"
+                                                    aria-label="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.placeholder.value') : 'Hodnota'}"
                                                     oninput="data.topics[${topicIndex}].questions[${questionIndex}].value=Number(this.value)"
                                                 >
 
                                                 <button
                                                     class="btn danger"
                                                     onclick="removeQuestion(${topicIndex},${questionIndex})"
+                                                    aria-label="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.btn.deleteQuestion') : 'Smazat otázku'}"
+                                                    title="${window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate('builder.btn.deleteQuestion') : 'Smazat otázku'}"
                                                 >
                                                     ×
                                                 </button>
