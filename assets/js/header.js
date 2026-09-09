@@ -29,7 +29,7 @@
         <span class="brand-mark" aria-hidden="true">F</span>
         <span>BBFRAXY</span>
       </a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Open navigation">
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Toggle navigation" title="Toggle navigation" data-i18n-attr="aria-label:nav.toggleMenu;title:nav.toggleMenu">
         <span></span><span></span><span></span>
       </button>
       <div class="nav-menu" id="site-menu">
@@ -37,10 +37,10 @@
           ${navItems.map((item) => `<a href="${item.href}" data-i18n="nav.${item.key}"${item.key === activeKey ? ' aria-current="page"' : ""}>${item.label}</a>`).join("")}
         </div>
         <div class="nav-actions">
-          <button class="icon-button lang-toggle" type="button" aria-label="Switch language" data-i18n-attr="aria-label:nav.switchLanguage">
+          <button class="icon-button lang-toggle" type="button" aria-label="Switch language" title="Switch language" data-i18n-attr="aria-label:nav.switchLanguage;title:nav.switchLanguage">
             <span class="lang-flag" aria-hidden="true"></span>
           </button>
-          <button class="icon-button theme-toggle" type="button" aria-label="Switch theme" aria-pressed="false" data-i18n-attr="aria-label:nav.switchTheme">
+          <button class="icon-button theme-toggle" type="button" aria-label="Switch theme" title="Switch theme" aria-pressed="false" data-i18n-attr="aria-label:nav.switchTheme;title:nav.switchTheme">
             <span class="theme-icon" aria-hidden="true"></span>
           </button>
         </div>

@@ -103,7 +103,6 @@ function syncThemeToggle() {
 
   const isLight = root.dataset.theme === "light";
   themeToggle.setAttribute("aria-pressed", String(isLight));
-  themeToggle.setAttribute("aria-label", isLight ? "Switch to dark theme" : "Switch to light theme");
 }
 
 themeToggle?.addEventListener("click", () => {
@@ -182,7 +181,6 @@ function setupNavigation() {
   menuToggle.addEventListener("click", () => {
     const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
     menuToggle.setAttribute("aria-expanded", String(!isOpen));
-    menuToggle.setAttribute("aria-label", isOpen ? "Open navigation" : "Close navigation");
     navMenu.classList.toggle("is-open", !isOpen);
     root.classList.toggle("nav-open", !isOpen);
   });
@@ -202,7 +200,6 @@ function setupNavigation() {
 
 function closeNavigation() {
   menuToggle?.setAttribute("aria-expanded", "false");
-  menuToggle?.setAttribute("aria-label", "Open navigation");
   navMenu?.classList.remove("is-open");
   root.classList.remove("nav-open");
 }
