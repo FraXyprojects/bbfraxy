@@ -1,0 +1,34 @@
+name: Move GitHub Simplifier config
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  move-config:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Move config files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          mkdir -p tools/github-simplifier
+          git mv package.json tools/github-simplifier/package.json
+          git mv package-lock.json tools/github-simplifier/package-lock.json
+          git mv jest.config.js tools/github-simplifier/jest.config.js
+          rm .github/workflows/move-github-simplifier-config.yml
+
+          git add -A
+          git commit -m "chore: move GitHub Simplifier test config"
+          git push
