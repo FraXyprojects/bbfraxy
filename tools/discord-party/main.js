@@ -38,7 +38,7 @@
 
   const parseToDiscordHTML = (markdown) => {
     let html = markdown
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") // escape
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") // escape
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold
       .replace(/\[(.*?)\]\((.*?)\)/g, (match, text, url) => {
         const cleanUrl = url.trim();
