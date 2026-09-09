@@ -276,17 +276,20 @@ function setupAmbientCanvas() {
     context.beginPath();
     for (let index = 0; index < particles.length; index += 1) {
       const particle = particles[index];
+      const px = particle.x;
+      const py = particle.y;
       for (let next = index + 1; next < particles.length; next += 1) {
         const other = particles[next];
-        const dx = particle.x - other.x;
-        const dy = particle.y - other.y;
 
-        if (dx > 118 || dx < -118 || dy > 118 || dy < -118) {
-          continue;
-        }
+        // Optimize: early return on X-axis bounds before calculating Y difference
+        const dx = px - other.x;
+        if (dx > 118 || dx < -118) continue;
+
+        const dy = py - other.y;
+        if (dy > 118 || dy < -118) continue;
 
         if (dx * dx + dy * dy < 13924) {
-          context.moveTo(particle.x, particle.y);
+          context.moveTo(px, py);
           context.lineTo(other.x, other.y);
         }
       }
