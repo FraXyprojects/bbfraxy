@@ -28,6 +28,7 @@ export function renderPlayers({ players, container, onAdd, onRemove }) {
         .map(
             (player, index) => {
                 const placeholder = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.playerPlaceholder") + ` ${index + 1}` : `Hráč / tým ${index + 1}`;
+                const removeAria = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.removePlayer") + ` ${index + 1}` : `Odstranit hráče ${index + 1}`;
                 return `
                 <div class="player-row">
                     <span
@@ -37,9 +38,11 @@ export function renderPlayers({ players, container, onAdd, onRemove }) {
                     <input
                         value="${esc(player.name)}"
                         placeholder="${placeholder}"
+                        aria-label="${placeholder}"
                     >
                     <button
                         class="player-remove"
+                        aria-label="${removeAria}"
                         ${players.length <= 2 ? 'disabled' : ''}
                     >×</button>
                 </div>
@@ -71,6 +74,7 @@ export function renderQuestionEditor({ topicCount, questionCount, container }) {
                     <input
                         data-topic="${topicIndex}"
                         placeholder="${topicPlaceholder}"
+                        aria-label="${topicPlaceholder}"
                     >
                 </div>
 
@@ -78,18 +82,21 @@ export function renderQuestionEditor({ topicCount, questionCount, container }) {
                     const value = (questionIndex + 1) * 100;
                     const questionPlaceholder = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.questionPlaceholder") + ` ${value}` : `Otázka za ${value}`;
                     const answerPlaceholder = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.answerPlaceholder") : `Odpověď`;
+                    const valueAria = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("riskuj.setup.valuePlaceholder") : `Hodnota`;
 
                     return `
                         <div class="q-row">
                             <input
                                 data-q="${topicIndex}-${questionIndex}"
                                 placeholder="${questionPlaceholder}"
+                                aria-label="${questionPlaceholder}"
                             >
                             <input
                                 data-a="${topicIndex}-${questionIndex}"
                                 placeholder="${answerPlaceholder}"
+                                aria-label="${answerPlaceholder}"
                             >
-                            <input value="${value}" disabled>
+                            <input value="${value}" disabled aria-label="${valueAria}">
                         </div>
                     `;
                 }).join('')}
