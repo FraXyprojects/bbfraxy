@@ -343,7 +343,11 @@ function setupAmbientCanvas() {
 
   observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
-  window.addEventListener("resize", resize);
+  let resizeTimeout;
+  window.addEventListener("resize", () => {
+    window.clearTimeout(resizeTimeout);
+    resizeTimeout = window.setTimeout(resize, 200);
+  });
   prefersReducedMotion.addEventListener("change", restart);
   document.addEventListener("visibilitychange", onVisibilityChange);
 
