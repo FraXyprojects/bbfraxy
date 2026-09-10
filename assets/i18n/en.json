@@ -522,6 +522,8 @@
       "topicPlaceholder": "Topic",
       "questionPlaceholder": "Question for",
       "answerPlaceholder": "Answer",
+      "removePlayer": "Remove player",
+      "valuePlaceholder": "Value",
       "loadedPrefix": "Loaded:",
       "topicsLoaded": "topics. Quiz is ready.",
       "invalidJson": "File is not a valid Riskuj JSON.",

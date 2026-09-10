@@ -522,6 +522,8 @@
       "topicPlaceholder": "Téma",
       "questionPlaceholder": "Otázka za",
       "answerPlaceholder": "Odpověď",
+      "removePlayer": "Odstranit hráče",
+      "valuePlaceholder": "Hodnota",
       "loadedPrefix": "Načteno:",
       "topicsLoaded": "témat. Kvíz je připraven.",
       "invalidJson": "Soubor není platný Riskuj JSON.",
