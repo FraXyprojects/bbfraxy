@@ -343,7 +343,18 @@ function setupAmbientCanvas() {
 
   observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
-  window.addEventListener("resize", resize);
+  // Optimization: Debounce window resize events
+  // Expected impact: Prevents excessive CPU usage and garbage collection
+  // during continuous window resizing. Limits resize handler calls to once
+  // every 200ms after the resize action completes, improving main thread
+  // availability and reducing layout thrashing.
+  let resizeTimeout;
+  const debouncedResize = () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(resize, 200);
+  };
+
+  window.addEventListener("resize", debouncedResize);
   prefersReducedMotion.addEventListener("change", restart);
   document.addEventListener("visibilitychange", onVisibilityChange);
 
