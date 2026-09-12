@@ -119,6 +119,7 @@ function setMissingOpen(open) {
   if (!missingPanel || !missingTrigger) return;
   missingPanel.classList.toggle("is-open", open);
   missingPanel.setAttribute("aria-hidden", String(!open));
+  missingTrigger.setAttribute("aria-expanded", String(open));
   if (open) document.querySelector("#missing-title")?.focus();
 }
 
