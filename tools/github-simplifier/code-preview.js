@@ -220,7 +220,14 @@
   }
 
   function highlightWithLineNumbers(text, language) {
-    return text.replace(/\r\n?/g,'\n').split('\n').map((line,index) => `<div class="code-line"><span class="code-ln">${index+1}</span><span class="code-src">${highlightLine(line,language) || ' '}</span></div>`).join('') + '<div class="code-copybar"><button type="button" class="code-copy">Copy file</button></div>';
+    const lines = text.replace(/\r\n?/g,'\n').split('\n');
+    const len = lines.length;
+    const out = new Array(len + 1);
+    for (let i = 0; i < len; i++) {
+      out[i] = `<div class="code-line"><span class="code-ln">${i+1}</span><span class="code-src">${highlightLine(lines[i],language) || ' '}</span></div>`;
+    }
+    out[len] = '<div class="code-copybar"><button type="button" class="code-copy">Copy file</button></div>';
+    return out.join('');
   }
 
   // Performance optimization: Pre-compile regex rules outside the render loop
