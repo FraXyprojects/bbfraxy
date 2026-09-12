@@ -1,3 +1,6 @@
 ## 2024-05-18 - Riskuj Builder Accessibility and Destructive Actions
 **Learning:** Destructive actions that delete parent structures (like a topic that holds multiple questions) must have confirmation dialogs to prevent catastrophic data loss from misclicks, and dynamic inputs in builder UIs need localized ARIA labels because placeholders are insufficient for screen readers.
 **Action:** When implementing or reviewing builder UIs, always check if 'delete' actions affect child elements and require confirmation, and ensure all dynamic inputs have both placeholders and ARIA labels linked to the localization system.
+## 2024-05-18 - Expanding/Collapsing Panels and ARIA States
+**Learning:** For floating or triggered panels (like the "Missing a game?" panel in coop-finder), simply toggling visibility (via classes or `display: none`) and `aria-hidden` on the panel itself is insufficient for screen readers. The trigger element (the button) must explicitly use `aria-expanded` and dynamically sync it with the panel's open/close state to properly broadcast the interactive context.
+**Action:** When implementing custom toggles or flyouts, always pair `aria-expanded` on the trigger with `aria-hidden` on the target, and ensure JavaScript synchronizes both states during interaction.
