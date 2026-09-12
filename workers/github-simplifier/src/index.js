@@ -236,7 +236,7 @@ async function handleRepoTree(owner, repo, env, ctx, origin) {
 }
 
 async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
-  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000 || path.includes("..")) {
     return json({ error: "Invalid GitHub file path." }, 400, {}, origin);
   }
 
