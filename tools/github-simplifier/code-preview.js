@@ -95,10 +95,16 @@
     const state = { analysis, repo, key, panel, tree: [], filtered: [], fileCache: new Map(), token: ++generation };
     active = state;
 
+    // Optimization: Debounce search input to reduce main thread blocking
+    // Expected impact: Improves typing responsiveness when filtering large repository trees
+    let searchTimeout;
     panel.querySelector('.code-search').addEventListener('input', (event) => {
+      clearTimeout(searchTimeout);
       const q = event.currentTarget.value.trim().toLowerCase();
-      state.filtered = q ? state.tree.filter((item) => item.path.toLowerCase().includes(q)) : state.tree.slice();
-      renderSidebar(state);
+      searchTimeout = setTimeout(() => {
+        state.filtered = q ? state.tree.filter((item) => item.path.toLowerCase().includes(q)) : state.tree.slice();
+        renderSidebar(state);
+      }, 150);
     });
     panel.querySelector('.code-collapse').addEventListener('click', () => panel.querySelectorAll('details.code-folder').forEach((node) => { node.open = false; }));
     panel.querySelector('.code-load-all').addEventListener('click', () => loadAll(state));
