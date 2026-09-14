@@ -222,12 +222,11 @@
   function highlightWithLineNumbers(text, language) {
     const lines = text.replace(/\r\n?/g,'\n').split('\n');
     const len = lines.length;
-    const out = new Array(len + 1);
+    let out = '';
     for (let i = 0; i < len; i++) {
-      out[i] = `<div class="code-line"><span class="code-ln">${i+1}</span><span class="code-src">${highlightLine(lines[i],language) || ' '}</span></div>`;
+      out += `<div class="code-line"><span class="code-ln">${i+1}</span><span class="code-src">${highlightLine(lines[i],language) || ' '}</span></div>`;
     }
-    out[len] = '<div class="code-copybar"><button type="button" class="code-copy">Copy file</button></div>';
-    return out.join('');
+    return out + '<div class="code-copybar"><button type="button" class="code-copy">Copy file</button></div>';
   }
 
   // Performance optimization: Pre-compile regex rules outside the render loop
@@ -260,7 +259,8 @@
 
   function languageFor(path) { return LANGUAGE_MAP[path.split('.').pop()?.toLowerCase() || ''] || 'text'; }
   function languageLabel(path) { const v=languageFor(path); return v==='text' ? 'Text' : v.charAt(0).toUpperCase()+v.slice(1); }
-  function isGenerated(path) { return path.toLowerCase().split('/').some(part => ['node_modules','.git','dist','build','bin','obj'].includes(part)); }
+  const GENERATED_REGEX = /(?:^|\/)(node_modules|\.git|dist|build|bin|obj)(?:\/|$)/i;
+  function isGenerated(path) { return GENERATED_REGEX.test(path); }
   function formatBytes(bytes) { if (!Number.isFinite(bytes)||bytes<1024) return `${Math.max(0,Math.round(bytes||0))} B`; const units=['KB','MB','GB']; let value=bytes/1024,index=0; while(value>=1024&&index<units.length-1){value/=1024;index++;} return `${value.toFixed(value>=10?0:1)} ${units[index]}`; }
   function escapeHtml(value) { return String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
   async function copyText(text,button){ try{await navigator.clipboard.writeText(text);const old=button.textContent;button.textContent='Copied';setTimeout(()=>button.textContent=old,1200);}catch{button.textContent='Copy failed';} }
