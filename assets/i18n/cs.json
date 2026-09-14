@@ -206,6 +206,7 @@
       "modalTypeBoth": "Dny i časy (odděleně)",
       "modalTypeCombined": "Konkrétní termíny (Den + Čas)",
       "modalAddBtn": "+ Přidat možnost",
+      "modalRemoveBtn": "Odstranit možnost",
       "modalSaveBtn": "Uložit hlasování",
       "modalCancelBtn": "Zrušit",
       "discordPreviewName": "Ty",

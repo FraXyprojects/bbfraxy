@@ -183,9 +183,9 @@
   </div>
 
   <!-- Modal -->
-  <div class="dp-modal-overlay" id="dp-vote-modal">
-    <div class="dp-modal">
-      <div class="dp-modal-header" data-i18n="tools.discordParty.modalTitle">Hlasování o termínu</div>
+  <div class="dp-modal-overlay" id="dp-vote-modal" aria-hidden="true">
+    <div class="dp-modal" role="dialog" aria-modal="true" aria-labelledby="dp-modal-title">
+      <div class="dp-modal-header" id="dp-modal-title" data-i18n="tools.discordParty.modalTitle">Hlasování o termínu</div>
 
       <div class="dp-field" style="margin-bottom: 20px;">
         <label class="dp-label" data-i18n="tools.discordParty.modalTypeLabel">Typ hlasování</label>

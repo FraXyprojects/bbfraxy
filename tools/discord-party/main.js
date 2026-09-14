@@ -115,20 +115,21 @@
   const createOptionRow = (type, values = {}) => {
     const row = document.createElement("div");
     row.className = "dp-modal-option";
+    const removeAria = window.BBFRAXY_I18N ? window.BBFRAXY_I18N.translate("tools.discordParty.modalRemoveBtn") || "Odstranit" : "Odstranit";
 
     if (type === 'dates') {
       row.innerHTML = `
         <div class="dp-modal-option-inputs">
           <input class="dp-input" type="date" value="${values.date || ''}" required>
         </div>
-        <button type="button" class="dp-modal-option-remove" aria-label="Remove">×</button>
+        <button type="button" class="dp-modal-option-remove" aria-label="${removeAria}" title="${removeAria}">×</button>
       `;
     } else if (type === 'times') {
       row.innerHTML = `
         <div class="dp-modal-option-inputs">
           <input class="dp-input" type="time" value="${values.time || '20:00'}" required>
         </div>
-        <button type="button" class="dp-modal-option-remove" aria-label="Remove">×</button>
+        <button type="button" class="dp-modal-option-remove" aria-label="${removeAria}" title="${removeAria}">×</button>
       `;
     } else if (type === 'combined') {
       row.innerHTML = `
@@ -136,7 +137,7 @@
           <input class="dp-input" type="date" value="${values.date || ''}" required>
           <input class="dp-input" type="time" value="${values.time || '20:00'}" required>
         </div>
-        <button type="button" class="dp-modal-option-remove" aria-label="Remove">×</button>
+        <button type="button" class="dp-modal-option-remove" aria-label="${removeAria}" title="${removeAria}">×</button>
       `;
     }
 
@@ -168,10 +169,12 @@
     modalTypeSelect.value = defaultType;
     populateModal();
     modal.classList.add("is-visible");
+    modal.setAttribute("aria-hidden", "false");
   };
 
   const closeModal = () => {
     modal.classList.remove("is-visible");
+    modal.setAttribute("aria-hidden", "true");
   };
 
   const syncUIState = () => {

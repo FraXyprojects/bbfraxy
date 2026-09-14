@@ -206,6 +206,7 @@
       "modalTypeBoth": "Days and times (separate)",
       "modalTypeCombined": "Specific times (Day + Time)",
       "modalAddBtn": "+ Add option",
+      "modalRemoveBtn": "Remove option",
       "modalSaveBtn": "Save poll",
       "modalCancelBtn": "Cancel",
       "discordPreviewName": "You",
