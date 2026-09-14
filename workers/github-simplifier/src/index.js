@@ -1,6 +1,7 @@
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "public, max-age=60, s-maxage=300, stale-while-revalidate=86400",
+  "x-content-type-options": "nosniff",
 };
 
 const GITHUB_API = "https://api.github.com";
@@ -289,6 +290,8 @@ async function handleRawContent(owner, repo, path, ctx) {
     headers: {
       "content-type": contentType,
       "cache-control": `public, max-age=60, s-maxage=${FILE_CACHE_TTL}, stale-while-revalidate=86400`,
+      "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+      "x-content-type-options": "nosniff",
       ...corsHeaders("*"),
     },
   });
