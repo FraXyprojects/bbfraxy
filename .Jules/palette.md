@@ -4,3 +4,6 @@
 ## 2024-05-18 - Expanding/Collapsing Panels and ARIA States
 **Learning:** For floating or triggered panels (like the "Missing a game?" panel in coop-finder), simply toggling visibility (via classes or `display: none`) and `aria-hidden` on the panel itself is insufficient for screen readers. The trigger element (the button) must explicitly use `aria-expanded` and dynamically sync it with the panel's open/close state to properly broadcast the interactive context.
 **Action:** When implementing custom toggles or flyouts, always pair `aria-expanded` on the trigger with `aria-hidden` on the target, and ensure JavaScript synchronizes both states during interaction.
+## 2024-05-18 - Accessible Custom Modals and Dynamic Inputs
+**Learning:** Custom-built modals (that do not use the native `<dialog>` element) require explicit `role="dialog"`, `aria-modal="true"`, and `aria-hidden` management to be accessible to screen readers, and dynamically generated buttons within them must use localized ARIA labels rather than hardcoded text.
+**Action:** Always ensure custom modals have proper ARIA attributes (`role`, `aria-modal`, `aria-labelledby`, `aria-hidden`) toggled correctly via JavaScript, and use `window.BBFRAXY_I18N.translate()` to provide localized accessible names for dynamic inputs and buttons.
