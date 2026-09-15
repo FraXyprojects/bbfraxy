@@ -208,6 +208,7 @@
       "modalAddBtn": "+ Add option",
       "modalSaveBtn": "Save poll",
       "modalCancelBtn": "Cancel",
+      "modalRemoveBtn": "Remove",
       "discordPreviewName": "You",
       "discordPreviewTime": "Today at 12:00",
       "formLabel": "Discord Party form",
