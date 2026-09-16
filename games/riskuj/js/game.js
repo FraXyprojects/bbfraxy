@@ -30,7 +30,7 @@ export function renderGame({
                                 data-key="${esc(`${topic}-${value}`)}"
                                 ${question ? '' : 'disabled'}
                             >
-                                ${value}
+                                ${esc(value)}
                             </button>
                         </td>
                     `;
@@ -112,7 +112,7 @@ export function openQuestion({
 
     questionEl.innerHTML = `
         <div class="question-value">
-            ${question.value} <span data-i18n="riskuj.points">BODŮ</span>
+            ${esc(question.value)} <span data-i18n="riskuj.points">BODŮ</span>
         </div>
 
         <div class="question-text">
@@ -298,7 +298,7 @@ function renderQuestionPreview({ state, cell, preview }) {
         </button>
 
         <div class="question-preview-value">
-            ${question.value} <span data-i18n="riskuj.points">BODŮ</span>
+            ${esc(question.value)} <span data-i18n="riskuj.points">BODŮ</span>
         </div>
 
         <div class="question-preview-text">
