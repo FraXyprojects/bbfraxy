@@ -11,3 +11,6 @@
 ## 2025-01-26 - Avoid functional pipelines in hot loops
 **Learning:** Functional string pipelines like `path.toLowerCase().split('/').some(...)` executed thousands of times during filtering cause significant GC thrashing due to intermediate string and array allocations.
 **Action:** When filtering large arrays based on string patterns, always use a pre-compiled `RegExp` instead of splitting and chaining array methods.
+## 2023-10-24 - String Replacement Optimization
+**Learning:** Chained `.replaceAll()` calls on strings, and loops calling `.replaceAll()` repeatedly over an array of placeholders, cause significant performance bottlenecks due to multiple O(N) passes and memory reallocations.
+**Action:** Always prefer a single-pass regex replacement using a pre-allocated/hoisted lookup object (`const ESCAPE_MAP = {...}`) or a single replacer function when handling multiple distinct token replacements. Ensure the lookup map is defined outside the replacer function to avoid constant reallocation during matching.
