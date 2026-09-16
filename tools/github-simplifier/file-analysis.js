@@ -262,7 +262,9 @@
     document.head.append(style);
   }
 
+  // ⚡ Bolt: Single regex pass with hoisted map to prevent reallocation overhead
+  const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
   function escapeHtml(value) {
-    return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    return String(value ?? "").replace(/[&<>"']/g, (m) => HTML_ESCAPES[m]);
   }
 })();

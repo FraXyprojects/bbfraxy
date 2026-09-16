@@ -465,7 +465,9 @@ const RAW_API = "https://bbfraxy-github-simplifier.fraxy.workers.dev/v1/raw";
     return `<style>html,body{height:100%;margin:0;background:#050607;color:#ffbcbc;font:14px system-ui;padding:24px;box-sizing:border-box}pre{white-space:pre-wrap;font:inherit}</style><pre>${escapeHtml(message)}</pre>`;
   }
 
+  // ⚡ Bolt: Single regex pass with hoisted map to prevent reallocation overhead
+  const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
   function escapeHtml(value) {
-    return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    return String(value ?? "").replace(/[&<>"']/g, (m) => HTML_ESCAPES[m]);
   }
 })();
