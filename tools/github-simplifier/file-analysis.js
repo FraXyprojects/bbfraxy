@@ -262,7 +262,10 @@
     document.head.append(style);
   }
 
+  // Performance optimization: Pre-allocate HTML entities map and use a single RegExp pass
+  // Expected impact: Eliminates chained .replaceAll() allocations which reduces GC thrashing and speeds up string escaping for large text.
+  const HTML_ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
   function escapeHtml(value) {
-    return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    return String(value ?? "").replace(/[&<>"']/g, match => HTML_ENTITIES[match]);
   }
 })();
