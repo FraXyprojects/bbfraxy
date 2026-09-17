@@ -673,3 +673,26 @@ button {
     transition-duration: 1ms !important;
   }
 }
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -1000px;
+  left: -1000px;
+  z-index: 9999;
+  padding: 12px 24px;
+  background: var(--bg);
+  color: var(--text);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 150ms ease, top 150ms ease, left 150ms ease;
+}
+
+.skip-link:focus-visible {
+  top: 16px;
+  left: 16px;
+  opacity: 1;
+}
