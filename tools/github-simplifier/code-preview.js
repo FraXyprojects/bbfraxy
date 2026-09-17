@@ -253,7 +253,12 @@
   function colorize(text, rules) {
     let output = text; const placeholders = [];
     for (let i=0;i<rules.length;i+=2) output = output.replace(rules[i], match => { const token=`\u0000${placeholders.length}\u0000`; placeholders.push(`<span class="tok-${rules[i+1]}">${match}</span>`); return token; });
-    placeholders.forEach((html,index) => { output = output.replaceAll(`\u0000${index}\u0000`,html); });
+
+    // Performance optimization: Replace multiple .replaceAll() loop with a single regex pass
+    // Expected impact: Massively reduces O(N*M) string scanning bottleneck on large files, speeding up colorization significantly.
+    if (placeholders.length > 0) {
+      output = output.replace(/\u0000(\d+)\u0000/g, (_, index) => placeholders[index]);
+    }
     return output;
   }
 
@@ -262,7 +267,12 @@
   const GENERATED_REGEX = /(?:^|\/)(node_modules|\.git|dist|build|bin|obj)(?:\/|$)/i;
   function isGenerated(path) { return GENERATED_REGEX.test(path); }
   function formatBytes(bytes) { if (!Number.isFinite(bytes)||bytes<1024) return `${Math.max(0,Math.round(bytes||0))} B`; const units=['KB','MB','GB']; let value=bytes/1024,index=0; while(value>=1024&&index<units.length-1){value/=1024;index++;} return `${value.toFixed(value>=10?0:1)} ${units[index]}`; }
-  function escapeHtml(value) { return String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
+
+  // Performance optimization: Pre-allocate HTML entities map and use a single RegExp pass
+  // Expected impact: Eliminates chained .replaceAll() allocations which reduces GC thrashing and speeds up string escaping for large text.
+  const HTML_ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+  function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, match => HTML_ENTITIES[match]); }
+
   async function copyText(text,button){ try{await navigator.clipboard.writeText(text);const old=button.textContent;button.textContent='Copied';setTimeout(()=>button.textContent=old,1200);}catch{button.textContent='Copy failed';} }
 
   function installStyles(){

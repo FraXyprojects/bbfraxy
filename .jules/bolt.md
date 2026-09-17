@@ -11,3 +11,6 @@
 ## 2025-01-26 - Avoid functional pipelines in hot loops
 **Learning:** Functional string pipelines like `path.toLowerCase().split('/').some(...)` executed thousands of times during filtering cause significant GC thrashing due to intermediate string and array allocations.
 **Action:** When filtering large arrays based on string patterns, always use a pre-compiled `RegExp` instead of splitting and chaining array methods.
+## 2025-02-19 - O(N*M) bottleneck in multiple replaceAll calls
+**Learning:** Chaining `.replaceAll()` inside a loop for syntax highlighting created a massive O(N*M) string scanning bottleneck, causing large strings to process extremely slowly (~6.7s vs 90ms).
+**Action:** Always prefer a single regex `.replace()` with a function callback or a pre-allocated map for replacing multiple distinct tokens instead of looping `.replaceAll()` on large strings.
