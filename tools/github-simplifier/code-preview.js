@@ -253,7 +253,8 @@
   function colorize(text, rules) {
     let output = text; const placeholders = [];
     for (let i=0;i<rules.length;i+=2) output = output.replace(rules[i], match => { const token=`\u0000${placeholders.length}\u0000`; placeholders.push(`<span class="tok-${rules[i+1]}">${match}</span>`); return token; });
-    placeholders.forEach((html,index) => { output = output.replaceAll(`\u0000${index}\u0000`,html); });
+    // Bolt ⚡: Replacing O(N*M) multiple replaceAll calls with a single O(M) regex pass
+    output = output.replace(/\u0000(\d+)\u0000/g, (_, index) => placeholders[index]);
     return output;
   }
 
