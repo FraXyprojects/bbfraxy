@@ -64,14 +64,15 @@ export default {
 
     const rawMatch = url.pathname.match(/^\/v1\/raw\/([^/]+)\/([^/]+)\/(.+)$/);
     if (rawMatch) {
-      let owner, repo;
+      let owner, repo, path;
       try {
         owner = decodeURIComponent(rawMatch[1]);
         repo = decodeURIComponent(rawMatch[2]);
+        path = rawMatch[3].split("/").map(decodeURIComponent).join("/");
       } catch {
         return json({ error: "Invalid GitHub path encoding." }, 400, {}, origin);
       }
-      return handleRawContent(owner, repo, rawMatch[3], ctx);
+      return handleRawContent(owner, repo, path, ctx);
     }
 
     return json({
@@ -272,7 +273,7 @@ async function handleRawContent(owner, repo, path, ctx) {
     return new Response(JSON.stringify({ error: "Invalid raw content path." }), { status: 400, headers: { ...JSON_HEADERS, ...corsHeaders("*") } });
   }
 
-  const rawPath = `${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${path}`;
+  const rawPath = `${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${path.split("/").map(encodeURIComponent).join("/")}`;
 
   const cacheKey = new Request(`https://cache.bbfraxy.local/raw/${rawPath}`);
   const cached = await caches.default.match(cacheKey);
