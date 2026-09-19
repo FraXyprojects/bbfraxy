@@ -4,3 +4,6 @@
 ## 2024-05-18 - Avoid Dynamically Changing `aria-label` In Toggles
 **Learning:** Dynamically changing strings in an `aria-label` attribute (e.g. "Open navigation" / "Close navigation") often breaks internationalization (i18n) systems, because the hardcoded logic will overwrite the translated string with a fallback language string.
 **Action:** For toggles (like theme or menu toggles), always rely on a static, translated accessible name via `aria-label` or visually hidden text, and use stateful ARIA attributes such as `aria-expanded` or `aria-pressed` to communicate the state change to screen readers.
+## 2024-05-18 - Skip to Main Content Link Target Focus
+**Learning:** When implementing a "skip to main content" link, simply setting `id="main"` on the target container is not enough; it must also explicitly have `tabindex="-1"` so it can programmatically catch focus and be announced reliably across screen readers.
+**Action:** Always ensure the target element of a skip link has `tabindex="-1"`.
