@@ -40,38 +40,38 @@ export default {
       return handleCoopSuggestion(request, env, ctx, origin);
     }
 
-    const userMatch = url.pathname.match(/^\/v1\/github\/user\/([^/]+)\/repos\/?$/);
-    if (userMatch) {
-      const owner = decodeURIComponent(userMatch[1]);
-      const limit = clampNumber(url.searchParams.get("limit"), DEFAULT_REPO_LIMIT, 1, MAX_REPO_LIMIT);
-      return handleUserRepos(owner, limit, env, ctx, origin);
-    }
-
-    const treeMatch = url.pathname.match(/^\/v1\/github\/repo\/([^/]+)\/([^/]+)\/tree\/?$/);
-    if (treeMatch) {
-      const owner = decodeURIComponent(treeMatch[1]);
-      const repo = decodeURIComponent(treeMatch[2]);
-      return handleRepoTree(owner, repo, env, ctx, origin);
-    }
-
-    const fileMatch = url.pathname.match(/^\/v1\/github\/repo\/([^/]+)\/([^/]+)\/file\/(.+)$/);
-    if (fileMatch) {
-      const owner = decodeURIComponent(fileMatch[1]);
-      const repo = decodeURIComponent(fileMatch[2]);
-      const path = fileMatch[3].split("/").map(decodeURIComponent).join("/");
-      return handleRepoFile(owner, repo, path, url.searchParams.get("branch") || "main", env, ctx, origin);
-    }
-
-    const rawMatch = url.pathname.match(/^\/v1\/raw\/([^/]+)\/([^/]+)\/(.+)$/);
-    if (rawMatch) {
-      let owner, repo;
-      try {
-        owner = decodeURIComponent(rawMatch[1]);
-        repo = decodeURIComponent(rawMatch[2]);
-      } catch {
-        return json({ error: "Invalid GitHub path encoding." }, 400, {}, origin);
+    try {
+      const userMatch = url.pathname.match(/^\/v1\/github\/user\/([^/]+)\/repos\/?$/);
+      if (userMatch) {
+        const owner = decodeURIComponent(userMatch[1]);
+        const limit = clampNumber(url.searchParams.get("limit"), DEFAULT_REPO_LIMIT, 1, MAX_REPO_LIMIT);
+        return handleUserRepos(owner, limit, env, ctx, origin);
       }
-      return handleRawContent(owner, repo, rawMatch[3], ctx);
+
+      const treeMatch = url.pathname.match(/^\/v1\/github\/repo\/([^/]+)\/([^/]+)\/tree\/?$/);
+      if (treeMatch) {
+        const owner = decodeURIComponent(treeMatch[1]);
+        const repo = decodeURIComponent(treeMatch[2]);
+        return handleRepoTree(owner, repo, env, ctx, origin);
+      }
+
+      const fileMatch = url.pathname.match(/^\/v1\/github\/repo\/([^/]+)\/([^/]+)\/file\/(.+)$/);
+      if (fileMatch) {
+        const owner = decodeURIComponent(fileMatch[1]);
+        const repo = decodeURIComponent(fileMatch[2]);
+        const path = fileMatch[3].split("/").map(decodeURIComponent).join("/");
+        return handleRepoFile(owner, repo, path, url.searchParams.get("branch") || "main", env, ctx, origin);
+      }
+
+      const rawMatch = url.pathname.match(/^\/v1\/raw\/([^/]+)\/([^/]+)\/(.+)$/);
+      if (rawMatch) {
+        const owner = decodeURIComponent(rawMatch[1]);
+        const repo = decodeURIComponent(rawMatch[2]);
+        const path = rawMatch[3].split("/").map(decodeURIComponent).join("/");
+        return handleRawContent(owner, repo, path, ctx);
+      }
+    } catch {
+      return json({ error: "Invalid URL encoding." }, 400, {}, origin);
     }
 
     return json({
@@ -272,7 +272,8 @@ async function handleRawContent(owner, repo, path, ctx) {
     return new Response(JSON.stringify({ error: "Invalid raw content path." }), { status: 400, headers: { ...JSON_HEADERS, ...corsHeaders("*") } });
   }
 
-  const rawPath = `${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${path}`;
+  const encodedPath = path.split("/").map(encodeURIComponent).join("/");
+  const rawPath = `${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodedPath}`;
 
   const cacheKey = new Request(`https://cache.bbfraxy.local/raw/${rawPath}`);
   const cached = await caches.default.match(cacheKey);
