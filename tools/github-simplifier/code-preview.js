@@ -253,8 +253,8 @@
   function colorize(text, rules) {
     let output = text; const placeholders = [];
     for (let i=0;i<rules.length;i+=2) output = output.replace(rules[i], match => { const token=`\u0000${placeholders.length}\u0000`; placeholders.push(`<span class="tok-${rules[i+1]}">${match}</span>`); return token; });
-    placeholders.forEach((html,index) => { output = output.replaceAll(`\u0000${index}\u0000`,html); });
-    return output;
+    // Performance optimization: Replace multiple .replaceAll() passes inside a loop with a single regex .replace() pass
+    return output.replace(/\u0000(\d+)\u0000/g, (_, index) => placeholders[index]);
   }
 
   function languageFor(path) { return LANGUAGE_MAP[path.split('.').pop()?.toLowerCase() || ''] || 'text'; }
