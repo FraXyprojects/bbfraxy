@@ -20,6 +20,6 @@
   "homepage": "https://github.com/FraXyprojects/bbfraxy#readme",
   "devDependencies": {
     "jest": "^30.5.1",
-    "jest-environment-jsdom": "^30.5.1"
+    "jest-environment-jsdom": "^30.5.2"
   }
 }
