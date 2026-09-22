@@ -236,7 +236,7 @@ async function handleRepoTree(owner, repo, env, ctx, origin) {
 }
 
 async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
-  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000 || path.includes("..")) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000 || decodeFully(path).includes("..")) {
     return json({ error: "Invalid GitHub file path." }, 400, {}, origin);
   }
 
@@ -268,7 +268,7 @@ async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
 }
 
 async function handleRawContent(owner, repo, path, ctx) {
-  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 2000 || path.includes("..")) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 2000 || decodeFully(path).includes("..")) {
     return new Response(JSON.stringify({ error: "Invalid raw content path." }), { status: 400, headers: { ...JSON_HEADERS, ...corsHeaders("*") } });
   }
 
@@ -393,4 +393,19 @@ async function hashKey(value) {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function decodeFully(value) {
+  if (!value) return value;
+  let prev = "";
+  let curr = value;
+  while (curr !== prev) {
+    prev = curr;
+    try {
+      curr = decodeURIComponent(curr);
+    } catch {
+      break;
+    }
+  }
+  return curr;
 }
