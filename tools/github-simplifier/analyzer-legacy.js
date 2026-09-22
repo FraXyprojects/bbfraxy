@@ -397,7 +397,7 @@ function rankImportantFiles(tree, projectType) {
       else if (/^manifest\.(json|xml|yaml|yml)$/.test(base)) { score = 95; reason = "Project metadata or mod/plugin manifest"; }
       else if (base === "package.json") { score = 90; reason = "Dependencies and project scripts"; }
       else if (/^(vite|next|astro|webpack|rollup)\.config\./.test(base)) { score = 85; reason = "Build and development configuration"; }
-      else if (parts.some((part) => ["config", "configs", "configuration", "settings"].includes(part)) || /^(config|settings)\.(json|yaml|yml|toml|ini|cfg)$/.test(base)) { score = 80; reason = "Likely user-facing configuration"; }
+      else if (/(?:^|\/)(?:config|configs|configuration|settings)(?:\/|$)/i.test(path) || /^(config|settings)\.(json|yaml|yml|toml|ini|cfg)$/.test(base)) { score = 80; reason = "Likely user-facing configuration"; }
       else if (/\.(csproj|sln|gradle|pom|cargo|mod)$/.test(base)) { score = 75; reason = "Project or build configuration"; }
       else if (/^(index|main|app|program)\.[a-z0-9]+$/.test(base)) { score = 70; reason = "Likely application entry point"; }
       else if (/\.(html|tsx|jsx|vue|svelte)$/.test(base)) { score = 50; reason = "User-facing interface"; }
@@ -417,9 +417,9 @@ function classifyEditability(path) {
   const parts = lower.split("/");
   const base = parts[parts.length - 1] || lower;
 
-  if (parts.some((part) => ["node_modules", "dist", "build", "bin", "obj", ".git"].includes(part))) return { badge: "Core", className: "edit-core", explanation: "Generated or dependency content. Editing it directly is usually not the right approach." };
+  if (/(?:^|\/)(?:node_modules|dist|build|bin|obj|\.git)(?:\/|$)/i.test(path)) return { badge: "Core", className: "edit-core", explanation: "Generated or dependency content. Editing it directly is usually not the right approach." };
   if (/\.(dll|exe|so|dylib|jar|class|wasm)$/.test(base)) return { badge: "Core", className: "edit-core", explanation: "Compiled or binary content. It is generally not intended for manual editing." };
-  if (parts.some((part) => ["config", "configs", "configuration", "settings"].includes(part)) || /^(config|settings)\.(json|yaml|yml|toml|ini|cfg)$/.test(base) || /\.(cfg|ini)$/.test(base)) return { badge: "Likely safe", className: "edit-safe", explanation: "The path looks like user-facing configuration. Check the project's documentation before changing values." };
+  if (/(?:^|\/)(?:config|configs|configuration|settings)(?:\/|$)/i.test(path) || /^(config|settings)\.(json|yaml|yml|toml|ini|cfg)$/.test(base) || /\.(cfg|ini)$/.test(base)) return { badge: "Likely safe", className: "edit-safe", explanation: "The path looks like user-facing configuration. Check the project's documentation before changing values." };
   if (/^readme(?:\.|$)/i.test(base) || parts.includes("docs") || parts.includes("documentation")) return { badge: "Likely safe", className: "edit-safe", explanation: "Documentation is normally safe to edit and does not directly change runtime behavior." };
   if (["package-lock.json", "pnpm-lock.yaml", "yarn.lock", "composer.lock", "cargo.lock"].includes(base)) return { badge: "Caution", className: "edit-caution", explanation: "Lockfiles represent dependency state. Prefer changing the dependency definition instead." };
   if (/\.(json|yaml|yml|toml)$/.test(base)) return { badge: "Likely safe", className: "edit-safe", explanation: "Structured configuration or metadata is often editable, but the exact effect depends on the project." };
@@ -542,8 +542,10 @@ function getFileType(path) {
   return map[extension] || "Text";
 }
 
+const ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
+const ESCAPE_REGEX = /[&<>"']/g;
 function escapeHtml(value) {
-  return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  return String(value ?? "").replace(ESCAPE_REGEX, (m) => ESCAPE_MAP[m]);
 }
 
 function escapeAttribute(value) {

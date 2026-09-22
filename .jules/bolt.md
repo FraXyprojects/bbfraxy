@@ -11,3 +11,6 @@
 ## 2025-01-26 - Avoid functional pipelines in hot loops
 **Learning:** Functional string pipelines like `path.toLowerCase().split('/').some(...)` executed thousands of times during filtering cause significant GC thrashing due to intermediate string and array allocations.
 **Action:** When filtering large arrays based on string patterns, always use a pre-compiled `RegExp` instead of splitting and chaining array methods.
+## 2025-01-26 - Pre-compiled RegExp vs Array iteration
+**Learning:** Using `[...].includes()` with dynamic arrays in hot loops creates massive GC pressure.
+**Action:** Replace dynamically allocated arrays inside iterative filters (e.g., `parts.some(p => ["a", "b"].includes(p))`) with pre-compiled RegExp literal tests like `/(?:^|\/)(?:a|b)(?:\/|$)/.test(path)`.

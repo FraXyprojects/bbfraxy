@@ -262,7 +262,9 @@
     document.head.append(style);
   }
 
+  const ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
+  const ESCAPE_REGEX = /[&<>"']/g;
   function escapeHtml(value) {
-    return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    return String(value ?? "").replace(ESCAPE_REGEX, (m) => ESCAPE_MAP[m]);
   }
 })();

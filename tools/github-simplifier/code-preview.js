@@ -262,7 +262,9 @@
   const GENERATED_REGEX = /(?:^|\/)(node_modules|\.git|dist|build|bin|obj)(?:\/|$)/i;
   function isGenerated(path) { return GENERATED_REGEX.test(path); }
   function formatBytes(bytes) { if (!Number.isFinite(bytes)||bytes<1024) return `${Math.max(0,Math.round(bytes||0))} B`; const units=['KB','MB','GB']; let value=bytes/1024,index=0; while(value>=1024&&index<units.length-1){value/=1024;index++;} return `${value.toFixed(value>=10?0:1)} ${units[index]}`; }
-  function escapeHtml(value) { return String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
+  const ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+  const ESCAPE_REGEX = /[&<>"']/g;
+  function escapeHtml(value) { return String(value??'').replace(ESCAPE_REGEX, m => ESCAPE_MAP[m]); }
   async function copyText(text,button){ try{await navigator.clipboard.writeText(text);const old=button.textContent;button.textContent='Copied';setTimeout(()=>button.textContent=old,1200);}catch{button.textContent='Copy failed';} }
 
   function installStyles(){
