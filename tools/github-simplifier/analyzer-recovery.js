@@ -232,7 +232,9 @@
     return "GitHub project";
   }
 
+  const ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
+  const ESCAPE_REGEX = /[&<>"']/g;
   function escapeHtml(value) {
-    return String(value).replace(/[&<>\"]/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[char]));
+    return String(value ?? "").replace(ESCAPE_REGEX, (m) => ESCAPE_MAP[m]);
   }
 })();
