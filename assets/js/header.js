@@ -24,6 +24,7 @@
   };
 
   header.innerHTML = `
+    <a href="#main" class="skip-link" data-i18n="nav.skipToMain">Skip to main content</a>
     <nav class="navbar" aria-label="Primary navigation">
       <a class="brand" href="/" aria-label="BBFRAXY home">
         <span class="brand-mark" aria-hidden="true">F</span>
