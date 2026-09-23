@@ -3,6 +3,20 @@
   const currentPath = normalizePath(window.location.pathname);
   const header = document.querySelector(".site-header");
 
+  const mainElement = document.querySelector("main");
+  let mainId = "main";
+  if (mainElement) {
+    if (mainElement.id) {
+      mainId = mainElement.id;
+    } else {
+      mainElement.id = mainId;
+    }
+    if (!mainElement.hasAttribute("tabindex")) {
+      mainElement.setAttribute("tabindex", "-1");
+    }
+  }
+
+
   if (!header) return;
 
   const navItems = [
@@ -24,6 +38,7 @@
   };
 
   header.innerHTML = `
+    <a href="#${mainId}" class="skip-link" data-i18n="nav.skipToContent">Skip to content</a>
     <nav class="navbar" aria-label="Primary navigation">
       <a class="brand" href="/" aria-label="BBFRAXY home">
         <span class="brand-mark" aria-hidden="true">F</span>
