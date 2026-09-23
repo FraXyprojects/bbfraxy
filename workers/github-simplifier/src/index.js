@@ -42,33 +42,36 @@ export default {
 
     const userMatch = url.pathname.match(/^\/v1\/github\/user\/([^/]+)\/repos\/?$/);
     if (userMatch) {
-      const owner = decodeURIComponent(userMatch[1]);
+      const owner = tryDecode(userMatch[1]);
+      if (owner === null) return json({ error: "Invalid GitHub path encoding." }, 400, {}, origin);
       const limit = clampNumber(url.searchParams.get("limit"), DEFAULT_REPO_LIMIT, 1, MAX_REPO_LIMIT);
       return handleUserRepos(owner, limit, env, ctx, origin);
     }
 
     const treeMatch = url.pathname.match(/^\/v1\/github\/repo\/([^/]+)\/([^/]+)\/tree\/?$/);
     if (treeMatch) {
-      const owner = decodeURIComponent(treeMatch[1]);
-      const repo = decodeURIComponent(treeMatch[2]);
+      const owner = tryDecode(treeMatch[1]);
+      const repo = tryDecode(treeMatch[2]);
+      if (owner === null || repo === null) return json({ error: "Invalid GitHub path encoding." }, 400, {}, origin);
       return handleRepoTree(owner, repo, env, ctx, origin);
     }
 
     const fileMatch = url.pathname.match(/^\/v1\/github\/repo\/([^/]+)\/([^/]+)\/file\/(.+)$/);
     if (fileMatch) {
-      const owner = decodeURIComponent(fileMatch[1]);
-      const repo = decodeURIComponent(fileMatch[2]);
-      const path = fileMatch[3].split("/").map(decodeURIComponent).join("/");
-      return handleRepoFile(owner, repo, path, url.searchParams.get("branch") || "main", env, ctx, origin);
+      const owner = tryDecode(fileMatch[1]);
+      const repo = tryDecode(fileMatch[2]);
+      const pathSegments = fileMatch[3].split("/").map(tryDecode);
+      if (owner === null || repo === null || pathSegments.includes(null)) {
+        return json({ error: "Invalid GitHub path encoding." }, 400, {}, origin);
+      }
+      return handleRepoFile(owner, repo, pathSegments.join("/"), url.searchParams.get("branch") || "main", env, ctx, origin);
     }
 
     const rawMatch = url.pathname.match(/^\/v1\/raw\/([^/]+)\/([^/]+)\/(.+)$/);
     if (rawMatch) {
-      let owner, repo;
-      try {
-        owner = decodeURIComponent(rawMatch[1]);
-        repo = decodeURIComponent(rawMatch[2]);
-      } catch {
+      const owner = tryDecode(rawMatch[1]);
+      const repo = tryDecode(rawMatch[2]);
+      if (owner === null || repo === null) {
         return json({ error: "Invalid GitHub path encoding." }, 400, {}, origin);
       }
       return handleRawContent(owner, repo, rawMatch[3], ctx);
@@ -236,7 +239,7 @@ async function handleRepoTree(owner, repo, env, ctx, origin) {
 }
 
 async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
-  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000 || path.includes("..")) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000 || hasPathTraversal(path)) {
     return json({ error: "Invalid GitHub file path." }, 400, {}, origin);
   }
 
@@ -268,7 +271,7 @@ async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
 }
 
 async function handleRawContent(owner, repo, path, ctx) {
-  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 2000 || path.includes("..")) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 2000 || hasPathTraversal(path)) {
     return new Response(JSON.stringify({ error: "Invalid raw content path." }), { status: 400, headers: { ...JSON_HEADERS, ...corsHeaders("*") } });
   }
 
@@ -393,4 +396,24 @@ async function hashKey(value) {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function tryDecode(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
+}
+
+function hasPathTraversal(path, depth = 0) {
+  if (path.includes("..")) return true;
+  if (depth > 5) return false;
+  try {
+    const decoded = decodeURIComponent(path);
+    if (decoded !== path) return hasPathTraversal(decoded, depth + 1);
+  } catch {
+    // Ignore invalid encodings during traversal check
+  }
+  return false;
 }
