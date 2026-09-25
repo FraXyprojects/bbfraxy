@@ -11,3 +11,6 @@
 ## 2025-01-26 - Avoid functional pipelines in hot loops
 **Learning:** Functional string pipelines like `path.toLowerCase().split('/').some(...)` executed thousands of times during filtering cause significant GC thrashing due to intermediate string and array allocations.
 **Action:** When filtering large arrays based on string patterns, always use a pre-compiled `RegExp` instead of splitting and chaining array methods.
+## 2024-05-22 - [Escape HTML Optimization Attempt Failed]
+**Learning:** Benchmarked a seemingly obvious optimization for `escapeHtml` (replacing chained `.replaceAll()` with a single regex `.replace(/[&<>"']/g, replacer)` pass). Surprisingly, the chained `.replaceAll()` calls were faster (1.20s) compared to the regex approach (1.64s) in this Node environment for string escaping. V8 seems to heavily optimize `.replaceAll` strings, making regex replacer functions comparatively slower for simple character substitutions.
+**Action:** Do not attempt to "optimize" string escaping functions by replacing chained `.replaceAll()` literal replacements with a regex replacer function in this codebase, as it actually worsens performance. Stick to regex for larger substitutions like syntax highlighting placeholders where iterations cause O(N*M) scanning.
