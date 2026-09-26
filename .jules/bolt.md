@@ -11,3 +11,6 @@
 ## 2025-01-26 - Avoid functional pipelines in hot loops
 **Learning:** Functional string pipelines like `path.toLowerCase().split('/').some(...)` executed thousands of times during filtering cause significant GC thrashing due to intermediate string and array allocations.
 **Action:** When filtering large arrays based on string patterns, always use a pre-compiled `RegExp` instead of splitting and chaining array methods.
+## 2025-01-26 - Pre-compiled RegExp instances in array mapping/filtering
+**Learning:** Instantiating new RegExp instances implicitly through `.some(...)` or chained `.split(...)` during array filtering creates enormous GC pressure and overhead compared to testing against statically defined `RegExp` objects. Also, checking for simple path properties like `.endsWith(...)` is extremely fast and iterating with a standard `for` loop significantly outperforms chaining `.map().filter()`.
+**Action:** When filtering or determining types from large arrays (like GitHub repository trees), pre-compile all regex patterns statically outside the function and use a single standard `for` loop to avoid intermediate array allocation and repeated regex instantiation.
