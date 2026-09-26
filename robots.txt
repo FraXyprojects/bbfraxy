@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /gift/kr8m2q9v7x4p/
 
 Sitemap: https://bbfraxy.com/sitemap.xml
