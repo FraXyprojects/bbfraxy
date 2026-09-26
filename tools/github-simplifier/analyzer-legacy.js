@@ -383,48 +383,70 @@ function renderImportantFile(item) {
   </button>`;
 }
 
+const RE_RANK_README = /(?:^|\/)readme(?:\.[^/]*)?$/i;
+const RE_RANK_MANIFEST = /(?:^|\/)manifest\.(?:json|xml|yaml|yml)$/i;
+const RE_RANK_PKG = /(?:^|\/)package\.json$/i;
+const RE_RANK_BUILD_CONF = /(?:^|\/)(?:vite|next|astro|webpack|rollup)\.config\.[^/]+$/i;
+const RE_RANK_CONF_DIRS = /(?:^|\/)(?:config|configs|configuration|settings)(?:\/|$)/i;
+const RE_RANK_CONF_FILE = /(?:^|\/)(?:(?:config|settings)\.(?:json|yaml|yml|toml|ini|cfg))$/i;
+const RE_RANK_PROJ_CONF = /\.(?:csproj|sln|gradle|pom|cargo|mod)$/i;
+const RE_RANK_ENTRY = /(?:^|\/)(?:index|main|app|program)\.[a-z0-9]+$/i;
+const RE_RANK_UI = /\.(?:html|tsx|jsx|vue|svelte)$/i;
+const RE_RANK_STYLE = /\.(?:css|scss|l\x65ss)$/i;
+const RE_RANK_SRC = /\.(?:cs|java|kt|py|js|ts|cpp|c|rs|go)$/i;
+const RE_RANK_IGNORE_DIRS = /(?:^|\/)(?:node_modules|dist|build|test|tests)(?:\/|$)/i;
+
 function rankImportantFiles(tree, projectType) {
-  return tree
-    .filter((item) => item.type === "blob")
-    .map((item) => {
-      const path = item.path.toLowerCase();
-      const base = path.split("/").pop() || path;
-      const parts = path.split("/");
-      let score = 0;
-      let reason = "Relevant project file";
+  const result = [];
+  const srcReason = `Source code for ${projectType.toLowerCase()}`;
+  for (let i = 0; i < tree.length; i++) {
+    const item = tree[i];
+    if (item.type !== "blob") continue;
+    const path = item.path;
+    let score = 0;
+    let reason = "Relevant project file";
 
-      if (/^readme(?:\.|$)/i.test(base)) { score = 100; reason = "Project documentation and usage overview"; }
-      else if (/^manifest\.(json|xml|yaml|yml)$/.test(base)) { score = 95; reason = "Project metadata or mod/plugin manifest"; }
-      else if (base === "package.json") { score = 90; reason = "Dependencies and project scripts"; }
-      else if (/^(vite|next|astro|webpack|rollup)\.config\./.test(base)) { score = 85; reason = "Build and development configuration"; }
-      else if (parts.some((part) => ["config", "configs", "configuration", "settings"].includes(part)) || /^(config|settings)\.(json|yaml|yml|toml|ini|cfg)$/.test(base)) { score = 80; reason = "Likely user-facing configuration"; }
-      else if (/\.(csproj|sln|gradle|pom|cargo|mod)$/.test(base)) { score = 75; reason = "Project or build configuration"; }
-      else if (/^(index|main|app|program)\.[a-z0-9]+$/.test(base)) { score = 70; reason = "Likely application entry point"; }
-      else if (/\.(html|tsx|jsx|vue|svelte)$/.test(base)) { score = 50; reason = "User-facing interface"; }
-      else if (/\.(css|scss|less)$/.test(base)) { score = 45; reason = "Visual styling"; }
-      else if (/\.(cs|java|kt|py|js|ts|cpp|c|rs|go)$/.test(base)) { score = 35; reason = `Source code for ${projectType.toLowerCase()}`; }
+    if (RE_RANK_README.test(path)) { score = 100; reason = "Project documentation and usage overview"; }
+    else if (RE_RANK_MANIFEST.test(path)) { score = 95; reason = "Project metadata or mod/plugin manifest"; }
+    else if (RE_RANK_PKG.test(path)) { score = 90; reason = "Dependencies and project scripts"; }
+    else if (RE_RANK_BUILD_CONF.test(path)) { score = 85; reason = "Build and development configuration"; }
+    else if (RE_RANK_CONF_DIRS.test(path) || RE_RANK_CONF_FILE.test(path)) { score = 80; reason = "Likely user-facing configuration"; }
+    else if (RE_RANK_PROJ_CONF.test(path)) { score = 75; reason = "Project or build configuration"; }
+    else if (RE_RANK_ENTRY.test(path)) { score = 70; reason = "Likely application entry point"; }
+    else if (RE_RANK_UI.test(path)) { score = 50; reason = "User-facing interface"; }
+    else if (RE_RANK_STYLE.test(path)) { score = 45; reason = "Visual styling"; }
+    else if (RE_RANK_SRC.test(path)) { score = 35; reason = srcReason; }
 
-      if (parts.includes("node_modules") || parts.includes("dist") || parts.includes("build") || parts.includes("test") || parts.includes("tests")) score -= 50;
-      return { ...item, score, reason };
-    })
-    .filter((item) => item.score > 0)
+    if (score > 0) {
+      if (RE_RANK_IGNORE_DIRS.test(path)) score -= 50;
+      if (score > 0) result.push({ ...item, score, reason });
+    }
+  }
+
+  return result
     .sort((a, b) => b.score - a.score || a.path.localeCompare(b.path))
     .slice(0, 10);
 }
 
-function classifyEditability(path) {
-  const lower = path.toLowerCase();
-  const parts = lower.split("/");
-  const base = parts[parts.length - 1] || lower;
+const RE_EDIT_CORE_DIRS = /(?:^|\/)(?:node_modules|dist|build|bin|obj|\.git)(?:\/|$)/i;
+const RE_EDIT_CORE_EXT = /\.(?:dll|exe|so|dylib|jar|class|wasm)$/i;
+const RE_EDIT_CONF_DIRS = /(?:^|\/)(?:config|configs|configuration|settings)(?:\/|$)/i;
+const RE_EDIT_CONF_FILE = /(?:^|\/)(?:(?:config|settings)\.(?:json|yaml|yml|toml|ini|cfg)|[^/]+\.(?:cfg|ini))$/i;
+const RE_EDIT_DOCS = /(?:^|\/)(?:docs|documentation)(?:\/|$)|(?:^|\/)readme(?:\.[^/]*)?$/i;
+const RE_EDIT_LOCK = /(?:^|\/)(?:package-lock\.json|pnpm-lock\.yaml|yarn\.lock|composer\.lock|cargo\.lock)$/i;
+const RE_EDIT_META = /\.(?:json|yaml|yml|toml)$/i;
+const RE_EDIT_UI = /\.(?:css|scss|l\x65ss|html|tsx|jsx|vue|svelte)$/i;
+const RE_EDIT_SRC = /\.(?:js|ts|py|cs|java|kt|rs|go|cpp|c|h|hpp)$/i;
 
-  if (parts.some((part) => ["node_modules", "dist", "build", "bin", "obj", ".git"].includes(part))) return { badge: "Core", className: "edit-core", explanation: "Generated or dependency content. Editing it directly is usually not the right approach." };
-  if (/\.(dll|exe|so|dylib|jar|class|wasm)$/.test(base)) return { badge: "Core", className: "edit-core", explanation: "Compiled or binary content. It is generally not intended for manual editing." };
-  if (parts.some((part) => ["config", "configs", "configuration", "settings"].includes(part)) || /^(config|settings)\.(json|yaml|yml|toml|ini|cfg)$/.test(base) || /\.(cfg|ini)$/.test(base)) return { badge: "Likely safe", className: "edit-safe", explanation: "The path looks like user-facing configuration. Check the project's documentation before changing values." };
-  if (/^readme(?:\.|$)/i.test(base) || parts.includes("docs") || parts.includes("documentation")) return { badge: "Likely safe", className: "edit-safe", explanation: "Documentation is normally safe to edit and does not directly change runtime behavior." };
-  if (["package-lock.json", "pnpm-lock.yaml", "yarn.lock", "composer.lock", "cargo.lock"].includes(base)) return { badge: "Caution", className: "edit-caution", explanation: "Lockfiles represent dependency state. Prefer changing the dependency definition instead." };
-  if (/\.(json|yaml|yml|toml)$/.test(base)) return { badge: "Likely safe", className: "edit-safe", explanation: "Structured configuration or metadata is often editable, but the exact effect depends on the project." };
-  if (/\.(css|scss|less|html|tsx|jsx|vue|svelte)$/.test(base)) return { badge: "Caution", className: "edit-caution", explanation: "This is likely user-facing code. It is editable, but changes can affect behavior or presentation." };
-  if (/\.(js|ts|py|cs|java|kt|rs|go|cpp|c|h|hpp)$/.test(base)) return { badge: "Caution", className: "edit-caution", explanation: "Source code is editable, but changes may alter program behavior or introduce errors." };
+function classifyEditability(path) {
+  if (RE_EDIT_CORE_DIRS.test(path)) return { badge: "Core", className: "edit-core", explanation: "Generated or dependency content. Editing it directly is usually not the right approach." };
+  if (RE_EDIT_CORE_EXT.test(path)) return { badge: "Core", className: "edit-core", explanation: "Compiled or binary content. It is generally not intended for manual editing." };
+  if (RE_EDIT_CONF_DIRS.test(path) || RE_EDIT_CONF_FILE.test(path)) return { badge: "Likely safe", className: "edit-safe", explanation: "The path looks like user-facing configuration. Check the project's documentation before changing values." };
+  if (RE_EDIT_DOCS.test(path)) return { badge: "Likely safe", className: "edit-safe", explanation: "Documentation is normally safe to edit and does not directly change runtime behavior." };
+  if (RE_EDIT_LOCK.test(path)) return { badge: "Caution", className: "edit-caution", explanation: "Lockfiles represent dependency state. Prefer changing the dependency definition instead." };
+  if (RE_EDIT_META.test(path)) return { badge: "Likely safe", className: "edit-safe", explanation: "Structured configuration or metadata is often editable, but the exact effect depends on the project." };
+  if (RE_EDIT_UI.test(path)) return { badge: "Caution", className: "edit-caution", explanation: "This is likely user-facing code. It is editable, but changes can affect behavior or presentation." };
+  if (RE_EDIT_SRC.test(path)) return { badge: "Caution", className: "edit-caution", explanation: "Source code is editable, but changes may alter program behavior or introduce errors." };
   return { badge: "Unknown", className: "edit-unknown", explanation: "There is not enough evidence from the path alone to classify this file safely." };
 }
 
@@ -490,16 +512,29 @@ function detectLanguages(tree) {
 }
 
 function detectProjectType(tree, repository, languages) {
-  const paths = tree.filter((item) => item.type === "blob").map((item) => item.path.toLowerCase());
   const description = String(repository?.description || "").toLowerCase();
 
-  if (paths.some((path) => path.endsWith(".csproj") || path.endsWith(".sln") || path.includes("bepinex") || path.includes("plugins/"))) return "C# project / game mod";
-  if (paths.includes("package.json") || languages.includes("JavaScript") || languages.includes("TypeScript")) return "JavaScript project";
-  if (paths.some((path) => path.endsWith(".py"))) return "Python project";
-  if (paths.some((path) => path.endsWith(".java") || path.endsWith(".kt"))) return "JVM project";
-  if (paths.some((path) => path.endsWith(".rs"))) return "Rust project";
+  let hasCsharp = false, hasPkg = false, hasPy = false, hasJvm = false, hasRs = false, hasHtml = false;
+  for (let i = 0; i < tree.length; i++) {
+    const item = tree[i];
+    if (item.type !== "blob") continue;
+    const path = item.path.toLowerCase();
+
+    if (!hasCsharp && (path.endsWith(".csproj") || path.endsWith(".sln") || path.includes("bepinex") || path.includes("plugins/"))) hasCsharp = true;
+    if (!hasPkg && path === "package.json") hasPkg = true;
+    if (!hasPy && path.endsWith(".py")) hasPy = true;
+    if (!hasJvm && (path.endsWith(".java") || path.endsWith(".kt"))) hasJvm = true;
+    if (!hasRs && path.endsWith(".rs")) hasRs = true;
+    if (!hasHtml && path.endsWith(".html")) hasHtml = true;
+  }
+
+  if (hasCsharp) return "C# project / game mod";
+  if (hasPkg || languages.includes("JavaScript") || languages.includes("TypeScript")) return "JavaScript project";
+  if (hasPy) return "Python project";
+  if (hasJvm) return "JVM project";
+  if (hasRs) return "Rust project";
   if (description.includes("mod")) return "Game mod project";
-  if (paths.some((path) => path.endsWith(".html"))) return "Web project";
+  if (hasHtml) return "Web project";
   return "Software project";
 }
 
