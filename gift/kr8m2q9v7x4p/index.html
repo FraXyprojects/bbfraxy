@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="theme-color" content="#050607">
+  <title>🎁 Ještě chvilku…</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050607;
+      --panel: rgba(16, 20, 24, .82);
+      --line: rgba(95, 231, 255, .18);
+      --cyan: #5fe7ff;
+      --text: #f4f7f8;
+      --muted: #94a3ad;
+      --accent: #a78bfa;
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(95,231,255,.16), transparent 30%),
+        radial-gradient(circle at 82% 76%, rgba(167,139,250,.14), transparent 32%),
+        var(--bg);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -30%;
+      background:
+        linear-gradient(115deg, transparent 40%, rgba(255,255,255,.025) 50%, transparent 60%);
+      transform: rotate(12deg);
+      pointer-events: none;
+    }
+    .wrap {
+      width: min(92vw, 760px);
+      padding: 28px;
+    }
+    .card {
+      position: relative;
+      padding: clamp(28px, 6vw, 56px);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--panel);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 30px 100px rgba(0,0,0,.5), 0 0 80px rgba(95,231,255,.06);
+      text-align: center;
+    }
+    .emoji { font-size: clamp(42px, 8vw, 72px); line-height: 1; margin-bottom: 22px; }
+    .eyebrow {
+      color: var(--cyan);
+      font-size: .8rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 7vw, 4.5rem);
+      line-height: .98;
+      letter-spacing: -.045em;
+    }
+    .subtitle {
+      max-width: 540px;
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2.6vw, 1.18rem);
+      line-height: 1.55;
+    }
+    .target {
+      margin-top: 10px;
+      color: #cbd5dc;
+      font-size: .95rem;
+    }
+    .countdown {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 34px 0 18px;
+    }
+    .unit {
+      padding: 16px 10px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.035);
+    }
+    .value {
+      display: block;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(1.8rem, 6vw, 3.1rem);
+      font-weight: 850;
+      letter-spacing: -.04em;
+    }
+    .label {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .tiny {
+      color: #73818a;
+      font-size: .78rem;
+      margin-top: 22px;
+    }
+    .hidden { display: none !important; }
+    .open {
+      color: var(--cyan);
+      font-weight: 800;
+    }
+    @media (max-width: 540px) {
+      .wrap { width: 100%; padding: 14px; }
+      .card { border-radius: 22px; padding: 30px 20px; }
+      .countdown { gap: 7px; }
+      .unit { padding: 14px 6px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card" aria-live="polite">
+      <div class="emoji">🎁</div>
+      <div class="eyebrow">Narozeninový přístup</div>
+
+      <div id="waiting">
+        <h1>Ještě chvilku…</h1>
+        <p class="subtitle">
+          Tohle překvapení čeká na správný okamžik. Až odbije čas, stránka tě automaticky pošle dál.
+        </p>
+        <p class="target">Odemknutí: <strong>úterý 29. 9. 2026 v 08:00</strong></p>
+
+        <div class="countdown" role="timer" aria-label="Odpočet do odemknutí">
+          <div class="unit"><span class="value" id="days">0</span><span class="label">dnů</span></div>
+          <div class="unit"><span class="value" id="hours">00</span><span class="label">hodin</span></div>
+          <div class="unit"><span class="value" id="minutes">00</span><span class="label">minut</span></div>
+          <div class="unit"><span class="value" id="seconds">00</span><span class="label">sekund</span></div>
+        </div>
+
+        <div class="tiny">Tajná stránka • nikde na webu není odkazovaná</div>
+      </div>
+
+      <div id="unlocked" class="hidden">
+        <h1>🎉 Je čas!</h1>
+        <p class="subtitle">Otevírám dárek…</p>
+        <p class="target open">Přesměrování právě probíhá.</p>
+      </div>
+
+      <div id="missing" class="hidden">
+        <h1>🎁 Připraveno</h1>
+        <p class="subtitle">Čas odemknutí už nastal, ale cílová adresa kupónu ještě nebyla nastavená.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Nastaví se až bude známá finální URL kupónu.
+    const REDIRECT_URL = "";
+
+    // 29. 9. 2026 v 08:00 Europe/Prague (CEST = UTC+2).
+    const UNLOCK_AT = new Date("2026-09-29T08:00:00+02:00");
+
+    const $ = (id) => document.getElementById(id);
+
+    function pad(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function update() {
+      const remaining = UNLOCK_AT.getTime() - Date.now();
+
+      if (remaining <= 0) {
+        $("waiting").classList.add("hidden");
+
+        if (REDIRECT_URL) {
+          $("unlocked").classList.remove("hidden");
+          setTimeout(() => {
+            window.location.replace(REDIRECT_URL);
+          }, 700);
+        } else {
+          $("missing").classList.remove("hidden");
+        }
+        return;
+      }
+
+      const totalSeconds = Math.floor(remaining / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      $("days").textContent = days;
+      $("hours").textContent = pad(hours);
+      $("minutes").textContent = pad(minutes);
+      $("seconds").textContent = pad(seconds);
+    }
+
+    update();
+    setInterval(update, 1000);
+  </script>
+</body>
+</html>
