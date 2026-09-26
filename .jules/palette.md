@@ -4,3 +4,6 @@
 ## 2024-05-18 - Avoid Dynamically Changing `aria-label` In Toggles
 **Learning:** Dynamically changing strings in an `aria-label` attribute (e.g. "Open navigation" / "Close navigation") often breaks internationalization (i18n) systems, because the hardcoded logic will overwrite the translated string with a fallback language string.
 **Action:** For toggles (like theme or menu toggles), always rely on a static, translated accessible name via `aria-label` or visually hidden text, and use stateful ARIA attributes such as `aria-expanded` or `aria-pressed` to communicate the state change to screen readers.
+## 2024-05-18 - Missing ARIA pressed on custom toggles
+**Learning:** Custom UI components that behave as toggles or selectable options often miss `aria-pressed` or `aria-selected` attributes, which are vital for screen reader users to understand their current state.
+**Action:** Always ensure that custom button or toggle elements visually depicting a selected state also have the corresponding ARIA attribute dynamically updated in JavaScript and set correctly in HTML.

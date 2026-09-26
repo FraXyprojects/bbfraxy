@@ -51,15 +51,19 @@ for (const group of document.querySelectorAll("[data-group]")) {
       if (state.tags.has(value)) {
         state.tags.delete(value);
         button.classList.remove("is-selected");
+        button.setAttribute("aria-pressed", "false");
       } else {
         state.tags.add(value);
         button.classList.add("is-selected");
+        button.setAttribute("aria-pressed", "true");
       }
       return;
     }
 
     for (const sibling of group.querySelectorAll("button[data-value]")) {
-      sibling.classList.toggle("is-selected", sibling === button);
+      const isSelected = sibling === button;
+      sibling.classList.toggle("is-selected", isSelected);
+      sibling.setAttribute("aria-pressed", String(isSelected));
     }
 
     state[groupName] = button.dataset.value;
