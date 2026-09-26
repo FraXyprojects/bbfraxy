@@ -236,7 +236,7 @@ async function handleRepoTree(owner, repo, env, ctx, origin) {
 }
 
 async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
-  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000 || path.includes("..")) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000 || hasPathTraversal(path)) {
     return json({ error: "Invalid GitHub file path." }, 400, {}, origin);
   }
 
@@ -268,7 +268,7 @@ async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
 }
 
 async function handleRawContent(owner, repo, path, ctx) {
-  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 2000 || path.includes("..")) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 2000 || hasPathTraversal(path)) {
     return new Response(JSON.stringify({ error: "Invalid raw content path." }), { status: 400, headers: { ...JSON_HEADERS, ...corsHeaders("*") } });
   }
 
@@ -362,6 +362,21 @@ function corsHeaders(origin = "https://bbfraxy.com") {
 
 function getAllowedOrigin(origin) {
   return origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://bbfraxy.com";
+}
+
+function hasPathTraversal(path) {
+  let decoded = path;
+  let prev = "";
+  while (decoded !== prev) {
+    prev = decoded;
+    try {
+      decoded = decodeURIComponent(decoded);
+    } catch (e) {
+      break;
+    }
+  }
+  const lower = decoded.toLowerCase();
+  return lower.includes("..") || lower.includes("%2e%2e") || lower.includes("%252e%252e");
 }
 
 function isSafeGithubName(value) {
