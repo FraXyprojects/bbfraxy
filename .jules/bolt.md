@@ -11,3 +11,7 @@
 ## 2025-01-26 - Avoid functional pipelines in hot loops
 **Learning:** Functional string pipelines like `path.toLowerCase().split('/').some(...)` executed thousands of times during filtering cause significant GC thrashing due to intermediate string and array allocations.
 **Action:** When filtering large arrays based on string patterns, always use a pre-compiled `RegExp` instead of splitting and chaining array methods.
+
+## 2024-05-26 - [Bolt: Optimize HTML interpolation placeholder replacement]
+**Learning:** Iterating through an array of tokens and running `.replaceAll()` for each token over a large string creates a massive O(N*M) scanning overhead. Restoring indexed placeholders using a chained loop takes significantly longer than using a single `.replace()` pass with a replacer function on large inputs (e.g. going from ~3900ms to ~11ms).
+**Action:** Always prefer a single regex `.replace()` pass with a callback function when replacing multiple indexed placeholders (like `\u0000[index]\u0000`) instead of calling `.replaceAll()` in a loop.
