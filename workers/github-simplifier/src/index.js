@@ -236,7 +236,7 @@ async function handleRepoTree(owner, repo, env, ctx, origin) {
 }
 
 async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
-  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000 || path.includes("..")) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 1000 || !isSafePath(path)) {
     return json({ error: "Invalid GitHub file path." }, 400, {}, origin);
   }
 
@@ -268,7 +268,7 @@ async function handleRepoFile(owner, repo, path, branch, env, ctx, origin) {
 }
 
 async function handleRawContent(owner, repo, path, ctx) {
-  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 2000 || path.includes("..")) {
+  if (!isSafeGithubName(owner) || !isSafeGithubName(repo) || !path || path.length > 2000 || !isSafePath(path)) {
     return new Response(JSON.stringify({ error: "Invalid raw content path." }), { status: 400, headers: { ...JSON_HEADERS, ...corsHeaders("*") } });
   }
 
@@ -370,6 +370,24 @@ function isSafeGithubName(value) {
 
 function isSafeRef(value) {
   return /^[A-Za-z0-9._\/-]+$/.test(value) && value.length <= 200;
+}
+
+function isSafePath(value) {
+  if (typeof value !== "string") return false;
+  let decoded = value;
+  let prev;
+  do {
+    prev = decoded;
+    try {
+      decoded = decodeURIComponent(decoded);
+    } catch {
+      break;
+    }
+  } while (decoded !== prev);
+  const lowerDecoded = decoded.toLowerCase();
+  const lowerOrig = value.toLowerCase();
+  // Check fully decoded string for literal '..' and both for known encoded bypasses in case of decode failure
+  return !lowerDecoded.includes("..") && !lowerDecoded.includes("%2e%2e") && !lowerDecoded.includes("%252e%252e") && !lowerOrig.includes("%2e%2e") && !lowerOrig.includes("%252e%252e");
 }
 
 function decodeBase64Utf8(value) {
