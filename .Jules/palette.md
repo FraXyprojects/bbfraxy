@@ -4,3 +4,6 @@
 ## 2024-05-18 - Expanding/Collapsing Panels and ARIA States
 **Learning:** For floating or triggered panels (like the "Missing a game?" panel in coop-finder), simply toggling visibility (via classes or `display: none`) and `aria-hidden` on the panel itself is insufficient for screen readers. The trigger element (the button) must explicitly use `aria-expanded` and dynamically sync it with the panel's open/close state to properly broadcast the interactive context.
 **Action:** When implementing custom toggles or flyouts, always pair `aria-expanded` on the trigger with `aria-hidden` on the target, and ensure JavaScript synchronizes both states during interaction.
+## 2026-09-29 - Implementing Skip to Main Content
+**Learning:** When implementing a 'skip to main content' link, it is crucial that the target container (`<main>`) explicitly specifies `tabindex="-1"`. Without this, some screen readers and browsers may fail to properly catch and manage programmatic focus when the link is clicked, breaking keyboard navigation flow.
+**Action:** Always ensure any focus target of a skip link (or similar anchor) includes `tabindex="-1"` to guarantee reliable focus management across all assistive technologies.
