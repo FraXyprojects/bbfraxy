@@ -101,6 +101,27 @@ button {
   padding: 24px;
 }
 
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  z-index: 100;
+  padding: 12px 24px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: top 200ms ease;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.skip-to-content:focus {
+  top: 16px;
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
 .site-header {
   position: sticky;
   top: 16px;
